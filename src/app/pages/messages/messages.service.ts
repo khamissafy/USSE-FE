@@ -140,9 +140,15 @@ deleteMessage(ids:string[]):Observable<any>{
 
 }
 
-sendWhatsappBusinessMessage( deviceid: string,targetPhoneNumber: string[],msgBody: string,scheduledAt:string,email: string,attachments:string[]):Observable<any>{
+sendWhatsappBusinessMessage( deviceid: string,
+  targetPhoneNumber: string[],
+  msgBody: string,
+  scheduledAt:string,
+  email: string,
+  attachments:string[],
+  chatMsg?:{channelType:number,groupName:string}):Observable<any>{
 
-  const data=attachments.length!=0?{
+  let data:any=attachments.length!=0?{
     deviceid: deviceid,
     targetPhoneNumber: targetPhoneNumber,
     attachments:attachments,
@@ -155,6 +161,10 @@ sendWhatsappBusinessMessage( deviceid: string,targetPhoneNumber: string[],msgBod
     msgBody: msgBody,
     scheduledAt:scheduledAt,
     email: email
+  }
+  if(chatMsg){
+    data.channelType=chatMsg.channelType;
+    data.groupName=chatMsg.groupName
   }
   return this.http.post<any>(`${this.api}Message/sendWhatsappBusinessMessage`,data)
 
