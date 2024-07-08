@@ -249,7 +249,7 @@
                                     <span>{{ isGroupe? chatIcon(chat?.targetPhoneNumber) : chatIcon(chatName) }}</span>
                                 </div>
                                 <div class="received-chats-msg">
-                                    <span *ngIf="chat.channelType !==1" class="text-primary-800 font-w-700 txt-xs">
+                                    <span *ngIf="chat?.chat?.channelType > 1" class="text-primary-800 font-w-700 txt-xs">
                                         {{chat?.targetPhoneNumber}}
                                         </span>
                                     <p>{{ chat?.msgBody }}</p>

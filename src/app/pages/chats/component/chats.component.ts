@@ -99,6 +99,7 @@ export class ChatsComponent implements OnInit, AfterViewInit,OnDestroy{
   searchSub: Subscription;
   filteredDevices: any=[];
   isGroupe: boolean=false;
+  activeChat:chatsData;
   constructor( public dialog: MatDialog,
     private translationService:TranslationService,
     private authService:AuthService,
@@ -565,6 +566,7 @@ chatRec(search){
                   this.clearChats()
                   }
                   else{
+                    this.activeChat=res.data[0];
                     this.selectedChatId=res.data[0]?.chat?.id;
                     this.chatName=res.data[0].chat?.chatName;
                     this.targetPhoneNumber=res.data[0].chat?.targetPhoneNumber;
@@ -746,6 +748,7 @@ resetForm(){
     }
 
     navigateToChat(chat:chatsData){
+      this.activeChat=chat;
       this.openChat=true;
       this.isSearch=false;
       this.hideSearch=false;
@@ -837,7 +840,11 @@ resetChatsOrder(chatContact){
           }  
         }
         let attachements = this.filesList.map((file)=>{return file.url})
-          this.messageService.sendWhatsappBusinessMessage(this.deviceId,[this.targetPhoneNumber],message,null,this.email,attachements).subscribe(
+        let chatMsg=this.activeChat?.chat.channelType>1? {
+          channelType:this.activeChat.chat.channelType,
+          groupName:this.activeChat.chat.chatName
+        }:null
+          this.messageService.sendWhatsappBusinessMessage(this.deviceId,[this.targetPhoneNumber],message,null,this.email,attachements,chatMsg).subscribe(
             (res)=>{
           let mainData:any={id: this.selectedChatId,
             deviceid: this.deviceId,
@@ -869,13 +876,12 @@ resetChatsOrder(chatContact){
 
 
             }
-            let foundChat=this.listChats.find((chat)=>chat.chat.id == this.selectedChatId );
+            let foundChat:chatsData=this.listChats.find((chat)=>chat.chat.id == this.selectedChatId );
             if(foundChat){
               foundChat.lastMessageContent='';
               foundChat.lastMessageFileName='';
               foundChat.lastMessageFileUrl='';
               foundChat.fileType='';
-  
               foundChat.lastMessageContent=message;
               foundChat.lastMessageStatus=0;
               
@@ -1048,7 +1054,9 @@ else{
     updateMessageStatus(newMessage){
 
       let message:chatHub=JSON.parse(newMessage)
-      if(this.filteredDevices.includes(message.Deviceid)){
+      console.log('status update',message)
+      if(this.filteredDevices.length==0 || (this.filteredDevices.length > 0 && this.filteredDevices.includes(message.Deviceid))){
+
         // update Status on list chats
         let findChat = this.listChats.find((chat)=>chat.chat.id == message.ChatId);
         if(findChat){
@@ -1130,8 +1138,11 @@ else{
       }
 
       updateMessagesOnReceive(message){
-        let newMessage:chatHub=JSON.parse(message)
-        if(this.filteredDevices.includes(message.Deviceid)){
+        let newMessage:chatHub=JSON.parse(message);
+        console.log('new message',newMessage)
+        console.log(this.filteredDevices,( ( this.filteredDevices.indexOf(newMessage.Deviceid)>-1)))
+        if(this.filteredDevices.length==0 || (this.filteredDevices.length > 0 && this.filteredDevices.indexOf(newMessage.Deviceid)>-1)){
+          
           // in case the message is sent from the current opend chat
             if(this.selectedChatId === newMessage.ChatId){
               if(newMessage.direction){
@@ -1194,10 +1205,7 @@ else{
       if(foundChat.chat.channelType>1){
         foundChat.targetPhoneNumber=newMessage.targetPhoneNumber
       }
-      foundChat.device={
-        id:newMessage.Deviceid,
-
-      };
+    
       if(this.listChats.indexOf(foundChat) !== 0){
         // Remove the element from its current position
         this.listChats.splice(this.listChats.indexOf(foundChat), 1);
