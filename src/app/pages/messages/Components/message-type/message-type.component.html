@@ -179,7 +179,7 @@
           <td mat-cell *matCellDef="let element" style="max-width: 135px;">
             <div class="py-2">
               <div class="d-flex justify-content-center align-items-center flex-column">
-                <p style="max-width: 100%;" class="msg-body overflow-line-4 mb-0">{{ element.msgBody }}</p>
+                <p style="max-width: 100%;" class="msg-body overflow-line-4 mb-0">{{ element.msgBody |textMasking}}</p>
 
                 <div *ngIf="element?.fileName" class="text-start  pt-2 pb-3">
                   <img *ngIf="(element.fileName | type )=='assets/images/image.svg' else otherType"  [src]="element.fileName | type" alt="" style=" width: 80px;">

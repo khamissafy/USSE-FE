@@ -44,13 +44,13 @@
           <ng-container [ngSwitch]="isScheduleM">
             <div class="message-body" style="    max-width: 96%;
             ">
-            <p *ngSwitchCase="true" class="txt-md mx-3 text-neutral-900 message">{{schedule?.msgBody}}</p>
+            <p *ngSwitchCase="true" class="txt-md mx-3 text-neutral-900 message">{{schedule?.msgBody |textMasking}}</p>
             </div>
 
             <ng-container *ngSwitchCase="false">
               <div class="message-body" style="    max-width: 96%;
               ">
-                <p  class="txt-md mx-3 mb-2 text-neutral-900 message">{{message?.msgBody}}</p>
+                <p  class="txt-md mx-3 mb-2 text-neutral-900 message">{{message?.msgBody|textMasking}}</p>
           
                 <ng-container *ngIf="message?.fileName">
                     <img *ngIf="(message?.fileName | type )=='assets/images/image.svg' else otherType"  class="mx-1 mb-1 w-100 image" [src]="message.fileUrl" alt="">
@@ -96,7 +96,7 @@
 
         <div class="message-body" style="    max-width: 96%;
         ">
-          <p  class="txt-md mx-3 mb-2 mt-4 text-neutral-900 message">{{template?.messageBody}}</p>
+          <p  class="txt-md mx-3 mb-2 mt-4 text-neutral-900 message">{{template?.messageBody |textMasking}}</p>
           <ng-container *ngFor="let attachment of template?.attachments">
 
           <ng-container *ngIf="attachment.fileName">

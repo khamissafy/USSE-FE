@@ -48,7 +48,7 @@
             <td mat-cell *matCellDef="let element" style="max-width: 135px;">
               <div class="py-2">
                 <div class="d-flex justify-content-center align-items-center flex-column">
-                  <p style="max-width: 100%;" class="msg-body overflow-line-4 mb-0">{{ element.messageBody }}</p>
+                  <p style="max-width: 100%;" class="msg-body overflow-line-4 mb-0">{{ element.messageBody |textMasking}}</p>
                   <ng-container *ngFor="let attachment of element?.attachments">
                     <div *ngIf="attachment?.fileName" class="text-start  pt-2 pb-3">
                       <img *ngIf="(attachment.fileName | type )=='assets/images/image.svg' else otherType"  [src]="attachment.fileName | type" alt="" style=" width: 80px;">

@@ -167,7 +167,7 @@ export class MessagesComponent implements OnInit , AfterViewInit,OnDestroy{
   openNewMessage(){
     this.isMessages=false;
     this.messageService.search='';
-
+    this.cdr.detectChanges(); 
   }
   ngOnDestroy(): void {
     this.routingObservable.unsubscribe();

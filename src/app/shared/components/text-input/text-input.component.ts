@@ -310,7 +310,7 @@ onHideOptionsMouseDown(event: MouseEvent): void {
 uplayMaskingOnSelectedTxt(maskingData: maskingData) {
   this.isTextSelected = false;
   this.maskingMsg = {
-    maskedText: `[${maskingData.selectedText},${maskingData.maskingOptions.startFrom},${maskingData.maskingOptions.numberOfLetters},${maskingData.maskingOptions.direction}]`,
+    maskedText: `{${maskingData.selectedText};${maskingData.maskingOptions.startFrom};${maskingData.maskingOptions.numberOfLetters};${maskingData.maskingOptions.direction}}`,
     originalText: `[${maskingData.selectedText}]`,
     selectedText: maskingData.selectedText
   };
@@ -336,24 +336,24 @@ getMaskedMessage(currentMessage, maskedText, startPos, endPos) {
 getOriginalMessage(maskedMessage){
   if(this.isTextArea){
     this.maskedMsg=maskedMessage;
-    const regex = /\[\w+\s*,\s*\d+\s*,\s*\d+\s*,\s*[a-zA-Z]\]/g; // Updated regex to handle spaces around commas
+    this.originalMsg=maskedMessage;
+    const regex = /\{\w+\s*;\s*\d+\s*;\s*\d+\s*;\s*[a-zA-Z]\}/g; // Updated regex to handle spaces around commas
     let matches = maskedMessage.match(regex);
-    
       if (matches) {
         matches.forEach(match => {
-          let originalText = match.substring(match.indexOf('['), match.indexOf(','))+']';
+          let originalText = '['+ match.substring(match.indexOf('{')+1, match.indexOf(';'))+']';
           this.arrayOfMasks.push({
             originalText: originalText,
             maskedText: match,
             index: maskedMessage.indexOf(match)
           });
-    
           // Replace maskedText with originalText in originalMsg
-          this.originalMsg = maskedMessage.replace(match, originalText);
+          this.originalMsg = this.originalMsg.replace(match, originalText);
         });
+       
+ this.value=this.originalMsg;
       }
     
-    this.value=this.originalMsg;
   }
 }
 

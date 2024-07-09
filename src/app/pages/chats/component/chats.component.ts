@@ -1060,6 +1060,7 @@ else{
         // update Status on list chats
         let findChat = this.listChats.find((chat)=>chat.chat.id == message.ChatId);
         if(findChat){
+          console.log('chat in list chats',findChat)
           findChat.lastMessageStatus=message.status;
           findChat.lastMessageContent=message.msgBody;
           findChat.lastMessageDate=newMessage.createdAt;
@@ -1068,11 +1069,14 @@ else{
         // in case the message is sent from the current opend chat
         if(this.selectedChatId === message.ChatId){
           const messageDate = new Date(message.createdAt);
+        
           const day = this.getGroupHeader(messageDate);
           let foundMesg = this.groupedMessages[day].find(chat => chat.chat?.id === message.id);
+          console.log('msg',this.groupedMessages[day])
           if (foundMesg) {
             if(message.status > foundMesg.status)
             {
+
               foundMesg.status=message.status;
             }
             foundMesg.updatedAt=message.updatedAt;
@@ -1140,7 +1144,6 @@ else{
       updateMessagesOnReceive(message){
         let newMessage:chatHub=JSON.parse(message);
         console.log('new message',newMessage)
-        console.log(this.filteredDevices,( ( this.filteredDevices.indexOf(newMessage.Deviceid)>-1)))
         if(this.filteredDevices.length==0 || (this.filteredDevices.length > 0 && this.filteredDevices.indexOf(newMessage.Deviceid)>-1)){
           
           // in case the message is sent from the current opend chat

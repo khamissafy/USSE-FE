@@ -55,6 +55,7 @@ import { UsButtonComponent } from './components/us-button/us-button.component';
 import { NavActionsComponent } from './components/nav-actions/nav-actions.component';
 import { ErrorTranslatePipe } from './pipes/errorTranslate.pipe';
 import { HideOptionsComponent } from './components/hideOptions/hideOptions.component';
+import { TextMaskingPipe } from './pipes/textMasking.pipe';
 
 // import { SearchCountryField, TooltipLabel, CountryISO } from 'ngx-intl-tel-input';
 
@@ -109,7 +110,8 @@ import { HideOptionsComponent } from './components/hideOptions/hideOptions.compo
     UsButtonDirective,
     NavActionsComponent,
     ErrorTranslatePipe,
-    HideOptionsComponent
+    HideOptionsComponent,
+    TextMaskingPipe
 
   ],
   exports:[
@@ -154,7 +156,8 @@ import { HideOptionsComponent } from './components/hideOptions/hideOptions.compo
     UsButtonDirective,
     RouterModule,
     NavActionsComponent,
-    ClickOutsideDirective
+    ClickOutsideDirective,
+    TextMaskingPipe
 
   ],
   
