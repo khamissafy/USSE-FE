@@ -209,7 +209,7 @@
                         <div *ngIf="!isSearch && sortedDays.length>0" style="cursor: pointer;">
                             <img (click)="toggleSearch()" src="assets/icons/search-blue.svg" alt="">
                         </div>
-                        <div *ngIf="isSearch && sortedDays.length>0" class="d-flex justify-content-between position-relative msg-search">
+                        <div *ngIf="isSearch " class="d-flex justify-content-between position-relative msg-search">
                             <form [formGroup]="searchMsgForm" class="p-0 w-100">
                                 <input #MsgsearchInput type="text" class="form-control ps-5 txt-xs" id="messageSearchInput"
                                     formControlName="searchMsg"
