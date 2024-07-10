@@ -666,7 +666,8 @@
   "start_from":"Starts From letter",
   "hidden_letters":"Hidden Letters",
   "hide_options":"Hide information",
-  "group_name":"Group Name"
+  "group_name":"Group Name",
+  "device_is_deleted":"Deleted device cannot send messages!"
 
   
 

@@ -86,11 +86,12 @@
                                     class="pOut overflow overflow-line-1 "
                                     >{{chatContact.chat?.chatName}}</span>
                                 <div class="d-flex gap-1 align-items-center">
-                                    <img id="devType" [src]="chatContact.device?.deviceType | deviceType" alt="" style="width:15px">
+                                    <img id="devType" [ngClass]="{'clr-primary-filter':!chatContact.device?.isDeleted}" [src]="chatContact.device?.deviceType | deviceType" alt="" style="width:15px">
                                     <span
                                     [dir]="changeTextDir(chatContact.lastMessageContent)"
                                     [ngStyle]="{'text-align': changeTextDir(chatContact.lastMessageContent) === 'rtl' ? 'right' : 'left'}"
-                                    class="pOut overflow text-primary-800  overflow-line-1 "
+                                    [ngClass]="chatContact.device?.isDeleted?'text-neutral-600':'text-primary-800'"
+                                    class="pOut overflow  overflow-line-1 "
                                     >{{chatContact.device?.deviceName}}</span>
                                 </div>
                             </div>
@@ -430,11 +431,8 @@
                         [placeholder]="'Type a message' |translate"></textarea>
                 </form>
             </div>
-
-
-
             <button style="width: 5%;" class="sendBtn" [disabled]="disable" [ngClass]="{disable}"
-                style="cursor: pointer;" (click)="sendMsg()">
+                style="cursor: pointer;" (click)="sendMsg()" [title]="activeChat?.device?.isDeleted? ('device_is_deleted' |translate):''">
                 <img src="../assets/icons/send.svg" alt="">
             </button>
         </div>

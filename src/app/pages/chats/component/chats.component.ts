@@ -567,6 +567,7 @@ chatRec(search){
                   }
                   else{
                     this.activeChat=res.data[0];
+                    this.disable=this.activeChat.device.isDeleted;
                     this.selectedChatId=res.data[0]?.chat?.id;
                     this.chatName=res.data[0].chat?.chatName;
                     this.targetPhoneNumber=res.data[0].chat?.targetPhoneNumber;
@@ -749,6 +750,8 @@ resetForm(){
 
     navigateToChat(chat:chatsData){
       this.activeChat=chat;
+      this.disable=this.activeChat.device.isDeleted;
+
       this.openChat=true;
       this.isSearch=false;
       this.hideSearch=false;
@@ -830,10 +833,10 @@ resetChatsOrder(chatContact){
     sendMsg(event?){
       let message = this.messageForm.value.message;
       let newMessage:any=[];
-      this.disable=true;
 
-      if(this.filesList.length > 0 || message.trim() !== ''){
-      
+      if((this.filesList.length > 0 || message.trim() !== '') && !this.disable){
+        this.disable=true;
+
         if(event){
           if (event.key === 'Enter' && !event.shiftKey) {
             event.preventDefault(); 
@@ -1225,7 +1228,13 @@ else{
       this.textDirection = /[^\u0000-\u007F]/.test(text) ? 'rtl' : 'ltr';
     }
     disableButtonOrnot() {
-      this.disable = !(this.filesList.length > 0 || this.message.value.trim() !== '')
+      if(this.activeChat.device.isDeleted){
+        this.disable=true
+      }
+      else{
+        this.disable = !(this.filesList.length > 0 || this.message.value.trim() !== '')
+
+      }
     }
 
 
