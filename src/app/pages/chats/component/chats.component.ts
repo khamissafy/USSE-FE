@@ -1189,7 +1189,6 @@ else{
                   this.listChats.unshift(newChat)
                 }
                 this.groupMessagesByDay();
-
         }
 
     }

@@ -250,7 +250,7 @@
                                     <span>{{ isGroupe? chatIcon(chat?.targetPhoneNumber) : chatIcon(chatName) }}</span>
                                 </div>
                                 <div class="received-chats-msg">
-                                    <span *ngIf="chat?.chat?.channelType > 1" class="text-primary-800 font-w-700 txt-xs">
+                                    <span *ngIf="chat?.chat?.channelType > 1 || chat?.groupName" class="text-primary-800 font-w-700 txt-xs">
                                         {{chat?.targetPhoneNumber}}
                                         </span>
                                     <p>{{ chat?.msgBody }}</p>
@@ -307,7 +307,10 @@
                                     <span>{{ chatIcon(chatName) }}</span>
                                 </div>
                                 <div class="received-chats-msg"
-                                    [ngClass]="{'received-files-only': (chat?.fileName && chat?.fileName !== '') && chat?.msgBody == '' }">
+                                    [ngClass]="{'received-files-only': (chat?.fileName && chat?.fileName !== '') && chat?.msgBody == '' && (chat?.chat?.channelType === 1 || !chat?.groupName) }">
+                                    <span *ngIf="chat?.chat?.channelType > 1 || chat?.groupName" class="text-primary-800 font-w-700 txt-xs">
+                                        {{chat?.targetPhoneNumber}}
+                                        </span>
                                     <ng-container *ngIf="chat?.fileName">
                                         <div *ngIf="(chat.fileUrl.includes('image') || (chat?.fileName | type ) === 'assets/images/image.svg'); else otherType"
                                             class="d-flex justify-content-center ">
