@@ -147,6 +147,7 @@ if(this.searchSub){
       (res) => {
 
         let filteredLlist = res.filter((e) => e.totalContacts != 0);
+        this.allLists=[]
         filteredLlist.map((list)=>{
           list.isExpanded=true;
           list.shoudBeClosed=false;
@@ -157,18 +158,9 @@ if(this.searchSub){
 
           })
         })
-
-        if(orderBy){
-          let found:ListContacts;
-          this.allLists.map((list)=>{
-            found=this.allSelectedLists.find((listCon)=>list.list.id==listCon.list.id);
-            if(found){
-              this.allLists.splice(this.allLists.indexOf(list),1,found)
-            }
-          })
-
-        }
-      },
+        this.selectAllStatus=0;
+        this.selectedListsNum=0;
+            },
       (err) => {
 
       }
