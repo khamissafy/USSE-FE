@@ -747,6 +747,13 @@ resetForm(){
         }
       });
     }
+    markMessageAsRead(chat){
+      this.chatService.markChatAsRead(chat.chat.id).subscribe(
+        (res)=>{
+          chat.unseenMessagesCount=0;
+        }
+      )
+    }
 
     navigateToChat(chat:chatsData){
       this.activeChat=chat;
@@ -760,11 +767,7 @@ resetForm(){
       if(!chat.active){
         this.clearInputData();
         if(chat.unseenMessagesCount > 0){
-          this.chatService.markChatAsRead(chat.chat.id).subscribe(
-            (res)=>{
-              chat.unseenMessagesCount=0;
-            }
-          )
+          this.markMessageAsRead(chat)
         }
         this.listChats.map((chat)=>chat.active=false)      
         chat.active=true;
@@ -1154,6 +1157,7 @@ else{
               if(newMessage.direction){
                 newMessage.status=1
               }
+             
               this.selectedChat.push(newMessage);
               setTimeout(() => {
                 this.scrollToBottom();
@@ -1183,7 +1187,11 @@ else{
               let foundChat = this.listChats.find((chat)=>chat.chat.id == newMessage.ChatId);
                 if (foundChat) {
                 this.updateChatDataWithNewMsg(foundChat,newMessage)
-              
+                if((this.selectedChatId === newMessage.ChatId) ){
+                    if(!newMessage.direction){
+                      this.markMessageAsRead(foundChat)
+                    }
+                  }
                 }
                 else{
                   this.listChats.unshift(newChat)
