@@ -100,4 +100,6 @@ export interface chatHub {
     BotId: string,
     isCampaignAction: boolean,
     chatName?:string
+    Device?:devices,
+
 }

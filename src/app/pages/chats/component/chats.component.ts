@@ -1172,6 +1172,7 @@ else{
                 targetPhoneNumber: newMessage.targetPhoneNumber,
                 createdAt: newMessage.createdAt,
               },
+              device:newMessage.Device,
               lastMessageDate: newMessage.createdAt,
               lastMessageContent: newMessage.msgBody,
               lastMessageFileName:newMessage.fileName,
@@ -1180,7 +1181,6 @@ else{
               lastMessageDirection: newMessage.direction,
               lastMessageStatus:  newMessage.direction?1:null,
               unseenMessagesCount: newMessage.direction?0:1,
-              device:{id:newMessage.Deviceid},
               targetPhoneNumber:newMessage.targetPhoneNumber
 
             }
