@@ -6,7 +6,7 @@ import { Contacts } from 'src/app/pages/manage-contacts/contacts';
 import { ManageContactsService } from 'src/app/pages/manage-contacts/manage-contacts.service';
 import { AuthService } from 'src/app/shared/services/auth.service';
 import { ChatsService } from '../../chats.service';
-import { Chats } from '../../interfaces/Chats';
+import { Chats, chatsData } from '../../interfaces/Chats';
 import { FormControl, FormGroup } from '@angular/forms';
 
 @Component({
@@ -17,7 +17,7 @@ import { FormControl, FormGroup } from '@angular/forms';
 export class ChatContactsComponent implements OnInit {
   allContacts:any=[];
   contacts:any=[];
-  foundChat:Chats;
+  foundChat:chatsData;
   searchControl = new FormControl();
   searchMsg = new FormControl();
 
@@ -26,6 +26,7 @@ export class ChatContactsComponent implements OnInit {
     searchMsg:this.searchMsg
 
   })
+  clicked=0;
   hideSearch:boolean=true;
   @ViewChild('MsgsearchInput') MsgsearchInput: ElementRef;
   @ViewChild('searchContainer') searchContainer: ElementRef<HTMLInputElement>;
@@ -69,7 +70,9 @@ export class ChatContactsComponent implements OnInit {
   
   }
   async addNewContact(contact: Contacts) {
-    let newContact = {
+    this.clicked+=1;
+    if(this.clicked==1){
+      let newContact = {
         chatName: contact.name,
         targetPhoneNumber: contact.mobileNumber,
         email: this.authService.getUserInfo()?.email,
@@ -82,15 +85,24 @@ export class ChatContactsComponent implements OnInit {
     } else {
         this.chatService.addNewChat(newContact).subscribe(
             (res) => {
+              console.log(res)
                 this.onClose(res);
+            },
+            (err)=>{
+              this.onClose()
             }
         );
     }
+    }
+    
 }
 
 
   async isContactExist(contactData) {
-    let contact = this.data.chats.find((chat: Chats) => (chat.chat.chatName === contactData.chatName) && (chat.chat.targetPhoneNumber === contactData.targetPhoneNumber));
+    let contact = this.data.chats.find((chat: chatsData) => (chat.chat.chatName === contactData.chatName) 
+    && (chat.chat.targetPhoneNumber === contactData.targetPhoneNumber) 
+    && chat.device.id == this.data.deviceId);
+
     if (contact) {
         this.foundChat = contact;
         return true;
@@ -140,9 +152,17 @@ toggleSearch(isSearch){
 async getChat(chatName) {
   try {
       let res = await this.chatService.listChats(this.authService.getUserInfo()?.email, 30, 0, chatName, this.data.deviceId).toPromise();
-      if (res.length > 0) {
-          this.foundChat = res[0];
-          return true;
+      if (res.data.length > 0) {
+          let found:chatsData =res.data.find((chat: chatsData) => (chat.chat.chatName === chatName) 
+          && chat.device.id == this.data.deviceId)
+          if(found){
+            this.foundChat=found
+            return true;
+
+          }
+          else{
+            return false
+          }
       } else {
           return false;
       }

@@ -18,6 +18,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { SelectOption } from 'src/app/shared/components/select/select-option.model';
 import { Subject, Subscription, debounceTime, distinctUntilChanged, switchMap, takeUntil } from 'rxjs';
 import { BreakpointObserver } from '@angular/cdk/layout';
+import { TimeZoneServiceService } from 'src/app/shared/services/timeZoneService.service';
 
 @Component({
 
@@ -73,17 +74,22 @@ export class UsersComponent implements OnInit, OnDestroy {
   })
   searchSub: Subscription;
   subscriptions:Subscription[]=[];
+  selectedTimeZone:number=0;
+
   constructor(public dialog: MatDialog,
     private toaster: ToasterServices,
     private authService: AuthService,
     private translate: TranslateService,
     private snackBar: MatSnackBar,
     private breakpointObserver: BreakpointObserver,
-    private userService: UsersService
+    private userService: UsersService,
+    private timeZoneService:TimeZoneServiceService
+
   ) { };
 
 
   ngOnInit() {
+    this.setTimeZone();
     this.breakpointObserver.observe(['(max-width: 768px)'])
     .pipe(takeUntil(this.destroy$))
     .subscribe(result => {
@@ -108,6 +114,13 @@ export class UsersComponent implements OnInit, OnDestroy {
 
 
   };
+  setTimeZone(){
+    let sub = this.timeZoneService.timezone$.subscribe(
+      res=> this.selectedTimeZone=res
+
+    )
+    this.subscriptions.push(sub)
+  }
 getUsersReq(searchVal){
   let shows = this.userService.display;
   let pageNum = searchVal ? 0 : this.userService.pageNum;

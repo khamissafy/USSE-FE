@@ -1,5 +1,5 @@
 import { SelectionModel } from '@angular/cdk/collections';
-import { Component, EventEmitter, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { MatPaginator } from '@angular/material/paginator';
@@ -39,7 +39,7 @@ export class ScheduledMobileViewComponent implements OnInit ,OnDestroy{
 
     // devices
     devices:SelectOption[];
-    deviceLoadingText:string='Loading ...';
+    deviceLoadingText:string='Loading';
     devicesData :any= new FormControl([]);
     form = new FormGroup({
       devicesData:this.devicesData,
@@ -73,6 +73,9 @@ export class ScheduledMobileViewComponent implements OnInit ,OnDestroy{
      
     });
   alldevices: any;
+  @Input() selectedTimeZone :number=0;
+  filteredDevices: any=[];
+
     constructor(private messageService:MessagesService,
       public dialog: MatDialog,
       private authService:AuthService,
@@ -82,6 +85,27 @@ export class ScheduledMobileViewComponent implements OnInit ,OnDestroy{
         this.pageIndex=this.messageService.pageNum;
       }
     ngAfterViewInit(): void {
+      }
+      getFilterationFromParent(selectedDevices,devicesArr){
+        console.log(
+              {
+                    selectedDevices:selectedDevices.value,
+                    devicesArr:devicesArr
+                  }
+                  )
+        setTimeout(() => {
+       
+            this.filteredDevices=devicesArr;
+      
+            this.form.patchValue({
+              devicesData:selectedDevices.value
+            })
+      
+           
+          
+        }, 0);
+     
+      
       }
     ngOnInit() {
     
@@ -144,36 +168,37 @@ export class ScheduledMobileViewComponent implements OnInit ,OnDestroy{
           this.loading = false;
           this.length=0;
           this.noData=true;
-  
+          this.deviceLoadingText='No Results'
+
         }
         else{
           this.noData=false
   
           this.deviceId=res[0].id;
   
-          if(this.authService.selectedDeviceId ==""){
+          // if(this.authService.selectedDeviceId ==""){
   
-            this.form.patchValue({
-            devicesData: {
-            title:this.alldevices[0]?.deviceName,
-            value:this.alldevices[0]?.id,
-            deviceIcon:this.alldevices[0].deviceType
-            }
+          //   this.form.patchValue({
+          //   devicesData: {
+          //   title:this.alldevices[0]?.deviceName,
+          //   value:this.alldevices[0]?.id,
+          //   deviceIcon:this.alldevices[0].deviceType
+          //   }
   
-            })
-          }
-          else{
-            let selected= this.devices.find((device)=>device.value==this.authService.selectedDeviceId)
-            this.deviceId=this.authService.selectedDeviceId;
-            this.form.patchValue({
-              devicesData: {
-              title:selected.title,
-              value:selected?.value,
-              deviceIcon:selected.deviceIcon
-              }
+          //   })
+          // }
+          // else{
+          //   let selected= this.devices.find((device)=>device.value==this.authService.selectedDeviceId)
+          //   this.deviceId=this.authService.selectedDeviceId;
+          //   this.form.patchValue({
+          //     devicesData: {
+          //     title:selected.title,
+          //     value:selected?.value,
+          //     deviceIcon:selected.deviceIcon
+          //     }
   
-              })
-          }
+          //     })
+          // }
           if(messages){
             this.numRows=res.length;
             this.loading = false;
@@ -181,7 +206,7 @@ export class ScheduledMobileViewComponent implements OnInit ,OnDestroy{
             this.length=length
            }
            else{
-            this.getMessages(this.deviceId);
+            this.getMessages();
            }
       }
       }
@@ -198,23 +223,34 @@ export class ScheduledMobileViewComponent implements OnInit ,OnDestroy{
       }
     )
   }
-    onSelect(device){
-      this.deviceId=device.value;
-      this.authService.selectedDeviceId=device.value
-  
-      this.getMessages(this.deviceId)
-          }
-      getMessages(deviceId:string){
-        this.getMessagesCount(deviceId);
+  onSelectDev(device){
+    this.filteredDevices.push(device.value);
+    if(this.paginator){
+      this.paginator.pageIndex=0
+    }
+    this.pageIndex=0;
+    this.getMessages(this.filteredDevices)  
+
+  }
+  deselectDev(device){
+    this.filteredDevices.splice(this.filteredDevices.indexOf(device.value),1)
+    if(this.paginator){
+      this.paginator.pageIndex=0
+    }
+    this.pageIndex=0;
+    this.getMessages(this.filteredDevices )  
+  }
+      getMessages(deviceId?:string[]){
         let shows=this.messageService.display;
         let email=this.messageService.email;
         this.loading=true;
         let messagesSub=this.messageService.getScheduledMessages(email,shows,this.pageIndex,deviceId).subscribe(
           (res)=>{
-            this.numRows=res.length;
+            this.numRows=res.data.length;
+            this.messagesTableData=res.data
+            this.length=res.count;
             this.loading = false;
-            this.messagesTableData=res
-  
+
           },
           (err)=>{
            this.loading = false;
@@ -226,20 +262,7 @@ export class ScheduledMobileViewComponent implements OnInit ,OnDestroy{
         this.subscribtions.push(messagesSub)
       }
   
-      getMessagesCount(deviceId){
-        let email=this.messageService.email;
-        this.messageService.listScheduledMessagesCount(email,deviceId).subscribe(
-          (res)=>{
-            this.length=res;
-          }
-          ,(err)=>{
-            this.loading = false;
-            this.length=0;
-            this.noData=true;
-          }
-        )
-  
-      }
+   
       isAllSelected() {
         const numSelected = this.selection.selected.length;
   
@@ -280,13 +303,13 @@ export class ScheduledMobileViewComponent implements OnInit ,OnDestroy{
             this.paginator.pageIndex=0;
           }
         
-          this.getMessages(this.deviceId);
+          this.getMessages(this.filteredDevices);
   
         }
         onPageChange(event){
           this.pageIndex=event.pageIndex;
           this.selection.clear();
-          this.getMessages(this.deviceId);
+          this.getMessages(this.filteredDevices);
   
         }
   

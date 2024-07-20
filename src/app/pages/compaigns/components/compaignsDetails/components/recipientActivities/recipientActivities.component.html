@@ -145,7 +145,7 @@
         <ng-container matColumnDef="Updated At">
           <th class="text-center" mat-header-cell *matHeaderCellDef>{{ 'updatedAtLabel' | translate }}</th>
           <td class="text-center" mat-cell *matCellDef="let element">
-            {{ element?.updatedAt | toLocalTime    }}
+            {{ element?.updatedAt | toLocalTime:selectedTimeZone    }}
           </td>
         </ng-container>
 
@@ -231,7 +231,7 @@
           <!-- Updated At Column -->
           <div class="row row-item" *ngIf="displayedColumns.includes('Updated At')">
             <div class="col row-header">{{ 'updatedAtLabel' | translate }}</div>
-            <div class="col">{{ element?.updatedAt | toLocalTime }}</div>
+            <div class="col">{{ element?.updatedAt | toLocalTime:selectedTimeZone }}</div>
           </div>
 
           <!-- Status Column -->

@@ -14,7 +14,9 @@ export interface DeviceData {
     port: any,
     systemID: string,
     lastUpdate: string,
-    token: string
+    token: string,
+    canEdit?:boolean
+
 }
 export interface Init{
   base64:string,

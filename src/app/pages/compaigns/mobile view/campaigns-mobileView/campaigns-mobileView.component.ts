@@ -1,4 +1,4 @@
-import { Component, EventEmitter, OnInit, Output, ViewChild } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { MatPaginator } from '@angular/material/paginator';
@@ -77,6 +77,8 @@ export class CampaignsMobileViewComponent implements OnInit {
   openedDialogs: any=[];
   searchSub: any;
   alldevices: any[];
+  @Input() selectedTimeZone :number=0;
+
   constructor(private compaignsService: CompaignsService,
     public dialog: MatDialog,
     private router: Router,

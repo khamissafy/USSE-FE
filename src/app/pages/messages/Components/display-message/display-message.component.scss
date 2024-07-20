@@ -22,6 +22,9 @@ h2{
 .message{
   line-height: 1.8;
 }
+p{
+  overflow-wrap: break-word;
+}
 .message-container{
   position: relative;
 

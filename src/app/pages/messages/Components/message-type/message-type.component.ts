@@ -4,7 +4,7 @@ import {MatTableDataSource, MatTableModule} from '@angular/material/table';
 import {SelectionModel} from '@angular/cdk/collections';
 import { MessagesService } from '../../messages.service';
 import { FormControl, FormGroup } from '@angular/forms';
-import { Message } from '../../message';
+import { Message, messageData } from '../../message';
 import { Subject, Subscription, debounceTime, distinctUntilChanged, switchMap, takeUntil } from 'rxjs';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { DisplayMessageComponent } from '../display-message/display-message.component';
@@ -19,6 +19,8 @@ import { TranslateService } from '@ngx-translate/core';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { arraysContainSameObjects } from 'src/app/shared/methods/arraysContainSameObjects';
 import { MessagesMobileViewComponent } from '../../mobile-view/messages-mobileView/messages-mobileView.component';
+import { TimeZoneServiceService } from 'src/app/shared/services/timeZoneService.service';
+import { DeviceData } from 'src/app/pages/devices/device';
 
 @Component({
   selector: 'app-message-type',
@@ -31,7 +33,7 @@ export class MessageTypeComponent implements OnInit ,OnDestroy ,AfterViewInit{
   numRows;
   loading:boolean=true;
   @Input() msgCategory:string="inbox"
-  @Output() isChecked = new EventEmitter<Message[]>;
+  @Output() isChecked = new EventEmitter<messageData[]>;
   @Output() selectedDeviceId = new EventEmitter<string>;
 
   @ViewChild(MatPaginator)  paginator!: MatPaginator;
@@ -39,8 +41,8 @@ export class MessageTypeComponent implements OnInit ,OnDestroy ,AfterViewInit{
   @Input() canEdit: boolean;
   cellClick:boolean=false;
   // devices
-  devices:SelectOption[];
-  deviceLoadingText:string='Loading ...';
+  devices:any[];
+  deviceLoadingText:string='Loading';
   devicesData :any= new FormControl([]);
   form = new FormGroup({
     devicesData:this.devicesData,
@@ -57,8 +59,8 @@ filters:any;
   columns :FormControl;
   displayed: string[] ;
   displayedColumns: string[] = ['select' ,'Device Name', 'Sender', 'Messages', 'Received At','Updated At','Status','Ation'];
-  dataSource:MatTableDataSource<Message>;
-  selection = new SelectionModel<Message>(true, []);
+  dataSource:MatTableDataSource<messageData>;
+  selection = new SelectionModel<messageData>(true, []);
   destroy$: Subject<void> = new Subject<void>();
 
   subscribtions:Subscription[]=[];
@@ -74,18 +76,22 @@ filters:any;
     searchControl:this.searchControl
   })
   searchSub: Subscription;
-  filteration: any;
+  filteration: any=[];
   @ViewChild(MessagesMobileViewComponent) mobileView :MessagesMobileViewComponent
   alldevices: any[]=[];
   isDataCalledInMobile: any;
-
+  selectedTimeZone:number=0;
+  filteredDevices: string[]=[];
+  permissionsForDevices:{}[]=[]
   constructor(public cdr: ChangeDetectorRef ,
     public dialog: MatDialog,
     private messageService:MessagesService,
     private authService:AuthService,
     private translate:TranslateService,
     private translationService:TranslationService,
-    private breakpointObserver: BreakpointObserver){
+    private breakpointObserver: BreakpointObserver,
+    private timeZoneService:TimeZoneServiceService
+  ){
       this.display=this.messageService.getUpdatedDisplayNumber()
       this.pageNum=this.messageService.pageNum;
 
@@ -106,6 +112,8 @@ filters:any;
     ]
 
   ngOnInit() {
+    this.setTimeZone();
+
     this.filteringForm.patchValue({
       filterdData:this.selectedItems
     }
@@ -118,8 +126,19 @@ filters:any;
       (res) => {
 
         if(res.source.selected.length){
-
-          this.isChecked.emit(res.source.selected)
+          let selectedMsg: messageData[] =[];
+          if(this.permission){
+            selectedMsg= res.source.selected.filter((msg) => {
+            
+              let device=this.permission.find((dev)=>dev.deviceId == msg.device.id)
+              let canDeleted = device.value=="FullAccess" ? true : false
+              return canDeleted; // Return true if canDeleted is true
+            });
+          }
+          else{
+            selectedMsg=res.source.selected
+          }
+            this.isChecked.emit(selectedMsg);
         }
         else{
           this.isChecked.emit()
@@ -137,6 +156,13 @@ else{
 }
 this.onChangeSecreanSizes()
     }
+    setTimeZone(){
+      let sub = this.timeZoneService.timezone$.subscribe(
+        res=> this.selectedTimeZone=res
+  
+      )
+      this.subscribtions.push(sub)
+    }
     onChangeSecreanSizes(){
       this.breakpointObserver.observe(['(max-width: 768px)'])
       .pipe(takeUntil(this.destroy$))
@@ -144,60 +170,80 @@ this.onChangeSecreanSizes()
         this.isSmallScreen = result.matches;
         if(!this.isSmallScreen){
           this.selection.clear()
-
             if(this.dataSource){
-  
-            if(!arraysContainSameObjects(this.dataSource.data,this.mobileView.messagesTableData)){
-              if(this.mobileView?.searchControl.value || this.mobileView.filteration){
+            if(!arraysContainSameObjects(this.dataSource.data,this.mobileView?.messagesTableData)){
+              if(this.mobileView?.searchControl.value ){
                 this.getDevices(this.msgCategory)
               }
               else{
-                this.getDataFromChild(this.mobileView.alldevices,this.mobileView.messagesTableData,this.mobileView.length)
+                this.getDataFromChild(this.mobileView?.alldevices,this.mobileView?.messagesTableData,this.mobileView?.length)
+                this.getFilterationFromChild(this.mobileView?.filterdData,this.mobileView?.devicesData,this.mobileView?.filteration,this.mobileView?.filteredDevices)
 
               }
             }
           }
-           else{
+          else{
             if(!this.isDataCalledInMobile){
               this.getDevices(this.msgCategory)
             }
             else{
-              if(this.mobileView.searchControl?.value  || this.mobileView.filteration){
+              if(this.mobileView?.searchControl?.value  ){
                 this.getDevices(this.msgCategory)
               }
               else{
-                this.getDataFromChild(this.mobileView.alldevices,this.mobileView.messagesTableData,this.mobileView.length)
+                this.getDataFromChild(this.mobileView?.alldevices,this.mobileView?.messagesTableData,this.mobileView?.length)
+                this.getFilterationFromChild(this.mobileView?.filterdData,this.mobileView?.devicesData,this.mobileView?.filteration,this.mobileView?.filteredDevices)
 
               }
             }
           } 
         }
-        else{
-  
+          else{
             if(this.dataSource){
               setTimeout(() => {
-                if(this.searchControl.value || this.filteration){
-                  this.mobileView.getDevices(this.mobileView.msgCategory)
+                if(this.searchControl.value ){
+                  this.mobileView?.getDevices(this.mobileView?.msgCategory)
                 }
                 else{
                   this.mobileView?.getDataFromParent(this.alldevices,this.dataSource.data,this.length)
+                  this.mobileView?.getFilterationFromParent(this.filterdData,this.devicesData,this.filteration,this.filteredDevices)
 
                 }
-            }, 100);
+            }, 0);
             }
             else{
               setTimeout(() => {
-  
-                this.mobileView?.getDevices(this.mobileView.msgCategory);
+
+                this.mobileView?.getDevices(this.mobileView?.msgCategory);
                 this.isDataCalledInMobile=true;
-  
-              }, 100);
+
+              }, 0);
             }
+
+          }
+          });
+          }
+          getFilterationFromChild(selectedFilters,selectedDevices,filterationArr,devicesArr){
+        
+            setTimeout(() => {
+                this.filteration=filterationArr;
+                this.filteredDevices=devicesArr;
           
+                this.form.patchValue({
+                  devicesData:selectedDevices.value
+                })
           
-        }
-      });
-    }
+                this.filteringForm.patchValue({
+                  filterdData:selectedFilters.value
+                })
+          
+              
+            }, 0);
+         
+          
+          }
+
+   
     handleResponce(res,messages?,length?){
       this.alldevices=res;
 
@@ -222,45 +268,43 @@ this.onChangeSecreanSizes()
         this.loading = false;
         this.length=0;
         this.noData=true;
+        this.deviceLoadingText='No Results'
       }
       else{
         this.noData=false
 
-        this.deviceId=res[0].id;
-        this.selectedDeviceId.emit(this.deviceId)
+        // this.filteredDevices.map((device)=> this.getDevicePermission(device))
 
-      this.getDevicePermission(this.deviceId);
+        // if(this.authService.selectedDeviceId ==""){
 
-        if(this.authService.selectedDeviceId ==""){
+        //   this.form.patchValue({
+        //   devicesData: {
+        //   title:this.alldevices[0]?.deviceName,
+        //   value:this.alldevices[0]?.id,
+        //   deviceIcon:this.alldevices[0].deviceType
 
-          this.form.patchValue({
-          devicesData: {
-          title:this.alldevices[0]?.deviceName,
-          value:this.alldevices[0]?.id,
-          deviceIcon:this.alldevices[0].deviceType
+        //   }
 
-          }
+        //   })
+        // }
+        // else{
+        //   let selected= this.devices.find((device)=>device.value==this.authService.selectedDeviceId)
+        //   this.filteredDevices=this.authService.selectedDeviceId;
+        //   this.selectedDeviceId.emit(this.filteredDevices)
 
-          })
-        }
-        else{
-          let selected= this.devices.find((device)=>device.value==this.authService.selectedDeviceId)
-          this.deviceId=this.authService.selectedDeviceId;
-          this.selectedDeviceId.emit(this.deviceId)
+        //   this.form.patchValue({
+        //     devicesData: {
+        //     title:selected.title,
+        //     value:selected?.value,
+        //     deviceIcon:selected.deviceIcon
 
-          this.form.patchValue({
-            devicesData: {
-            title:selected.title,
-            value:selected?.value,
-            deviceIcon:selected.deviceIcon
+        //     }
 
-            }
-
-            })
-        }
+        //     })
+        // }
         if(messages){
           this.numRows = res.length;
-          this.dataSource = new MatTableDataSource<Message>(messages);
+          this.dataSource = new MatTableDataSource<messageData>(messages);
           this.length=length;
 
           if (this.paginator) {
@@ -275,8 +319,7 @@ this.onChangeSecreanSizes()
 
         }
         else{
-          this.getMessages(this.deviceId);
-
+          this.getMessages();
         }
 
     }
@@ -304,53 +347,29 @@ ngAfterViewInit(): void {
     this.paginator.pageSize=this.display
   }
 }
-    getDevicePermission(deviceId:string){
-      if(this.permission && this.isUser){
+  
+  // fillBasedOnPermissions(permission:string){
+  //   if(permission=="FullAccess"){
+  //     this.tableData()
+  //   }
+  //   else{
+  //     if(this.msgCategory=='inbox'){
+  //       this.displayed = INBOXHEADER
+  //       this.displayedColumns = ['Device Name','Group Name', 'Sender', 'Messages', 'Received At'];
+  //     }
+  //     else if(this.msgCategory=='outbox'){
+  //       this.displayed = OUTBOX;
+  //       this.displayedColumns = ['Device Name','Group Name', 'Recipient', 'Messages', 'Received At','Updated At','Status'];
+  //     }
+  //     else if(this.msgCategory=='failed'){
 
-        let devicePermissions=this.permission.find((e)=>e.deviceId==deviceId);
-        if(devicePermissions){
+  //       this.displayedColumns = ['Device Name','Group Name', 'Recipient', 'Messages', 'Received At'];
+  //       this.displayed = FAILED;
 
-          let value=devicePermissions.value;
-          this.fillBasedOnPermissions(value);
-          this.canEdit=value=="ReadOnly"?false:true;
-        }
-        else{
-          this.fillBasedOnPermissions("ReadOnly")
-          this.canEdit=false;
-        }
-
-
-      }
-      else if(!this.permission && this.isUser){
-        this.fillBasedOnPermissions("ReadOnly")
-        this.canEdit=false;
-      }
-      else{
-        this.canEdit=true;
-      }
-    }
-  fillBasedOnPermissions(permission:string){
-    if(permission=="FullAccess"){
-      this.tableData()
-    }
-    else{
-      if(this.msgCategory=='inbox'){
-        this.displayed = INBOXHEADER
-        this.displayedColumns = ['Device Name', 'Sender', 'Messages', 'Received At'];
-      }
-      else if(this.msgCategory=='outbox'){
-        this.displayed = OUTBOX;
-        this.displayedColumns = ['Device Name', 'Recipient', 'Messages', 'Received At','Updated At','Status'];
-      }
-      else if(this.msgCategory=='failed'){
-
-        this.displayedColumns = ['Device Name', 'Recipient', 'Messages', 'Received At'];
-        this.displayed = FAILED;
-
-      }
-    }
-    this.columns.setValue(this.displayedColumns)
-  }
+  //     }
+  //   }
+  //   this.columns.setValue(this.displayedColumns)
+  // }
  // get devices data
  getDevices(megtype:string){
   this.msgCategory=megtype;
@@ -370,7 +389,7 @@ setupSearchSubscription(): void {
   this.searchSub = this.searchControl.valueChanges.pipe(
     debounceTime(700), // Wait for 1s pause in events
     distinctUntilChanged(), // Only emit if value is different from previous value
-    switchMap(searchVal => this.getMessagesReq(this.deviceId,this.msgCategory,this.filteration, searchVal))
+    switchMap(searchVal => this.getMessagesReq(this.filteredDevices,this.msgCategory,this.filteration, searchVal))
   ).subscribe(
     res => this.handleGetMessagesResponse(res,this.searchControl.value,this.filteration, this.msgCategory),
     err => this.handleError()
@@ -378,11 +397,12 @@ setupSearchSubscription(): void {
   this.subscribtions.push(this.searchSub);
 }
 
-getMessagesReq(deviceId:string,msgCat?,filterdItems?,searchVal?){
+getMessagesReq(deviceId:string[],msgCat?,filterdItems?,searchVal?){
   let shows=this.messageService.display;
   let email=this.messageService.email;
   let msgCategory=msgCat? msgCat : this.msgCategory;
-  let pageNumber=searchVal?0:this.pageNum
+  let pageNumber=searchVal?0:this.pageNum;
+
   if(searchVal && this.paginator){
     this.paginator.pageIndex=0
   }
@@ -390,13 +410,16 @@ getMessagesReq(deviceId:string,msgCat?,filterdItems?,searchVal?){
   if(this.selection){
     this.selection.clear()
   }
+  
   return this.messageService.getMessages(email,msgCategory,shows,pageNumber,searchVal,deviceId,filterdItems)
 }
 
-getMessages(deviceId: string, msgCat?: string, filterdItems?: any, searchVal?: string): void {
+getMessages(deviceId?: string[], msgCat?: string, filterdItems?: any, searchVal?: string): void {
+  this.loading=true;
+
   let search=searchVal?searchVal:"";
   let msgCategory=msgCat? msgCat : this.msgCategory;
-  if(this.searchSub && !filterdItems){
+  if(this.searchSub && (!filterdItems && this.filteredDevices.length==0)){
     this.searchSub.unsubscribe();
     this.searchSub=null;
     this.searchForm.patchValue({
@@ -416,21 +439,27 @@ getMessages(deviceId: string, msgCat?: string, filterdItems?: any, searchVal?: s
   this.subscribtions.push(messagesSub);
 }
 
-handleGetMessagesResponse(res: Message[], searchVal: string,filterdItems,msgCategory): void {
-  this.numRows = res.length;
-  this.dataSource = new MatTableDataSource<Message>(res);
-  this.loading = false;
+handleGetMessagesResponse(res: Message, searchVal: string,filterdItems,msgCategory): void {
+  this.numRows = res.data.length;
+  this.dataSource = new MatTableDataSource<messageData>(res.data);
 
   if (searchVal!='') {
-    this.length = res.length;
+    this.length = res.data.length;
     this.notFound = this.length === 0;
   } else {
     if (this.paginator) {
       this.paginator.pageIndex = this.pageNum;
     }
     this.notFound = false;
-    this.getMessagesCount(this.deviceId, msgCategory,filterdItems);
+    this.length=res.count;
+    this.loading=false
+    if(this.length ==0){
+      this.notFound=true;
+    }
+    // this.getMessagesCount(this.filteredDevices, msgCategory,filterdItems);
   }
+  this.loading = false;
+
 }
 
 handleError(): void {
@@ -440,80 +469,37 @@ handleError(): void {
 }
 
 
-    // getMessagesBeforeEdit(deviceId:string,msgCat?,filterdItems?,searchVal?){
-    //   let shows=this.messageService.display;
+
+    // getMessagesCount(deviceId,msgCategory,filterdItems?){
+    //   this.loading=true
     //   let email=this.messageService.email;
-    //   let msgCategory=msgCat? msgCat : this.msgCategory;
-    //   let search=searchVal?searchVal:"";
-    //   let pageNumber=searchVal?0:this.pageNum
-    //   if(searchVal && this.paginator){
-    //     this.paginator.pageIndex=0
-    //   }
-    //   this.loading = true;
-    //   let messagesSub=this.messageService.getMessages(email,msgCategory,shows,pageNumber,search,deviceId,filterdItems).subscribe(
+      
+    //   this.messageService.getMessagesCount(email,msgCategory,deviceId,filterdItems).subscribe(
     //     (res)=>{
-    //       this.numRows=res.length;
-
-    //       this.loading = false;
-    //       this.dataSource=new MatTableDataSource<Message>(res)
-
-    //       //
-    //       if(search!=""){
-    //         this.length=res.length;
-    //         if(this.length==0){
-    //           this.notFound=true;
-    //         }
-    //         else{
-    //           this.notFound=false;
-    //         }
-    //     }
-    //     else{
-    //       if(this.paginator){
-    //         this.paginator.pageIndex=this.pageNum
+    //       this.length=res;
+    //       this.loading=false
+    //       if(this.length ==0){
+    //         this.notFound=true;
     //       }
-    //       this.notFound=false;
-    //       this.getMessagesCount(deviceId,msgCategory,filterdItems);
-
     //     }
-    //     },
-    //     (err)=>{
-    //      this.loading = false;
-    //      this.length=0;
-    //      this.noData=true;
+    //     ,(err)=>{
+    //       this.length=0;
+    //       this.loading=false
+    //       this.noData=true;
 
     //     }
     //   )
-    //   this.subscribtions.push(messagesSub)
     // }
-    getMessagesCount(deviceId,msgCategory,filterdItems?){
-      this.loading=true
-      let email=this.messageService.email;
-      
-      this.messageService.getMessagesCount(email,msgCategory,deviceId,filterdItems).subscribe(
-        (res)=>{
-          this.length=res;
-          this.loading=false
-          if(this.length ==0){
-            this.notFound=true;
-          }
-        }
-        ,(err)=>{
-          this.length=0;
-          this.loading=false
-          this.noData=true;
+    // onSelect(device){
+    //   this.selection.clear()
+    //   this.filteredDevices=device.value;
+    //   this.selectedDeviceId.emit(this.filteredDevices)
 
-        }
-      )
-    }
-    onSelect(device){
-      this.selection.clear()
-      this.deviceId=device.value;
-      this.selectedDeviceId.emit(this.deviceId)
+    //   this.authService.selectedDeviceId=device.value
+    //   this.getMessages(this.filteredDevices);
+    //   this.getDevicePermission(this.filteredDevices);
+    //       }
 
-      this.authService.selectedDeviceId=device.value
-      this.getMessages(this.deviceId);
-      this.getDevicePermission(this.deviceId);
-          }
   /** Whether the number of selected elements matches the total number of rows. */
   isAllSelected() {
     const numSelected = this.selection.selected.length;
@@ -541,7 +527,7 @@ handleError(): void {
 
   onSearch(event:any){
     this.selection.clear();
-    this.getMessages(this.deviceId,null,null,event.value);
+    this.getMessages(this.filteredDevices,null,null,event.value);
   }
 
   changeColumns(event){
@@ -565,25 +551,49 @@ handleError(): void {
     this.messageService.updateDisplayNumber(event.pageSize)
     this.selection.clear();
 
-    this.getMessages(this.deviceId);
+    this.getMessages(this.filteredDevices);
 
   }
-  tableData(){
+  fillBasedOnPermissions(){
     if(this.msgCategory=='inbox'){
-
-      this.displayed = INBOXHEADER;
-      this.displayedColumns = ['select' ,'Device Name', 'Sender', 'Messages', 'Received At'];
+      this.displayed = INBOXHEADER
+      this.displayedColumns = ['Device Name','Group Name', 'Sender', 'Messages', 'Received At'];
     }
     else if(this.msgCategory=='outbox'){
       this.displayed = OUTBOX;
-      this.displayedColumns = ['select' ,'Device Name', 'Recipient', 'Messages', 'Received At','Updated At','Status'];
+      this.displayedColumns = ['Device Name','Group Name', 'Recipient', 'Messages', 'Received At','Updated At','Status'];
     }
     else if(this.msgCategory=='failed'){
-      this.displayedColumns = ['select' ,'Device Name', 'Recipient', 'Messages', 'Received At',"Ation"];
+
+      this.displayedColumns = ['Device Name','Group Name', 'Recipient', 'Messages', 'Received At'];
       this.displayed = FAILED;
 
     }
-    this.columns.setValue(this.displayedColumns)
+    this.canEdit=false;
+  this.columns.setValue(this.displayedColumns)
+}
+  tableData(){
+    if(!this.permission && this.isUser){
+      this.fillBasedOnPermissions();
+    }
+    else{
+      if(this.msgCategory=='inbox'){
+
+        this.displayed = INBOXHEADER;
+        this.displayedColumns = ['select' ,'Device Name','Group Name', 'Sender', 'Messages', 'Received At'];
+      }
+      else if(this.msgCategory=='outbox'){
+        this.displayed = OUTBOX;
+        this.displayedColumns = ['select' ,'Device Name','Group Name', 'Recipient', 'Messages', 'Received At','Updated At','Status'];
+      }
+      else if(this.msgCategory=='failed'){
+        this.displayedColumns = ['select' ,'Device Name','Group Name', 'Recipient', 'Messages', 'Received At',"Ation"];
+        this.displayed = FAILED;
+  
+      }
+      this.canEdit=true;
+      this.columns.setValue(this.displayedColumns)
+    }
 
   }
   displayMessage(row){
@@ -622,14 +632,14 @@ handleError(): void {
       data: {
         messageIds:[msgId],
         email: this.authService.getUserInfo().email,
-        deviceId: this.deviceId
+        deviceId: this.filteredDevices
       }
     }
   
     const dialogRef = this.dialog.open(ResendMessagesComponent,dialogConfig);
     dialogRef.afterClosed().subscribe(result => {
       if(result){
-        this.getMessages(this.deviceId,"failed");
+        this.getMessages(this.filteredDevices,"failed");
         
       }
     });
@@ -641,15 +651,34 @@ handleError(): void {
     
       this.subscribtions.map(e=>e.unsubscribe());
     this.selection.clear()
+    this.isChecked.emit(this.selection.selected)
+  }
+  onSelectDev(device){
+    this.filteredDevices.push(device.value);
+    if(this.paginator){
+      this.paginator.pageIndex=0
+    }
+    this.pageNum=0;
+    this.getMessages(this.filteredDevices,this.msgCategory,this.filteration,this.searchControl.value)  
+
+  }
+  deselectDev(device){
+    this.filteredDevices.splice(this.filteredDevices.indexOf(device.value),1)
+    if(this.paginator){
+      this.paginator.pageIndex=0
+    }
+    this.pageNum=0;
+
+    this.getMessages(this.filteredDevices,this.msgCategory,this.filteration,this.searchControl.value )  
   }
   selectFilter(item){
   // this.selectedItems.push(item);
       this.filteration= this.selectedItems.map((sel)=>sel.value-1)
-  this.getMessages(this.deviceId,"outbox",this.filteration,this.searchControl.value )  
+  this.getMessages(this.filteredDevices,"outbox",this.filteration,this.searchControl.value )  
   }
   deselectFilter(item){
       this.filteration= this.selectedItems.map((sel)=>sel.value-1)
-    this.getMessages(this.deviceId,"outbox",this.filteration,this.searchControl.value )   
+    this.getMessages(this.filteredDevices,"outbox",this.filteration,this.searchControl.value )   
 
   }
 }

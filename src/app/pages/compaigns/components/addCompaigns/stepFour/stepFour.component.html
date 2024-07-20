@@ -147,26 +147,49 @@
           <div style="width:250px" class="time-picker">
        
             <nz-time-picker
+            #timePicker1
             style="padding: 0 12px;"
             class="rounded-pill border border-1py-2 txt-input w-100"
             [nzUse12Hours]="true"
             formControlName="time1"
             nzFormat="h:mm a"
             [nzPopupClassName]="'custom-panel'"
+            [nzAddOn]="customTim1Footer"
 
-          ></nz-time-picker>
+          >
+
+              <ng-template #customTim1Footer>
+                <div class="custom-footer d-flex align-items-center justify-content-between" >
+                  <span class="text-primary-800 pointer" (click)="setTimeToNow(time1)">Now</span>
+                  <div class="d-flex align-items-center">
+                    <button class="bg-primary-800 custom-btn-ok text-white" (click)="onOkClick(timePicker1)"><span>ok</span></button>
+                  </div>
+                </div>
+                </ng-template>
+          </nz-time-picker>
+
           </div>
           <span class="mx-3">{{ 'toLabel' | translate }}</span>
           <div style="width:250px">
-         
             <nz-time-picker
+            #timePicker2
             [nzPopupClassName]="'custom-panel'"
             style="padding: 0 12px;"
               class="rounded-pill border border-1 py-2 txt-input w-100"
               [nzUse12Hours]="true"
               formControlName="time2"
               nzFormat="h:mm a"
-            ></nz-time-picker>
+              [nzAddOn]="customTim2Footer"
+            >
+            <ng-template #customTim2Footer>
+              <div class="custom-footer d-flex align-items-center justify-content-between" >
+                <span class="text-primary-800 pointer" (click)="setTimeToNow(time2)">Now</span>
+                <div class="d-flex align-items-center">
+                  <button class="bg-primary-800 custom-btn-ok text-white" (click)="onOkClick(timePicker2)"><span>ok</span></button>
+                </div>
+              </div>
+              </ng-template>
+          </nz-time-picker>
           </div>
         </div>
 

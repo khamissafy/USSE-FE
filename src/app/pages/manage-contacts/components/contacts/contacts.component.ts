@@ -20,6 +20,7 @@ import { TranslationService } from 'src/app/shared/services/translation.service'
 import { AdditonalParamsComponent } from './additonalParams/additonalParams.component';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { ContactsMobileViewComponent } from '../mobile view/contacts-mobileView/contacts-mobileView.component';
+import { TimeZoneServiceService } from 'src/app/shared/services/timeZoneService.service';
 
 @Component({
 
@@ -70,6 +71,8 @@ export class ContactsComponent  implements OnInit , AfterViewInit ,OnDestroy {
   searchSub: Subscription;
   @ViewChild(ContactsMobileViewComponent) mobileView :ContactsMobileViewComponent
   isDataCalledInMobile: boolean;
+  selectedTimeZone:number=0;
+
   constructor(public dialog: MatDialog,
     private toaster: ToasterServices,
     private listService:ManageContactsService,
@@ -77,7 +80,8 @@ export class ContactsComponent  implements OnInit , AfterViewInit ,OnDestroy {
     private translate: TranslateService,
     private authService:AuthService,
     private translationService:TranslationService,
-    private breakpointObserver: BreakpointObserver
+    private breakpointObserver: BreakpointObserver,
+    private timeZoneService:TimeZoneServiceService
   ) {
     this.display=listService.getUpdatedDisplayNumber()
     this.pageNum=this.listService.pageNum;
@@ -139,7 +143,7 @@ export class ContactsComponent  implements OnInit , AfterViewInit ,OnDestroy {
                 this.mobileView?.getDataFromParent(this.dataSource.data,'',this.isCanceled,this.length)
   
               }
-          }, 100);
+          }, 0);
           }
           else{
             setTimeout(() => {
@@ -147,7 +151,7 @@ export class ContactsComponent  implements OnInit , AfterViewInit ,OnDestroy {
               this.mobileView?.getContacts('',this.isCanceled);
               this.isDataCalledInMobile=true;
 
-            }, 100);
+            }, 0);
           }
         
         
@@ -168,7 +172,7 @@ export class ContactsComponent  implements OnInit , AfterViewInit ,OnDestroy {
 
   }
   ngOnInit() {
-  
+  this.setTimeZone();
      if(this.isCanceled){
     if(!this.canEdit){
         this.displayedColumns = ['Name', 'Mobile',"Lists",'Additional Parameters',"Create At"];
@@ -203,7 +207,13 @@ export class ContactsComponent  implements OnInit , AfterViewInit ,OnDestroy {
     
 this.onChangeSecreanSizes()
   }
+  setTimeZone(){
+    let sub = this.timeZoneService.timezone$.subscribe(
+      res=> this.selectedTimeZone=res
 
+    )
+    this.subscribtions.push(sub)
+  }
   getContactsReq(searchVal,canceled?){
     let shows=this.listService.display;
     let email=this.authService.getUserInfo()?.email;
@@ -447,8 +457,6 @@ unCancelSnackBar(){
       if(result){
         this.getContacts();
             }
-
-
     });
 
   }
@@ -558,7 +566,6 @@ ngOnDestroy(){
   this.destroy$.next();
   this.destroy$.complete();
   this.selection.clear();
-
   this.subscribtions.map(e=>e.unsubscribe());
 }
 

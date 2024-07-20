@@ -8,7 +8,7 @@ import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms'
 import { SelectOption } from 'src/app/shared/components/select/select-option.model';
 import { AuthService } from 'src/app/shared/services/auth.service';
 import { Observable, Subscription, concatMap,pipe, interval, throttleTime, combineLatest, find, debounceTime, distinctUntilChanged, switchMap } from 'rxjs';
-import { ChatById, Chats, chatHub } from '../interfaces/Chats';
+import { ChatById, Chats, chatHub, chatsData } from '../interfaces/Chats';
 import { ChatsService } from '../chats.service';
 import { DeleteModalComponent } from 'src/app/shared/components/delete-modal/delete-modal.component';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -17,6 +17,7 @@ import { DatePipe } from '@angular/common';
 import { ToasterServices } from 'src/app/shared/components/us-toaster/us-toaster.component';
 import { isFileSizeNotAllowed } from 'src/app/shared/methods/fileSizeValidator';
 import { TranslateService } from '@ngx-translate/core';
+import { TimeZoneServiceService } from 'src/app/shared/services/timeZoneService.service';
 
 interface files{
   fileName:string,
@@ -29,12 +30,13 @@ interface files{
   styleUrls: ['./chats.component.scss'] ,
 })
 export class ChatsComponent implements OnInit, AfterViewInit,OnDestroy{
-  devices:any;
-  deviceLoadingText:string='Loading ...';
+  devices:any=[];
+  deviceLoadingText:string='Loading';
   devicesData :any= new FormControl([]);
   message :any= new FormControl('',Validators.required);
   @ViewChild('fileInput') fileInputRef: ElementRef<HTMLInputElement>;
   @ViewChild('searchContainer') searchContainer: ElementRef<HTMLInputElement>;
+  selectedTimeZone:number=0;
 
   uploadedAttachments:files[]=[];
   form = new FormGroup({
@@ -58,7 +60,7 @@ export class ChatsComponent implements OnInit, AfterViewInit,OnDestroy{
   });
   deviceId:any
   // listChatsObservable$:Observable<Chats[]>;
-  listChats:Chats[]=[];
+  listChats:chatsData[]=[];
   email=this.authService.getUserInfo()?.email;
   searchKey:string='';
   openChat:boolean=false;
@@ -95,6 +97,9 @@ export class ChatsComponent implements OnInit, AfterViewInit,OnDestroy{
   hideSearch:boolean=false;
   subscriptions:Subscription[]=[];
   searchSub: Subscription;
+  filteredDevices: any=[];
+  isGroupe: boolean=false;
+  activeChat:chatsData;
   constructor( public dialog: MatDialog,
     private translationService:TranslationService,
     private authService:AuthService,
@@ -105,7 +110,9 @@ export class ChatsComponent implements OnInit, AfterViewInit,OnDestroy{
     private messageService:MessagesService,
    private datePipe: DatePipe,
    private toaster:ToasterServices,
-   private translate:TranslateService
+   private translate:TranslateService,
+   private timeZoneService:TimeZoneServiceService
+
     ){
       this.emojiForm = this.formBuilder.group({
         emojiInput: ['']
@@ -136,7 +143,8 @@ export class ChatsComponent implements OnInit, AfterViewInit,OnDestroy{
   }
   ngOnInit() {
     this.getDevices();
- 
+    this.setTimeZone();
+
     let searchMsgSub=this.searchMsg.valueChanges.pipe(
     debounceTime(700),
     distinctUntilChanged(),
@@ -169,6 +177,13 @@ export class ChatsComponent implements OnInit, AfterViewInit,OnDestroy{
     this.onRecieveMessages();
     this.onStatusChange();
   }
+   setTimeZone(){
+    let sub = this.timeZoneService.timezone$.subscribe(
+      res=> this.selectedTimeZone=res
+
+    )
+    this.subscriptions.push(sub)
+  }
   setupSearchSubscription(): void {
     this.searchSub= this.searchControl.valueChanges.pipe(
       debounceTime(700), // Wait for 1s pause in events
@@ -176,7 +191,7 @@ export class ChatsComponent implements OnInit, AfterViewInit,OnDestroy{
       switchMap(searchVal => this.listChatsReq(searchVal))
     ).subscribe(
       (res) => {
-        this.listChats=res;
+        this.listChats=res.data;
       }
     );
     this.subscriptions.push(this.searchSub)
@@ -343,20 +358,20 @@ onScrollToBottom(){
     this.chatService.listChats(this.email, this.contactsCount, 0, '', this.deviceId)
       .subscribe(
         (res) => {
-          if (res.length === 0) {
+          if (res.data.length === 0) {
             this.noMoreChats = true;
           } else {
-            if (this.listChats.length === res.length) {
+            if (this.listChats.length === res.data.length) {
               this.noMoreChats = true;
             } else {
               this.noMoreChats = false;
               let prevChat = this.listChats[0];
-              if(res.includes(prevChat)){
-                this.listChats=res.splice(res.indexOf(prevChat , 1))
+              if(res.data.includes(prevChat)){
+                this.listChats=res.data.splice(res.data.indexOf(prevChat , 1))
                 this.listChats.unshift(prevChat)
               }
               else{
-                this.listChats = res;
+                this.listChats = res.data;
 
               }
               setTimeout(() => {
@@ -492,30 +507,30 @@ chatRec(search){
           this.deviceId=res[0].id;
 
 
-        if(this.authService.selectedDeviceId ==""){
+        // if(this.authService.selectedDeviceId ==""){
 
-          this.form.patchValue({
-          devicesData: {
-          title:alldevices[0]?.deviceName,
-          value:alldevices[0]?.id,
-          deviceIcon:alldevices[0].deviceType
-          }
+        //   this.form.patchValue({
+        //   devicesData: {
+        //   title:alldevices[0]?.deviceName,
+        //   value:alldevices[0]?.id,
+        //   deviceIcon:alldevices[0].deviceType
+        //   }
 
-          })
+        //   })
         
-        }
-        else{
-          let selected= this.devices.find((device)=>device.value==this.authService.selectedDeviceId)
-          this.deviceId=this.authService.selectedDeviceId;
-          this.form.patchValue({
-            devicesData: {
-            title:selected.title,
-            value:selected?.value,
-            deviceIcon:selected.deviceIcon
-            }
+        // }
+        // else{
+        //   let selected= this.devices.find((device)=>device.value==this.authService.selectedDeviceId)
+        //   this.deviceId=this.authService.selectedDeviceId;
+        //   this.form.patchValue({
+        //     devicesData: {
+        //     title:selected.title,
+        //     value:selected?.value,
+        //     deviceIcon:selected.deviceIcon
+        //     }
 
-            })
-        }
+        //     })
+        // }
         this.getListChats();
         this.initRouting()
 
@@ -526,10 +541,10 @@ chatRec(search){
         })
   }
   listChatsReq(search){
-    return  this.chatService.listChats(this.email , 30,0,search,this.deviceId);
+    return  this.chatService.listChats(this.email , 30,0,search,this.filteredDevices);
   }
   getListChats(){
-  this.listChatsSub$= this.chatService.listChats(this.email , 30,0,this.searchKey,this.deviceId);
+  this.listChatsSub$= this.chatService.listChats(this.email , 30,0,this.searchKey,this.filteredDevices);
   if(this.searchSub){
     this.searchSub.unsubscribe();
     this.searchSub=null;
@@ -539,11 +554,11 @@ chatRec(search){
     })
   }
   this.listChatsSub$.subscribe(
-      (res)=>{
-        this.listChats=res;
+      (res:Chats)=>{
+        this.listChats=res.data;
         this.hideSearch=false;
 
-          let chat:Chats;
+          let chat:chatsData;
           if(!this.searchKey)
             {
               if(!this.selectedChatId){
@@ -551,10 +566,13 @@ chatRec(search){
                   this.clearChats()
                   }
                   else{
-                    this.selectedChatId=res[0]?.chat?.id;
-                    this.chatName=res[0]?.chat?.chatName;
-                    this.targetPhoneNumber=res[0]?.chat?.targetPhoneNumber;
-                    chat=res[0]
+                    this.activeChat=res.data[0];
+                    this.disable=this.activeChat.device.isDeleted;
+                    this.selectedChatId=res.data[0]?.chat?.id;
+                    this.chatName=res.data[0].chat?.chatName;
+                    this.targetPhoneNumber=res.data[0].chat?.targetPhoneNumber;
+                    chat=res.data[0];
+                    this.deviceId=chat.device.id
                     this.getChatById(this.selectedChatId);
                     this.openChat=true;
                     // this.updateQueryParams();
@@ -581,6 +599,7 @@ chatRec(search){
                 if(chat){
                   this.chatName=chat.chat.chatName;
                   this.targetPhoneNumber=chat.chat.targetPhoneNumber;
+                  this.deviceId=chat.device.id
                   chat.active=true
                   if(chat.unseenMessagesCount > 0){
                     this.chatService.markChatAsRead(chat.chat.id).subscribe(
@@ -648,7 +667,7 @@ resetForm(){
     this.searchKey=search.value;
     // this.getListChats()
   }
-  addNewContact(){
+  addNewContact(deviceId){
     const currentLang=this.translationService.getCurrentLanguage()
     const dialogConfig=new MatDialogConfig();
     dialogConfig.height='100vh';
@@ -658,7 +677,7 @@ resetForm(){
     dialogConfig.panelClass='add-new-chat-modal'
     dialogConfig.position =  currentLang=='ar'?{ right: '0'} :{ left: '0'} ;
     dialogConfig.direction = currentLang=='en'? "ltr" :"rtl";
-    dialogConfig.data={deviceId:this.deviceId , chats:this.listChats};
+    dialogConfig.data={deviceId:deviceId , chats:this.listChats};
     const dialogRef = this.dialog.open(ChatContactsComponent,dialogConfig);
 
     dialogRef.afterClosed().subscribe(result => {
@@ -693,7 +712,17 @@ resetForm(){
     }
 
     }
+    onSelectDev(device){
+      this.selectedChatId = ""
+      this.filteredDevices.push(device.value);
+      this.getListChats();  
 
+    }
+    deselectDev(device){
+      this.selectedChatId = ""
+      this.filteredDevices.splice(this.filteredDevices.indexOf(device.value),1)
+      this.getListChats();  
+    }
     deleteChat(chat){
       this.isDelete=true;
       const dialogConfig=new MatDialogConfig();
@@ -718,21 +747,27 @@ resetForm(){
         }
       });
     }
+    markMessageAsRead(chat){
+      this.chatService.markChatAsRead(chat.chat.id).subscribe(
+        (res)=>{
+          chat.unseenMessagesCount=0;
+        }
+      )
+    }
 
-    navigateToChat(chat:Chats){
+    navigateToChat(chat:chatsData){
+      this.activeChat=chat;
+      this.disable=this.activeChat.device.isDeleted;
+
       this.openChat=true;
       this.isSearch=false;
       this.hideSearch=false;
-
+      this.isGroupe=chat.chat.channelType >1
       this.resetValues()
       if(!chat.active){
         this.clearInputData();
         if(chat.unseenMessagesCount > 0){
-          this.chatService.markChatAsRead(chat.chat.id).subscribe(
-            (res)=>{
-              chat.unseenMessagesCount=0;
-            }
-          )
+          this.markMessageAsRead(chat)
         }
         this.listChats.map((chat)=>chat.active=false)      
         chat.active=true;
@@ -744,6 +779,7 @@ resetForm(){
         this.updateQueryParams()
         this.chatName=chat.chat.chatName;
         this.targetPhoneNumber=chat.chat.targetPhoneNumber;
+        this.deviceId=chat.device.id
         this.getChatById(this.selectedChatId)
         }
   
@@ -800,17 +836,21 @@ resetChatsOrder(chatContact){
     sendMsg(event?){
       let message = this.messageForm.value.message;
       let newMessage:any=[];
-      this.disable=true;
 
-      if(this.filesList.length > 0 || message.trim() !== ''){
-      
+      if((this.filesList.length > 0 || message.trim() !== '') && !this.disable){
+        this.disable=true;
+
         if(event){
           if (event.key === 'Enter' && !event.shiftKey) {
             event.preventDefault(); 
           }  
         }
         let attachements = this.filesList.map((file)=>{return file.url})
-          this.messageService.sendWhatsappBusinessMessage(this.deviceId,[this.targetPhoneNumber],message,null,this.email,attachements).subscribe(
+        let chatMsg=this.activeChat?.chat.channelType>1? {
+          channelType:this.activeChat.chat.channelType,
+          groupName:this.activeChat.chat.chatName
+        }:null
+          this.messageService.sendWhatsappBusinessMessage(this.deviceId,[this.targetPhoneNumber],message,null,this.email,attachements,chatMsg).subscribe(
             (res)=>{
           let mainData:any={id: this.selectedChatId,
             deviceid: this.deviceId,
@@ -842,13 +882,12 @@ resetChatsOrder(chatContact){
 
 
             }
-            let foundChat=this.listChats.find((chat)=>chat.chat.id == this.selectedChatId );
+            let foundChat:chatsData=this.listChats.find((chat)=>chat.chat.id == this.selectedChatId );
             if(foundChat){
               foundChat.lastMessageContent='';
               foundChat.lastMessageFileName='';
               foundChat.lastMessageFileUrl='';
               foundChat.fileType='';
-  
               foundChat.lastMessageContent=message;
               foundChat.lastMessageStatus=0;
               
@@ -1021,11 +1060,13 @@ else{
     updateMessageStatus(newMessage){
 
       let message:chatHub=JSON.parse(newMessage)
+      console.log('status update',message)
+      if(this.filteredDevices.length==0 || (this.filteredDevices.length > 0 && this.filteredDevices.includes(message.Deviceid))){
 
-      if(message.Deviceid == this.deviceId ){
         // update Status on list chats
         let findChat = this.listChats.find((chat)=>chat.chat.id == message.ChatId);
         if(findChat){
+          console.log('chat in list chats',findChat)
           findChat.lastMessageStatus=message.status;
           findChat.lastMessageContent=message.msgBody;
           findChat.lastMessageDate=newMessage.createdAt;
@@ -1034,11 +1075,14 @@ else{
         // in case the message is sent from the current opend chat
         if(this.selectedChatId === message.ChatId){
           const messageDate = new Date(message.createdAt);
+        
           const day = this.getGroupHeader(messageDate);
           let foundMesg = this.groupedMessages[day].find(chat => chat.chat?.id === message.id);
+          console.log('msg',this.groupedMessages[day])
           if (foundMesg) {
             if(message.status > foundMesg.status)
             {
+
               foundMesg.status=message.status;
             }
             foundMesg.updatedAt=message.updatedAt;
@@ -1104,13 +1148,16 @@ else{
       }
 
       updateMessagesOnReceive(message){
-        let newMessage:chatHub=JSON.parse(message)
-        if(newMessage.Deviceid == this.deviceId){
-            // in case the message is sent from the current opend chat
+        let newMessage:chatHub=JSON.parse(message);
+        console.log('new message',newMessage)
+        if(this.filteredDevices.length==0 || (this.filteredDevices.length > 0 && this.filteredDevices.indexOf(newMessage.Deviceid)>-1)){
+          
+          // in case the message is sent from the current opend chat
             if(this.selectedChatId === newMessage.ChatId){
               if(newMessage.direction){
                 newMessage.status=1
               }
+             
               this.selectedChat.push(newMessage);
               setTimeout(() => {
                 this.scrollToBottom();
@@ -1125,6 +1172,7 @@ else{
                 targetPhoneNumber: newMessage.targetPhoneNumber,
                 createdAt: newMessage.createdAt,
               },
+              device:newMessage.Device,
               lastMessageDate: newMessage.createdAt,
               lastMessageContent: newMessage.msgBody,
               lastMessageFileName:newMessage.fileName,
@@ -1133,22 +1181,27 @@ else{
               lastMessageDirection: newMessage.direction,
               lastMessageStatus:  newMessage.direction?1:null,
               unseenMessagesCount: newMessage.direction?0:1,
+              targetPhoneNumber:newMessage.targetPhoneNumber
+
             }
               let foundChat = this.listChats.find((chat)=>chat.chat.id == newMessage.ChatId);
                 if (foundChat) {
                 this.updateChatDataWithNewMsg(foundChat,newMessage)
-              
+                if((this.selectedChatId === newMessage.ChatId) ){
+                    if(!newMessage.direction){
+                      this.markMessageAsRead(foundChat)
+                    }
+                  }
                 }
                 else{
                   this.listChats.unshift(newChat)
                 }
                 this.groupMessagesByDay();
-
         }
 
     }
 
-    updateChatDataWithNewMsg(foundChat,newMessage:chatHub){
+    updateChatDataWithNewMsg(foundChat:chatsData,newMessage:chatHub){
       foundChat.lastMessageContent='';
       foundChat.lastMessageFileName='';
       foundChat.lastMessageFileUrl='';
@@ -1162,6 +1215,10 @@ else{
       foundChat.lastMessageFileName = newMessage.fileName;
       foundChat.lastMessageFileUrl = newMessage.fileUrl;
       foundChat.lastMessageDirection=newMessage.direction;
+      if(foundChat.chat.channelType>1){
+        foundChat.targetPhoneNumber=newMessage.targetPhoneNumber
+      }
+    
       if(this.listChats.indexOf(foundChat) !== 0){
         // Remove the element from its current position
         this.listChats.splice(this.listChats.indexOf(foundChat), 1);
@@ -1178,12 +1235,19 @@ else{
       this.textDirection = /[^\u0000-\u007F]/.test(text) ? 'rtl' : 'ltr';
     }
     disableButtonOrnot() {
-      this.disable = !(this.filesList.length > 0 || this.message.value.trim() !== '')
+      if(this.activeChat.device.isDeleted){
+        this.disable=true
+      }
+      else{
+        this.disable = !(this.filesList.length > 0 || this.message.value.trim() !== '')
+
+      }
     }
 
 
     ngOnDestroy() {
       this.chatService.closeConnection();
       this.closeSubsciptions();
+      this.subscriptions.map((sub)=>sub.unsubscribe())
       }
 }

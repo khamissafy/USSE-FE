@@ -38,6 +38,7 @@
           <ng-container  matColumnDef="select">
             <th class="checkBox" mat-header-cell *matHeaderCellDef>
               <mat-checkbox
+              [ngClass]="{'d-none':loading}"
                 color="ch-color"
                 (change)="$event ? toggleAllRows() : null"
                 [checked]="selection.hasValue() && isAllSelected()"
@@ -96,7 +97,7 @@
           <!-- Create At Column -->
           <ng-container matColumnDef="Create At">
             <th mat-header-cell *matHeaderCellDef mat-sort-header>  {{ 'CREATE_AT' | translate }} </th>
-            <td mat-cell *matCellDef="let element"> {{element.createdAt | toLocalTime  }} </td>
+            <td mat-cell *matCellDef="let element"> {{element.createdAt | toLocalTime:selectedTimeZone  }} </td>
           </ng-container>
     
             <!-- Additional Parameters Column -->
@@ -161,7 +162,7 @@
 
 
 <div *ngIf="isSmallScreen" class="small-screen-view">
-  <app-contacts-mobileView #moibleView [isCanceled]="isCanceled" [canEdit]="canEdit" ></app-contacts-mobileView>
+  <app-contacts-mobileView #moibleView [isCanceled]="isCanceled" [selectedTimeZone]="selectedTimeZone" [canEdit]="canEdit" ></app-contacts-mobileView>
 </div>
 
 </section>

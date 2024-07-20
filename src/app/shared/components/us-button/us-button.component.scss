@@ -43,6 +43,9 @@ button{
     min-height: 40px;
 
   }
+  &.noMinHight{
+    min-height: unset !important;
+  }
 }
 
 

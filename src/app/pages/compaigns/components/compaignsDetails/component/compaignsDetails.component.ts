@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToasterServices } from 'src/app/shared/components/us-toaster/us-toaster.component';
@@ -10,13 +10,14 @@ import { RecipientActivitiesComponent } from '../components/recipientActivities/
 import { AuthService } from 'src/app/shared/services/auth.service';
 import { DeleteModalComponent } from 'src/app/shared/components/delete-modal/delete-modal.component';
 import { ResendMessagesComponent } from 'src/app/pages/messages/Components/resendMessages/resendMessages.component';
+import { TimeZoneServiceService } from 'src/app/shared/services/timeZoneService.service';
 
 @Component({
   selector: 'app-compaignsDetails',
   templateUrl: './compaignsDetails.component.html',
   styleUrls: ['./compaignsDetails.component.scss']
 })
-export class CompaignsDetailsComponent implements OnInit ,AfterViewInit{
+export class CompaignsDetailsComponent implements OnInit ,AfterViewInit,OnDestroy{
   compaignId:string;
   compaign:compaignDetails;
   @ViewChild(ReportSummaryComponent) reportSummaryComponent:ReportSummaryComponent;
@@ -24,17 +25,28 @@ export class CompaignsDetailsComponent implements OnInit ,AfterViewInit{
   selectedTab="summary";
   tabs=["summary","activity"]
   length: number;
+  selectedTimeZone:number=0;
+  subscriptions: any=[];
+  utcTime:{
+    sendingoutFrom:any,
+    sendingoutTo:any
+  }
   constructor(private activeRoute:ActivatedRoute,public dialog: MatDialog,
     private compaignsService:CompaignsService,
     private campaignDetailsService:CompaignsDetailsService,
     private toaster: ToasterServices,
     private authService:AuthService,
-    private router:Router) {
+    private router:Router,
+    private timeZoneService:TimeZoneServiceService
+  ) {
     activeRoute.paramMap.subscribe((data)=>
     {
     this.compaignId=data.get('id');
 
     })
+  }
+  ngOnDestroy(): void {
+    this.subscriptions.map((sub)=>sub.unsubscribe())
   }
   ngAfterViewInit() {
     this.reportSummaryComponent.compaign=this.compaign
@@ -45,7 +57,22 @@ export class CompaignsDetailsComponent implements OnInit ,AfterViewInit{
 
   ngOnInit() {
     this.getCompaignData();
+    this.setTimeZone();
 
+    }
+  
+    setTimeZone(){
+      let sub = this.timeZoneService.timezone$.subscribe(
+        res=>{ this.selectedTimeZone=res;
+          setTimeout(() => {
+            this.reportSummaryComponent?.convertFromUtcToLocal(this.utcTime);
+
+          }, 0);
+        }
+
+  
+      )
+      this.subscriptions.push(sub)
     }
     resetTableData(ev){
       // this.compaignDetailsService.display=10;
@@ -56,34 +83,21 @@ export class CompaignsDetailsComponent implements OnInit ,AfterViewInit{
     getCompaignData(){
       this.compaignsService.getCampaignById(this.compaignId).subscribe(
       (res)=>{
+        this.utcTime={
+          sendingoutFrom:res.sendingoutFrom,
+          sendingoutTo:res.sendingoutTo
+        }
           this.compaign=res;
-          this.compaign.sendingoutFrom=this.convertUTCToLocal(this.compaign.sendingoutFrom)
-          this.compaign.sendingoutTo=this.convertUTCToLocal(this.compaign.sendingoutTo)
-
+          this.compaign.sendingoutFrom=this.campaignDetailsService.convertUTCToLocal(this.compaign.sendingoutFrom,this.timeZoneService.getTimezone())
+          this.compaign.sendingoutTo=this.campaignDetailsService.convertUTCToLocal(this.compaign.sendingoutTo,this.timeZoneService.getTimezone())
+         
       },
       (err)=>{
 
       }
       )
     }
-    convertUTCToLocal(utcTime: string): string {
-      const [hoursStr, minutesStr] = utcTime.split(':');
-      const hours = parseInt(hoursStr, 10);
-      const minutes = parseInt(minutesStr, 10);
   
-      // Get the current date and time in UTC
-      const utcDate = new Date(Date.UTC(0, 0, 0, hours, minutes));
-  
-      // Get the local time zone offset in minutes
-      const timezoneOffset = new Date().getTimezoneOffset();
-  
-      // Adjust hours and minutes for the local time zone offset
-      const localHours = (utcDate.getUTCHours() - Math.floor(timezoneOffset / 60)).toString().padStart(2, '0');
-      const localMinutes = (utcDate.getUTCMinutes() - (timezoneOffset % 60)).toString().padStart(2, '0');
-  
-      // Return local hours and minutes as a string
-      return `${localHours}:${localMinutes}`;
-    }
     resendAllCampaigns(){
       
       const dialogConfig=new MatDialogConfig();

@@ -1,4 +1,13 @@
 export interface Chats {
+    success:boolean,
+    statusCode:number,
+    message:string,
+    count:number,
+    data:chatsData[]
+  
+
+}
+export interface chatsData{
     chat?: chat,
     lastMessageDate?: string,
     lastMessageContent?: string,
@@ -10,7 +19,7 @@ export interface Chats {
     fileType?:string,
     device?: devices,
     active?: boolean;
-
+    targetPhoneNumber?:string
 }
 interface chat {
     id?: string,
@@ -18,6 +27,7 @@ interface chat {
     targetPhoneNumber?: string,
     createdAt?: string,
     isDeleted?: boolean,
+    channelType?:number
 }
 export interface ChatById {
     id?: string,
@@ -45,24 +55,25 @@ export interface ChatById {
     isCampaignAction?: boolean,
     updatedAtVisible?:boolean | false,
     day?: string
+    groupName?:string
 }
 interface devices {
-    id: string,
-    deviceName: string,
-    deviceType: string,
-    deviceNumber: string,
-    createdAt: string,
-    isConnected: boolean,
-    instanceId: string,
-    isDeleted: boolean,
-    delayIntervalInSeconds: number,
-    applicationUserId: string,
-    host: string,
-    password: string,
-    port: number,
-    systemID: string,
-    lastUpdate: string,
-    token: string
+    id?: string,
+    deviceName?: string,
+    deviceType?: string,
+    deviceNumber?: string,
+    createdAt?: string,
+    isConnected?: boolean,
+    instanceId?: string,
+    isDeleted?: boolean,
+    delayIntervalInSeconds?: number,
+    applicationUserId?: string,
+    host?: string,
+    password?: string,
+    port?: number,
+    systemID?: string,
+    lastUpdate?: string,
+    token?: string
 }
 
 export interface chatHub {
@@ -89,4 +100,6 @@ export interface chatHub {
     BotId: string,
     isCampaignAction: boolean,
     chatName?:string
+    Device?:devices,
+
 }

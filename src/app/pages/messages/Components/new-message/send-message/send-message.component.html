@@ -19,15 +19,29 @@
           [formControl]="dateFormControl"
         />
         <nb-date-timepicker withSeconds #dateTimePicker> </nb-date-timepicker> -->
-        <nz-date-picker
-        class="rounded-pill border border-1py-2 txt-input w-100 date"
-        style="padding: 0 12px;"
-          nzShowTime
-          nzFormat="yyyy-MM-dd HH:mm a"
-          [formControl]="dateFormControl"
-          nzUse12Hours
-          [nzShowTime]="{ nzFormat: 'hh:mm a',nzUse12Hours: true }"
-      ></nz-date-picker>
+     
+      <nz-date-picker
+      #datePicker
+      class="rounded-pill border border-1py-2 txt-input w-100 date"
+      style="padding: 0 12px;"
+        nzShowTime
+        nzFormat="yyyy-MM-dd HH:mm a"
+        [formControl]="dateFormControl"
+        nzUse12Hours
+        [nzShowTime]="{ nzFormat: 'hh:mm a',nzUse12Hours: true }"
+        (nzOnOpenChange)="convertToUTC(dateFormControl)"
+        [nzRenderExtraFooter]="footerTemplate"
+        [nzShowNow]="false"
+    >
+    <ng-template #footerTemplate>
+      <div class="custom-footer d-flex align-items-center justify-content-between" >
+        <span class="text-primary-800 pointer" (click)="setDefaultTime()">Now</span>
+        <div class="d-flex align-items-center">
+          <button class="bg-primary-800 custom-btn-ok text-white pointer" (click)="datePicker?.close()"><span>ok</span></button>
+        </div>
+      </div>
+      </ng-template>
+  </nz-date-picker>
       </div>
     </div>
 

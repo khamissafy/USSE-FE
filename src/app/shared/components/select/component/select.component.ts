@@ -95,6 +95,7 @@ export class SelectComponent implements ControlValueAccessor, OnInit {
   // @ Add a class to identify the first and last buttons in group to adjust styles @ //
   @Input() orderInGroup?: 'first' | 'last';
   @Input() fullWidth: boolean = false;
+  @Input() fullWidthOptions: boolean = false;
   @Input() deviceLableGap: boolean = false;
   @Input() withTooltip?: boolean = false;
   @Input() tooltipMsg:string='';
@@ -118,7 +119,7 @@ export class SelectComponent implements ControlValueAccessor, OnInit {
   filteredOptions!: SelectOption[]; // the options that being filtered by search
   isOpen = false; // to toggle dropdown list
   isTouched = false; // to handle on touched only once
-  searchText!: string;
+  searchText: string=null;
   isThrottling!: boolean;
 
   onChange = (value: any) => {}; // to register value accessor method onChange

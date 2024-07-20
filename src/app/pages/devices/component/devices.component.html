@@ -203,7 +203,7 @@
           <!-- Create At Column -->
           <ng-container matColumnDef="Create At">
             <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'CREATE_AT' | translate }}</th>
-            <td mat-cell *matCellDef="let element">{{ element.createdAt | toLocalTime   }}</td>
+            <td mat-cell *matCellDef="let element">{{ element.createdAt | toLocalTime:selectedTimeZone   }}</td>
           </ng-container>
           <!-- Status Column -->
           <ng-container matColumnDef="Status">
@@ -331,7 +331,7 @@
             <!-- Create At Column -->
             <div class="row row-item" *ngIf="displayedColumns.includes('Create At')">
               <div class="col row-header" >{{ 'CREATE_AT' | translate }}</div>
-              <div class="col">{{ element.createdAt | toLocalTime }}</div>
+              <div class="col">{{ element.createdAt | toLocalTime:selectedTimeZone }}</div>
             </div>
         
             <!-- Status Column -->

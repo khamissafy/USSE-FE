@@ -146,7 +146,7 @@ else{
 return sup$
 }
 handleGetDataRes(res){
-if(this.isFromListDetails){
+if(!this.isFromListDetails){
   this.loading=false;
   this.numRows=res.length;
   if(res.length == 0){

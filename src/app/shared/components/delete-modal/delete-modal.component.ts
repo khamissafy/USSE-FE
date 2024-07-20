@@ -7,7 +7,7 @@ import { Contacts } from 'src/app/pages/manage-contacts/contacts';
 import { ManageContactsService } from 'src/app/pages/manage-contacts/manage-contacts.service';
 import { ToasterServices } from '../us-toaster/us-toaster.component';
 import { ListData } from 'src/app/pages/manage-contacts/list-data';
-import { Message } from 'src/app/pages/messages/message';
+import { Message, messageData } from 'src/app/pages/messages/message';
 import { MessagesService } from 'src/app/pages/messages/messages.service';
 import { compaignDetails } from 'src/app/pages/compaigns/campaigns';
 import { CompaignsService } from 'src/app/pages/compaigns/compaigns.service';
@@ -15,7 +15,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { UsersService } from 'src/app/pages/users/users.service';
 import { AuthService } from '../../services/auth.service';
 import { BotService } from 'src/app/pages/bot/bot.service';
-import { Chats } from 'src/app/pages/chats/interfaces/Chats';
+import { Chats, chatsData } from 'src/app/pages/chats/interfaces/Chats';
 import { ChatsService } from 'src/app/pages/chats/chats.service';
 
 interface ComponentData {
@@ -23,11 +23,11 @@ interface ComponentData {
   deviceData?: { deviceId: string },
   templatesData?: { templatesId: string },
   listsData?: { contacts: Contacts[], list: string[], lists: ListData[] },
-  messagesData?: { messages: Message[] },
+  messagesData?: { messages: messageData[]},
   compaignData?: { compaignId: string, action: string },
   users?:{userEmail:string,customerEmail:string}
   automationData?: { automationId: string },
-  chatData?:{chat:Chats}
+  chatData?:{chat:chatsData}
 
 
 }

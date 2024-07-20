@@ -9,6 +9,7 @@ import { environment } from 'src/environments/environment';
 import { PermissionsService } from './permissions.service';
 import { PluginsService } from 'src/app/services/plugins.service';
 import { LocalStorageService } from './localStorage.service';
+import { TimeZoneServiceService } from './timeZoneService.service';
 interface DeviceData {
   id: string,
   deviceName: string,
@@ -54,20 +55,15 @@ unAuthorized:boolean=false;
 empty:number=0;
 userPermissions:Permission
 allPermissions:PermissionData[]
-permissionsSubject = new BehaviorSubject<PermissionData[]>([]);
-permissionSubject = new BehaviorSubject<Permission>({
-  Templates:true,
-  Bots:true,
-  Devices:true,
-  Contacts:true
-    });
+
 userData$:Observable<any>;
 showWarning:number=0;
 constructor(private loginService:LoginService,
   private http:HttpClient,
   private permissionService:PermissionsService,
   private localStorageService: LocalStorageService,
-  private plugin:PluginsService
+  private plugin:PluginsService,
+  private timezoneService:TimeZoneServiceService
   ) {
     this.setRefreshToken();
     // this.getUserInfoFromRequest();
@@ -149,6 +145,8 @@ getRedirectURL(){
  }
  updateUserInfo(data?){
   this.userInfo=data
+  this.timezoneService.setTimezone(this.userInfo.timezone)
+
 }
 
  updateUserPermisisons(permissions){

@@ -75,7 +75,7 @@ unsubscribe$ = new Subject<void>();
       apiToken:res.apiToken,
       maskType:res.maskType,
       phoneNumber:res.phoneNumber,
-      timeZone:res.timeZone,
+      timezone:res.timeZone,
       roles:res.roles[0],
       countryCode:res.countryCode
 
@@ -123,9 +123,7 @@ let isTrialUser:boolean;
       this.loginService.storeRefreshTokenInCookie(res.refreshToken);
       this.authService.setRefreshToken()
 
-        setInterval(() => {
-          this.refreshToken();
-        }, 60 * 60 * 1000); // 1 hour in milliseconds
+      
         this.languageService.setAppDirection();
         
         this.router.navigateByUrl('devices')

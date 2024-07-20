@@ -20,6 +20,6 @@ import { DeviceType } from '../../pipes/deviceType.pipe';
     RadioButtonModule,
     TooltipModule,
   ],
-  exports: [SelectComponent, SearchPipe],
+  exports: [SelectComponent, SearchPipe,DeviceType],
 })
 export class SelectModule {}

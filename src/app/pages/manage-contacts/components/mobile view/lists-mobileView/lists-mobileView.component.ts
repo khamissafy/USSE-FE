@@ -58,6 +58,8 @@ export class ListsMobileViewComponent implements OnInit {
     searchControl:this.searchControl
   })
   searchSub: any;
+  @Input() selectedTimeZone :number=0;
+
   constructor(public dialog: MatDialog,
     private toaster: ToasterServices,
     private listService:ManageContactsService,
@@ -305,6 +307,8 @@ createDynamicComponent(selectedLists) {
   let sub3 =  navActionsComponentInstance.updateData.subscribe((res) => {
     if(res){
       this.distroyDynamicComponent();
+      this.pageNum=0;
+
       this.getListData();
     }
   });

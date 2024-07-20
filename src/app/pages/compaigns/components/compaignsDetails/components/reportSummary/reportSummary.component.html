@@ -70,7 +70,7 @@
     <div>
       <h4 class="txt-lg" style="font-weight: 600">{{ 'MESSAGE_CONTENT' | translate }}</h4>
       <p class="msg-body">
-        {{ statics?.messageContent | translate }}
+        {{ statics?.messageContent | textMasking }}
       </p>
       <div class="d-flex w-100 gap-2 flex-wrap" *ngIf="compaign?.attachments">
         

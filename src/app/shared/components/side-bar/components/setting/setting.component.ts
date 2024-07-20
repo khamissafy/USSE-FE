@@ -8,6 +8,7 @@ import { ToasterServices } from '../../../us-toaster/us-toaster.component';
 import { TranslateService } from '@ngx-translate/core';
 import { TIMEZONES } from './constants/constant';
 import { CountryService } from 'src/app/shared/services/country.service';
+import { TimeZoneServiceService } from 'src/app/shared/services/timeZoneService.service';
 
 @Component({
 
@@ -52,7 +53,9 @@ export class SettingComponent implements OnInit , OnDestroy{
       private translate:TranslateService,
       private authService:AuthService,
       private toaster:ToasterServices,
-      private countryService:CountryService
+      private countryService:CountryService,
+      private timezoneService:TimeZoneServiceService
+
 
       ) {
      this.maskTypeArr=[
@@ -63,7 +66,7 @@ export class SettingComponent implements OnInit , OnDestroy{
     ]
     this.maskValue=this.maskTypeArr.find((res)=>res.value==authService.getUserInfo()?.maskType);
     this.timeZoneArr=this.timeZones.map((timezone)=>{return{
-      title:`${translate.instant(timezone.title)} `,
+      title:`${translate.instant(timezone?.title)} `,
       value:timezone.index
     }})
   
@@ -100,11 +103,11 @@ export class SettingComponent implements OnInit , OnDestroy{
         mobile:mobileNum,
         apiToken:this.authService.getUserInfo()?.apiToken,
         organisationName:this.authService.getUserInfo()?.organisationName,
-        maskType:{title:this.translate.instant(this.maskValue.title),value:this.maskValue.value},
+        maskType:{title:this.translate.instant(this.maskValue?.title),value:this.maskValue.value},
         countryCode:this.authService.getUserInfo().countryCode =="2"?"20":this.authService.getUserInfo().countryCode
       }
     )
-    let timeZone=this.authService.getUserInfo()?.timezone
+    let timeZone=this.authService.getUserInfo()?.timezone;
     this.selectedZone=timeZone !== null && timeZone !== undefined? timeZone:null;
     this.form.patchValue({
       timeZone:
@@ -113,33 +116,6 @@ export class SettingComponent implements OnInit , OnDestroy{
     })
   }
 
-  // getUserByEmail(){
-  //   this.userService.getUserByEmail(this.authService.getUserInfo()?.email).subscribe(
-  //     (res)=>{
-  //       console.log(res)
-  //       this.maskValue=this.maskTypeArr.find((mask)=>mask.value==res.maskType);
-    
-
-
-  //       let phoneNumber = res.phoneNumber;
-
-  //       let mobileNum = phoneNumber !== null && phoneNumber !== undefined ? phoneNumber.slice(1) : "";
-  //       this.form.patchValue(
-  //         {
-  //           contactName:res.contactName,
-  //           mobile:mobileNum,
-  //           apiToken:res.apiToken,
-  //           organisationName:res.organisationName,
-  //           maskType:{title:this.translate.instant(this.maskValue.title),value:this.maskValue.value},
-    
-  //         }
-  //       )
-  //     },
-  //     (err)=>{
-  //       console.log(err)
-  //     }
-  //   )
-  // }
 
   generateGuid() {
     this.form.patchValue(
@@ -194,7 +170,7 @@ this.selectedZone=this.timeZones.find((time)=>time.index==zone.value).value;
 
       this.loading=true;
       let mobile=this.form.value.mobile? this.form.value.mobile.e164Number:null;
-      const data=this.selectedZone?{
+      const data={
         token: this.authService.getRefreshToken(),
         apiToken: this.apiToken.value,
         contactName: this.form.value.contactName,
@@ -203,16 +179,8 @@ this.selectedZone=this.timeZones.find((time)=>time.index==zone.value).value;
         maskType: this.form.value.maskType.value,
         phoneNumber: mobile,
         countryCode:code
-      }:{
-        token: this.authService.getRefreshToken(),
-        apiToken: this.apiToken.value,
-        contactName: this.form.value.contactName,
-        organisationName: this.form.value.organisationName,
-        maskType: this.form.value.maskType.value,
-        phoneNumber: mobile,
-        countryCode:code
-
       }
+
       this.authService.editProfile(data).subscribe(
         (res)=>{
           this.loading=false;
@@ -225,6 +193,8 @@ this.selectedZone=this.timeZones.find((time)=>time.index==zone.value).value;
           this.authService.userInfo.phoneNumber=res.phoneNumber
           this.authService.userInfo.apiToken=res.apiToken;
           this.authService.userInfo.countryCode=code;
+          this.timezoneService.setTimezone(res?.timezone)
+
       this.onClose(true);
         },
         (err)=>{

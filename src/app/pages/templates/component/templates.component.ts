@@ -41,7 +41,7 @@ else{
     dialogConfig.height='77vh';
     dialogConfig.width='40vw';
     dialogConfig.maxWidth='100%';
-    dialogConfig.minWidth='465px';
+    dialogConfig.minWidth='720px';
     dialogConfig.maxHeight='85vh';
     dialogConfig.disableClose = true;
 

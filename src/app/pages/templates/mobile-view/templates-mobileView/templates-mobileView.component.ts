@@ -77,6 +77,7 @@ export class TemplatesMobileViewComponent implements OnInit ,OnDestroy{
 
   bottomSortingOptions: any = [{ opitonName: 'ASC', lable: `${this.translate.instant('ASCENDING')}`, isSelected: true },
   { opitonName: 'DEC', lable: `${this.translate.instant('DESCENDING')}`, isSelected: false }]
+  @Input() selectedTimeZone :number=0;
 
   constructor(
     public dialog: MatDialog,

@@ -7,7 +7,7 @@
 
       <div class="mb-3 d-flex gap-2 align-items-center w-100">
         <p class="txt-lg" style="font-weight: 500;">{{ compaign?.campaignName }}</p>
-        <p class="txt-xs mb-2" style="font-weight: 500; color: rgba(134, 134, 134, 1)">{{ compaign?.createdAt | toLocalTime   }}</p>
+        <p class="txt-xs mb-2" style="font-weight: 500; color: rgba(134, 134, 134, 1)">{{ compaign?.createdAt | toLocalTime:selectedTimeZone   }}</p>
       </div>
     </div>
     <us-button

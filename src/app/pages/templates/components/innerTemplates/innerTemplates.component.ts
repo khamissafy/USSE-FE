@@ -29,6 +29,7 @@ import { DisplayMessageComponent } from 'src/app/pages/messages/Components/displ
 import { TranslationService } from 'src/app/shared/services/translation.service';
 import { TemplatesMobileViewComponent } from '../../mobile-view/templates-mobileView/templates-mobileView.component';
 import { arraysContainSameObjects } from 'src/app/shared/methods/arraysContainSameObjects';
+import { TimeZoneServiceService } from 'src/app/shared/services/timeZoneService.service';
 
 @Component({
   selector: 'app-innerTemplates',
@@ -73,12 +74,16 @@ export class InnerTemplatesComponent implements OnInit ,AfterViewInit,OnDestroy{
   searchSub: Subscription;
   dataSource: MatTableDataSource<Templates>;
   isDataCalledInMobile: any;
+  selectedTimeZone:number=0;
+
   constructor(
     public dialog: MatDialog,
     private toaster: ToasterServices,
     private templatesService: TemplatesService,
     private breakpointObserver: BreakpointObserver,
     private translationService:TranslationService,
+    private timeZoneService:TimeZoneServiceService
+
 
   ) {}
 
@@ -154,6 +159,7 @@ export class InnerTemplatesComponent implements OnInit ,AfterViewInit,OnDestroy{
     }
 
   ngOnInit() {
+    this.setTimeZone();
     this.columns = new FormControl(this.displayedColumns);
     this.displayedColumns=this.canEdit?[
       'Template Name',
@@ -164,7 +170,13 @@ export class InnerTemplatesComponent implements OnInit ,AfterViewInit,OnDestroy{
 this.onChangeSecreanSizes();
   }
 
+  setTimeZone(){
+    let sub = this.timeZoneService.timezone$.subscribe(
+      res=> this.selectedTimeZone=res
 
+    )
+    this.subscribtions.push(sub)
+  }
   openDeleteModal(id:string){
     const dialogConfig=new MatDialogConfig();
     dialogConfig.disableClose = true;
@@ -193,7 +205,7 @@ this.onChangeSecreanSizes();
     dialogConfig.height='77vh';
     dialogConfig.width='40vw';
     dialogConfig.maxWidth='100%';
-    dialogConfig.minWidth='465px';
+    dialogConfig.minWidth='720px';
     dialogConfig.maxHeight='85vh';
     dialogConfig.disableClose = true;
 

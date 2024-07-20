@@ -77,12 +77,11 @@ this.permissions={
     //this.displaySetting=true;
     const dialogConfig = new MatDialogConfig();
     dialogConfig.height = this.isUser ? '50vw' : '83vh';
-    dialogConfig.width =  '55vw';
-    dialogConfig.maxWidth = '100%';
-    dialogConfig.minWidth = '300px';
+
     dialogConfig.maxHeight = this.isUser ?'415px' : '738px';
     dialogConfig.minHeight = this.isUser ?'415px' :  '620px';
     dialogConfig.disableClose = true;
+    dialogConfig.panelClass='settings-modal'
     const dialogRef = this.dialog.open(SettingComponent, dialogConfig);
     dialogRef.afterClosed().subscribe(result => {
      this.userName=this.authService.getUserInfo()?.userName

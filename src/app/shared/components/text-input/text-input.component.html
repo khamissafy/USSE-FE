@@ -1,4 +1,4 @@
-<section class=" us-input d-flex gap-lg-4 gap-2" [ngClass]="{'flex-column flex-lg-row':labelTopInMobileView}">
+<section class=" us-input d-flex gap-lg-4 gap-2" [ngClass]="{fullWidthAndHeight,'flex-column flex-lg-row':labelTopInMobileView}">
   <!-- Label & optional indicator -->
   <ng-container *ngIf="!labelTopInMobileView">
   <div
@@ -80,7 +80,7 @@
 
   </sr-tooltip>
 </ng-container>
-  <div class="w-100">
+  <div class="w-100 input-container">
     <!-- Input container ( contains: prefix, input, suffix, icon, steppers ) -->
     <div
       *ngIf="!isTextArea"
@@ -143,55 +143,74 @@
       
     </div>
 
+
+
+
+
+
     <!-- textarea container ( contains: prefix, input, suffix, icon, steppers ) -->
-    <div  
-      *ngIf="isTextArea"
-      [ngStyle]="{'height': divHeight}"
-      class="input-wrapper {{ orderInGroup }} resizable-div  txt-sm"
-      [ngClass]="{ fullWidth, error, 'disabled': isDisabled, grouped}"
-    >
-      <div *ngIf="prefix" class="prefix">
-        <p class="txt txt-sm">{{ prefix }}</p>
-      </div>
-      <textarea
-        #srInputEl
-        [(ngModel)]="value"
-        [ngClass]="{
-          has_icon: iconClass,
-          has_icon_trailing: iconClass && trailingIcon
-        }"
-        [id]="key"
-        [placeholder]="placeholder"
-        [required]="!optional"
-        [disabled]="isDisabled"
-        [pattern]="pattern"
-        (blur)="onTouched()"
-        [maxlength]="maxCharLimit"
-        (ngModelChange)="onValueChange(srInputEl)"
-        (change)="change.emit(value)"
-        (keyup)="keyup.emit(value)"
-        (keydown)="keydown.emit(value)"
-        (keyup.enter)="submit.emit(value)"
-        (oncopy)="copy.emit(value)"
-        (onpaste)="paste.emit(value)"
-        (click)="getCursorPosition($event);clicked.emit($event)"
-        (input)="input.emit($event);updateDivHeight()"
+     <div class="textarea-container position-relative  "#textareaContainer>
+      <div  
+      (click)="onTextareaClick($event)"
+        *ngIf="isTextArea"
+        [ngStyle]="{'height': divHeight}"
+        class="input-wrapper {{ orderInGroup }} resizable-div  txt-sm position-relative"
+        [ngClass]="{ fullWidth, error, 'disabled': isDisabled, grouped}"
       >
-      </textarea>
+        <div *ngIf="prefix" class="prefix">
+          <p class="txt txt-sm">{{ prefix }}</p>
+        </div>
+    
+        <textarea
+          #srInputEl
+          [(ngModel)]="value"
+          [ngClass]="{
+            has_icon: iconClass,
+            has_icon_trailing: iconClass && trailingIcon
+          }"
+          [id]="key"
+          (mouseup)="onSelectionChange($event)"
+          [placeholder]="placeholder"
+          [required]="!optional"
+          [disabled]="isDisabled"
+          [pattern]="pattern"
+          (blur)="onTouched()"
+          [maxlength]="maxCharLimit"
+          (ngModelChange)="onValueChange(srInputEl);onTextareaChange($event)"
+          (change)="change.emit(value)"
+          (keyup)="keyup.emit(value)"
+          (keydown)="keydown.emit(value)"
+          (keyup.enter)="submit.emit(value)"
+          (oncopy)="copy.emit(value)"
+          (onpaste)="paste.emit(value)"
+          (click)="getCursorPosition($event);clicked.emit($event)"
+          (input)="input.emit($event);updateDivHeight()"
+        >
+        
+        </textarea>
      
-
-      <div *ngIf="suffix" class="suffix">
-        <p class="txt txt-sm">{{ suffix }}</p>
+        <div *ngIf="suffix" class="suffix">
+          <p class="txt txt-sm">{{ suffix }}</p>
+        </div>
+  
+        <i
+          *ngIf="iconClass"
+          class="icon {{ iconClass }}"
+          [ngStyle]="{ order: trailingIcon ? 1 : -1 }"
+          (click)="onIconClick.emit()"
+        >
+        </i> 
       </div>
-
-      <i
-        *ngIf="iconClass"
-        class="icon {{ iconClass }}"
-        [ngStyle]="{ order: trailingIcon ? 1 : -1 }"
-        (click)="onIconClick.emit()"
-      >
-      </i> 
-    </div>
+      <app-hideOptions
+      style="position: absolute;"
+      [optionsData]="optionsData"
+      (click)="onTextareaClick($event)"
+      (mousedown)="onHideOptionsMouseDown($event)"
+        *ngIf="isTextSelected"
+        [ngStyle]="contextMenuPosition"
+      (hideOptionsData)="uplayMaskingOnSelectedTxt($event)"
+      ></app-hideOptions>
+     </div>
     <div *ngIf="isTextArea" class="d-flex justify-content-between  mx-2 mt-2" style="width: 98%;">
       
       <ng-container (appClickOutside)="showEmoji = false" *ngIf="isEmoji">
@@ -225,7 +244,6 @@
         <span style="color: #868686;">{{ charCount }} / {{ maxCharLimit }}</span> 
       </div>
     </div>
- 
     <div *ngIf="!isTextArea && type !=='number' && maxCharLimit" class="d-flex justify-content-between  mx-2 mt-2" style="width: 98%;">
       
     

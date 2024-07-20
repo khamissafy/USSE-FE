@@ -494,6 +494,24 @@ cursor: pointer;
   }
 }
 
+.font-w-800{
+  font-weight: 800 !important;
+}
+.font-w-700{
+  font-weight: 700 !important;
+}
+.font-w-600{
+  font-weight: 600 !important;
+}
+.font-w-500{
+  font-weight: 500 !important;
+}
+.font-w-400{
+  font-weight: 400 !important;
+}
+.font-w-300{
+  font-weight: 300 !important;
+}
 a{
   text-decoration: none !important;
 }
@@ -2409,6 +2427,7 @@ mat-tab-header.mat-mdc-tab-header::-webkit-scrollbar {
 .mdc-text-field--outlined:not(.mdc-text-field--disabled).mdc-text-field--focused .mdc-notched-outline__leading, .mdc-text-field--outlined:not(.mdc-text-field--disabled).mdc-text-field--focused .mdc-notched-outline__notch, .mdc-text-field--outlined:not(.mdc-text-field--disabled).mdc-text-field--focused .mdc-notched-outline__trailing {
   border-color: var(--clr-primary-800)  !important;
 }
+
 @media only screen and (max-width: 768px) {
   .new-campaign.stepper .mat-horizontal-stepper-wrapper .mat-horizontal-content-container {
     overflow-y: hidden !important; 
@@ -2886,4 +2905,87 @@ span.mat-mdc-select-value-text {
     .mat-mdc-dialog-container .mdc-dialog__surface {
         border-radius: 25px !important;
     }
+}
+
+.ant-picker-panel {
+  
+    .ant-picker-footer > :last-child{
+  display: none !important;
+    }
+    .custom-btn-ok{
+      border: none !important;
+      outline: none !important;
+      width: fit-content;
+      border: none;
+      height:30px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-radius: 4px;
+      margin-block:3px ;
+      &:hover{
+        filter: brightness(0.95);
+        -webkit-filter: brightness(0.95);
+      }
+  
+    }
+}
+
+
+.settings-modal {
+  width: 55vw;
+  max-width:900px;
+  min-width: 680px;
+  max-height:730px;
+}
+
+@media(max-width:768px){
+  .settings-modal {
+    width: 90%;
+    max-width:400px;
+    min-width: 270px;
+    .mat-dialog-container{
+      border-radius: 25px !important;
+    }
+    
+  }
+  .custom-responsive-modal {
+    .mat-mdc-dialog-container
+   .mdc-dialog__surface{
+      border-radius: 25px !important;
+  
+  }
+  }
+  
+  .settings-modal{
+  .mat-mdc-dialog-container
+   .mdc-dialog__surface{
+  
+      border-radius: 25px !important;
+  
+  }}
+}
+.rtl{
+  
+.hide-options-menu {
+  left: unset !important;
+  right: 103%;
+  min-width: 215px !important;
+  @media(max-width:768px){
+    min-width: 150px !important;
+
+  }
+}
+
+.options-container mat-icon {
+  rotate: 180deg;
+}
+
+}
+.deviceLableGap{
+  min-width: 80px  !important }
+.rtl{
+  .label-widget.deviceLableGap{
+    min-width: 65px !important ;
+  }
 }

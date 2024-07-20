@@ -19,6 +19,7 @@ import { SelectOption } from 'src/app/shared/components/select/select-option.mod
 import { Subject, debounceTime, distinctUntilChanged, switchMap, takeUntil } from 'rxjs';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { AddTLDeviceComponent } from '../components/telegramDevice/addTLDevice/addTLDevice.component';
+import { TimeZoneServiceService } from 'src/app/shared/services/timeZoneService.service';
 
 @Component({
   selector: 'app-devices',
@@ -80,12 +81,19 @@ export class DevicesComponent implements OnInit,OnDestroy{
   })
   subscriptions: any=[];
   searchSub: any;
+  selectedTimeZone:number=0;
+
   constructor(public dialog: MatDialog,
         private translate: TranslateService,
         private breakpointObserver: BreakpointObserver,
-    private  toaster: ToasterServices,private authService:AuthService,private devicesService:DevicesService){
+    private  toaster: ToasterServices,
+    private authService:AuthService,
+    private devicesService:DevicesService,
+    private timeZoneService:TimeZoneServiceService
+  ){
   }
   ngOnInit() {
+    this.setTimeZone();
     this.breakpointObserver.observe(['(max-width: 768px)'])
     .pipe(takeUntil(this.destroy$))
     .subscribe(result => {
@@ -126,6 +134,13 @@ else{
   this.canEdit=true
 }
 this.displayedColumns=this.canEdit?['Device Name', 'Device Type', 'Number',"Create At", "Status","Delay Interval(s)","action"]:['Device Name', 'Device Type', 'Number',"Create At", "Status"];
+  }
+  setTimeZone(){
+    let sub = this.timeZoneService.timezone$.subscribe(
+      res=> this.selectedTimeZone=res
+
+    )
+    this.subscriptions.push(sub)
   }
   getWidth(element: HTMLElement) {
     return `${element.clientWidth}px`;
@@ -311,7 +326,6 @@ onPageChange(event){
     this.isReonnect=true;
     this.devicesService.reconnectWPPDevice(device.id,this.email).subscribe(
       (res)=>{
-
         this.getDevices();
       },
       (error) => {
@@ -379,13 +393,15 @@ onPageChange(event){
     this.devicesService.telegramId=element.id;
     this.devicesService.reconnectTelegramDev(data).subscribe(
       (res)=>{
-        this.toaster.success( this.translate.instant("COMMON.SUCC_MSG"));
+        this.getDevices();
         this.devicesService.telegramId=''
+        this.loading=false;
       },
       (err)=>{
         if(this.dataNeeded(err.error.msg)){
           this.addTLDevice({deviceTl:element,error:err.error})
         }
+        this.loading=false;
       }
     )
   }

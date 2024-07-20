@@ -6,7 +6,7 @@
         <span class="text-primary-800 pointer "(click)="backTolists()" >{{ 'LISTS' | translate }}</span> / <span style="color:rgba(134, 134, 134, 1)">{{ list?.name }}</span>
       </div>
 
-      <div *ngIf="list?.createdAt" class="mb-3 d-flex gap-2 align-items-center w-100"><p class="txt-lg" style="font-weight: 500;">{{ list?.name }}</p> <p class="txt-xs mb-2" style="font-weight: 500; color:rgba(134, 134, 134, 1)">{{ list?.createdAt | toLocalTime    }}</p></div>
+      <div *ngIf="list?.createdAt" class="mb-3 d-flex gap-2 align-items-center w-100"><p class="txt-lg" style="font-weight: 500;">{{ list?.name }}</p> <p class="txt-xs mb-2" style="font-weight: 500; color:rgba(134, 134, 134, 1)">{{ list?.createdAt | toLocalTime:selectedTimeZone     }}</p></div>
 
     </div>
     <div class="buttons_ d-flex flex-wrap align-items-center">
@@ -144,7 +144,7 @@
 
       </ng-template>
       <ng-container *ngIf="tab == 'contacts'">
-        <app-list-contacts [canEdit]="canEdit" [count]="count" [isCanceled]="false" [listData]="list" (updatedCount)="updateTotalContacts($event)" (isChecked)="onChecked($event)"></app-list-contacts>
+        <app-list-contacts [canEdit]="canEdit"  [selectedTimeZone]="selectedTimeZone"  [count]="count" [isCanceled]="false" [listData]="list" (updatedCount)="updateTotalContacts($event)" (isChecked)="onChecked($event)"></app-list-contacts>
       </ng-container>
     </mat-tab>
 

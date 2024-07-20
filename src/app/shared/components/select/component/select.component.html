@@ -1,4 +1,4 @@
-<section [ngClass]="{fullWidth , smallDropDown ,'flex-column flex-lg-row  gap-lg-4 gap-2':labelTopInMobileView && !forFiteringOnly ,'gap-3':!labelTopInMobileView && !forFiteringOnly}"   class=" us-select-container d-flex align-items-center flex-nowrap" >
+<section [ngClass]="{fullWidth ,fullWidthOptions, smallDropDown ,'flex-column flex-lg-row  gap-lg-4 gap-2':labelTopInMobileView && !forFiteringOnly ,'gap-3':!labelTopInMobileView && !forFiteringOnly}"   class=" us-select-container d-flex align-items-center flex-nowrap" >
   <ng-container *ngIf="label">
     <ng-container *ngIf="!labelTopInMobileView || forFiteringOnly ">
       <div  class=" label-widget w-25 " [ngClass]="{deviceLableGap }" *ngIf="optional || label" [style]="forFiteringOnly? 'min-width: 0' : 'min-width: 25%'">
@@ -187,6 +187,7 @@
                   [title]="option?.title"
                   (onClose)="onBadgeDeselect($event, option)">
                 </sr-tag>
+
               </ng-container>
               <p class="txt-sm" *ngIf="setCount() > badgesLimit">+{{ setCount() - badgesLimit }}</p>
             </ng-container>
@@ -216,7 +217,9 @@
               <li *ngFor="let option of value" class="list_item item_selected" (click)="onOptionSelected(option)" [ngClass]="{'list_item_disabled': option.isDisabled}">
                 <sr-checkbox *ngIf="!isIndicatorDisabled" state="checked"></sr-checkbox>
                 <ng-container *ngIf="!option.custom; else custom">
+
                   <p class="txt txt-sm">{{ option?.title }}</p>
+                 
                   <i *ngIf="option?.iconClass" [class]="option?.iconClass"></i>
                 </ng-container>
                 <ng-template #custom>
@@ -232,7 +235,8 @@
                 <sr-checkbox *ngIf="!isIndicatorDisabled" [state]="isSelected(option) ? 'checked' : ''" [isDisabled]="option.isDisabled"></sr-checkbox>
                   <div class="sr-d-flex sr-justify-content-between sr-align-items-center" [style]="isOptNested(option?.children) ? 'width:100%' : ''">
                     <ng-container *ngIf="!option.custom; else custom">
-                      <div class="sr-d-flex">
+                      <div class="d-flex gap-2 align-items-center">
+                        <img *ngIf="isListDevicesDropdown" [src]="option.deviceIcon | deviceType" alt="" style="width:15px">
                         <p class="txt txt-sm">{{ option?.title }}</p>
                         <i *ngIf="option?.iconClass" [class]="option?.iconClass"></i>
                       </div>
@@ -265,11 +269,11 @@
               <!-- end nested select -->
               </ng-container>
             </ng-container>
-            <ng-container *ngIf="(isLoading || !options || !options?.length || !(options | search:searchText).length) && !enableDropdownWhileSearching">
-              <label *ngIf="isLoading || !options || (!options?.length && !searchText)" class="txt txt-sm font-w-600">{{ loadingText }}</label>
+            <ng-container *ngIf="(isLoading || !options || options?.length<=0  || !(options | search:searchText).length) && !enableDropdownWhileSearching">
+              <label *ngIf="isLoading || !options || (options?.length<=0 && !searchText)" class="txt txt-sm font-w-600">{{ loadingText }}</label>
               <label *ngIf="searchText && (!options?.length || !(options | search:searchText).length)" class="txt txt-sm font-w-600">{{ noResultText }}</label>
             </ng-container>
-            <ng-container *ngIf="(isLoading || !options || !options?.length || !(options | search:searchText).length) && enableDropdownWhileSearching">
+            <ng-container *ngIf="(isLoading || !options || options?.length<=0  || !(options | search:searchText).length) && enableDropdownWhileSearching">
               <label *ngIf="searchText && (!options?.length || !(options | search:searchText).length)" class="txt txt-sm font-w-600">{{ loadingText }}</label>
             </ng-container>
           </div>

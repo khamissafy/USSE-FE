@@ -18,6 +18,8 @@ import { TranslateService } from '@ngx-translate/core';
 import { ErrorsStatesComponent } from 'src/app/shared/components/bulkOperationModals/errorsStates/errorsStates.component';
 import { RequestStateComponent } from 'src/app/shared/components/bulkOperationModals/requestState/requestState.component';
 import { UnCancelContactsComponent } from '../../../contacts/unCancelContacts/unCancelContacts.component';
+import { TimeZoneServiceService } from 'src/app/shared/services/timeZoneService.service';
+import { Subscription } from 'rxjs';
 
 
 @Component({
@@ -36,12 +38,16 @@ export class ListDetailsComponent implements OnInit ,AfterViewInit , OnDestroy{
   canEdit: boolean;
   totalContacts:number;
   totalCanceledContacts:number;
+  selectedTimeZone:number=0;
+  sub:Subscription
   constructor(private activeRoute:ActivatedRoute,public dialog: MatDialog,
     private snackBar: MatSnackBar,
     private listService:ManageContactsService,
     private router:Router,private authService:AuthService,
     private translate:TranslateService,
-    private  toaster: ToasterServices) {
+    private  toaster: ToasterServices,
+    private timeZoneService:TimeZoneServiceService
+  ) {
     activeRoute.paramMap.subscribe((data)=>
     {
     this.listId=data.get('id');
@@ -56,6 +62,8 @@ export class ListDetailsComponent implements OnInit ,AfterViewInit , OnDestroy{
           return `${element.clientWidth}px`;
        }
   ngOnInit() {
+    this.setTimeZone();
+
     this.getListData();
     let permission =this.listService.contactsPermissions
 
@@ -74,7 +82,12 @@ else{
 }
 
     }
-
+    setTimeZone(){
+      this.sub = this.timeZoneService.timezone$.subscribe(
+        res=> this.selectedTimeZone=res
+  
+      )
+    }
     getListData(){
 
       this.listService.getListById(this.listId).subscribe(
@@ -133,7 +146,9 @@ this.router.navigateByUrl('contacts?tab=lists')
       if(result){
         if(result.errors == 'noErrors'){
           this.toaster.success( this.translate.instant("COMMON.SUCC_MSG"));
+          
           this.getListData();
+          this.listContacts.pageNum=0;
           this.listContacts.getContacts();        
         }
         else{
@@ -269,6 +284,7 @@ this.router.navigateByUrl('contacts?tab=lists')
         if(result == 'noErrors'){
           this.toaster.success( this.translate.instant("COMMON.SUCC_MSG"));
           this.getListData();
+          this.listContacts.pageNum=0
           this.listContacts.getContacts();        
         }
         else{
@@ -338,6 +354,9 @@ openUnCancelContactsModal(){
 }
 
 ngOnDestroy(): void {
+  if(this.sub){
+    this.sub.unsubscribe()
+  }
   // this.listService.display=10;
   // this.listService.pageNum=0;
   // this.listService.orderedBy='';

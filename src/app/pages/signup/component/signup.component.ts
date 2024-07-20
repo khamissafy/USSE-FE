@@ -103,7 +103,7 @@ export class SignupComponent implements OnInit ,OnDestroy{
           apiToken:res.apiToken,
           maskType:res.maskType,
           phoneNumber:res.phoneNumber,
-          timeZone:res.timeZone,
+          timezone:res.timeZone,
           roles:res.roles[0],
           countryCode:res.countryCode
 

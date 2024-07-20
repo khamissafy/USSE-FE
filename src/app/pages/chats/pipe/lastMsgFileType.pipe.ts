@@ -43,7 +43,7 @@ export class LastMsgFileTypePipe implements PipeTransform {
       'bin':'assets/icons/chat-file.svg'
   
     };
-    const audioTypes = ["mp3", "wav", "ogg", "aac", "flac"];
+    const audioTypes = ["mp3", "wav", "ogg","oga", "aac", "flac"];
     const fileExtension = value.split(".").pop().toLowerCase();
 
     if (imageTypes.includes(fileExtension)) {

@@ -585,6 +585,7 @@
     }
   }
 }
+
 }
 @media (max-width: 1400px){
   .host{
@@ -592,16 +593,14 @@
   
   }
 }
-@media (max-width: 1700px){
-  .deviceLableGap{
-    min-width: 18% !important;
-  }
-}
+
+
 @media (max-width:991px){
 
   .us-select-container.fullWidth .host {
     min-width: 8rem !important;
 }
+
 }
 @media(max-width:768px){
  
@@ -664,4 +663,21 @@
 
   }
 
+}
+.us-select-container{
+  &.fullWidthOptions{
+    width: 100% !important;
+    min-width: unset !important;
+    .host{
+      min-width: unset !important;
+      height: 100% !important;
+        }
+    .host .toggler {
+      height: 100% !important;
+  
+  }
+  .txt-sm {
+    font-size: 10px !important;
+}
+  }
 }

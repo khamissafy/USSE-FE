@@ -42,7 +42,7 @@ export class TypePipe implements PipeTransform {
       'bin':'assets/images/document.svg'
   
     };
-    const audioTypes = ["mp3", "wav", "ogg", "aac", "flac"];
+    const audioTypes = ["mp3", "wav", "ogg","oga", "aac", "flac"];
     const fileExtension = value.split(".").pop().toLowerCase();
 
     if (imageTypes.includes(fileExtension)) {

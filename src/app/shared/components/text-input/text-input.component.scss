@@ -285,3 +285,49 @@ textarea {
     padding: 0px 9px !important;;
 }
 }
+.us-input{
+  &.fullWidthAndHeight{
+    width: 100% !important;
+    min-width: unset !important;
+    height: 100% !important;
+    .input-container{
+      height: 100% !important;
+      .input-wrapper{
+        width: 100% !important;
+        min-width: unset !important;
+        height: 100% !important;
+        .steppers button {
+          font-size: 18px !important;
+          padding: 6px !important;
+          width: 26px !important;
+          height: 9px !important;
+      }
+      }
+    }
+    
+
+  .txt-sm {
+    font-size: 10px !important;
+}
+  }
+}
+.masked-text{
+  color: blue;
+}
+.highlight-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  padding: 8px; /* Adjust padding to match textarea */
+  border: 1px solid #ccc; /* Example border */
+  font-family: Arial, sans-serif; /* Example font */
+  font-size: 14px; /* Example font size */
+  line-height: 1.4;
+  white-space: pre-wrap; /* Preserve whitespace */
+  overflow-wrap: break-word; /* Wrap long lines */
+}
+
+.highlighted {
+  background-color: yellow; /* Example highlight color */
+  /* Any other styles for highlighted text */
+}

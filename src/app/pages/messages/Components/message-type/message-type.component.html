@@ -26,25 +26,27 @@
       max-width: 512px;">
         <form [formGroup]="form"class="d-flex" style=" margin-inline: 20px;">
           <us-select
+          [labelTopInMobileView]="false"
           class="mx-3"
           [isListDevicesDropdown]="true"
-          [labelTopInMobileView]="false"
           [deviceLableGap]="true"
-            [data]="devices"
-            formControlName="devicesData"
-            [multiSelect]="false"
-            [label]="'Devices' | translate"
-            (onSelect)="onSelect($event)"
-            [loadingText]="deviceLoadingText"
-            [placeholder]="'Select Devices' | translate"
-            [isDisabled]="false"
-            [optional]="true"
-            [enableSearch]="true"
-            [searchbarOnToggler]="true"
-            [searchNoResultText]="'THERE_IS_NO_RESULT' | translate"
-            [maxListItemsWithoutSearch]="5"
-
-          ></us-select>
+          [data]="devices"
+          formControlName="devicesData"
+          [multiSelect]="true"
+          [label]="'Devices' | translate"
+          (onSelect)="onSelectDev($event)"
+          (onDeSelect)="deselectDev($event)"
+          [loadingText]="deviceLoadingText | translate"
+          [placeholder]="'Select Devices' | translate"
+          [isDisabled]="false"
+          [optional]="true"
+          [enableSearch]="true"
+          [searchbarOnToggler]="true"
+          [searchNoResultText]="'THERE_IS_NO_RESULT' | translate"
+          [maxListItemsWithoutSearch]="5"
+          [isPlaceholderFixed]="true"
+          [forFiteringOnly]="true"
+        ></us-select>
         </form>
         <mat-form-field class="us-select">
           <mat-label class="txt-caption">
@@ -66,15 +68,16 @@
          
             <form [formGroup]="form" class="d-flex" style=" margin-inline: 20px;">
               <us-select
-              [labelTopInMobileView]="false"
-              class="mx-3"
-              [isListDevicesDropdown]="true"
-              [deviceLableGap]="true"
+                [labelTopInMobileView]="false"
+                class="mx-3"
+                [isListDevicesDropdown]="true"
+                [deviceLableGap]="true"
                 [data]="devices"
                 formControlName="devicesData"
-                [multiSelect]="false"
+                [multiSelect]="true"
                 [label]="'Devices' | translate"
-                (onSelect)="onSelect($event)"
+                (onSelect)="onSelectDev($event)"
+                (onDeSelect)="deselectDev($event)"
                 [loadingText]="deviceLoadingText"
                 [placeholder]="'Select Devices' | translate"
                 [isDisabled]="false"
@@ -83,14 +86,15 @@
                 [searchbarOnToggler]="true"
                 [searchNoResultText]="'THERE_IS_NO_RESULT' | translate"
                 [maxListItemsWithoutSearch]="5"
-    
+                [isPlaceholderFixed]="true"
+                [forFiteringOnly]="true"
               ></us-select>
             </form>
             <div  class="filter-dropDown">
               <form [formGroup]="filteringForm" class="d-flex" >
                 <us-select
-                class="mx-3"
-                [leadingIcon]="true"
+                  class="mx-3"
+                  [leadingIcon]="true"
                   [data]="filters"
                   formControlName="filterdData"
                   [multiSelect]="true"
@@ -127,9 +131,10 @@
     <section class="table-wrapper">
       <table mat-table [dataSource]="dataSource" class="table-wrapper">
         <!-- Checkbox Column -->
-        <ng-container  matColumnDef="select">
+        <ng-container  matColumnDef="select" >
           <th class="checkBox" mat-header-cell *matHeaderCellDef>
             <mat-checkbox
+            [ngClass]="{'d-none':loading}"
               color="ch-color"
               (change)="$event ? toggleAllRows() : null"
               [checked]="selection.hasValue() && isAllSelected()"
@@ -154,6 +159,11 @@
           <td class="text-center" mat-cell *matCellDef="let element">{{ element.device?.deviceName }}</td>
         </ng-container>
 
+        <!-- groupName Column -->
+        <ng-container matColumnDef="Group Name">
+          <th class="text-center" mat-header-cell *matHeaderCellDef>{{ 'group_name' | translate }}</th>
+          <td class="text-center" mat-cell *matCellDef="let element">{{ element.groupName ?element.groupName:'' }}</td>
+        </ng-container>
         <!-- Sender/Recipient Column -->
         <ng-container [matColumnDef]="msgCategory=='inbox' ? 'Sender' : 'Recipient'">
           <th class="text-center" mat-header-cell *matHeaderCellDef>
@@ -169,7 +179,7 @@
           <td mat-cell *matCellDef="let element" style="max-width: 135px;">
             <div class="py-2">
               <div class="d-flex justify-content-center align-items-center flex-column">
-                <p style="max-width: 100%;" class="msg-body overflow-line-4 mb-0">{{ element.msgBody }}</p>
+                <p style="max-width: 100%;" class="msg-body overflow-line-4 mb-0">{{ element.msgBody |textMasking}}</p>
 
                 <div *ngIf="element?.fileName" class="text-start  pt-2 pb-3">
                   <img *ngIf="(element.fileName | type )=='assets/images/image.svg' else otherType"  [src]="element.fileName | type" alt="" style=" width: 80px;">
@@ -191,13 +201,13 @@
         <!-- Received at Column -->
         <ng-container matColumnDef="Received At">
           <th class="text-center" mat-header-cell *matHeaderCellDef>{{ 'RECEIVED_AT_LABEL' | translate }}</th>
-          <td class="text-center" mat-cell *matCellDef="let element">{{ element.createdAt | toLocalTime  }}</td>
+          <td class="text-center" mat-cell *matCellDef="let element">{{ element.createdAt | toLocalTime:selectedTimeZone  }}</td>
         </ng-container>
 
         <!-- Updated At Column -->
         <ng-container matColumnDef="Updated At">
           <th class="text-center" mat-header-cell *matHeaderCellDef>{{ 'UPDATED_AT_LABEL' | translate }}</th>
-          <td class="text-center" mat-cell *matCellDef="let element">{{ element.updatedAt | toLocalTime  }}</td>
+          <td class="text-center" mat-cell *matCellDef="let element">{{ element.updatedAt | toLocalTime:selectedTimeZone  }}</td>
         </ng-container>
 
         <!-- Status Column -->
@@ -282,6 +292,6 @@
   </ng-container>
 </div>
 <div *ngIf="isSmallScreen" class="small-screen-view">
-  <app-messages-mobileView #moibleView [msgCategory]="msgCategory" [canEdit]="canEdit" (isOpenNewMessage)="openNewMessage($event)"></app-messages-mobileView>
+  <app-messages-mobileView #moibleView  [selectedTimeZone]="selectedTimeZone" [msgCategory]="msgCategory" [canEdit]="canEdit" (isOpenNewMessage)="openNewMessage($event)"></app-messages-mobileView>
 </div>
 </section>

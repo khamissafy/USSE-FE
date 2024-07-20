@@ -16,7 +16,10 @@ export const  INBOXHEADER: any[] = [
     title:"RECEIVED_AT_LABEL",
     value:"Received At"
   },
-
+  {
+    title:"group_name",
+    value:"Group Name"
+  },
 ];
 export const  OUTBOX: any[] = [
   {
@@ -44,6 +47,10 @@ export const  OUTBOX: any[] = [
     title:"STATUS_LABEL",
     value:"Status"
   },
+  {
+    title:"group_name",
+    value:"Group Name"
+  },
 
 
 ];
@@ -64,7 +71,11 @@ export const  FAILED: any[] = [
   {
     title:"RECEIVED_AT_LABEL",
     value:"Received At"
-  }
+  },
+  {
+    title:"group_name",
+    value:"Group Name"
+  },
 
 ];
 export const  SCHEDULED: any[] = [

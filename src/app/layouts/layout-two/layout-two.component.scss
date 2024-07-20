@@ -48,6 +48,7 @@ app-side-bar{
 }
 .vh-92{
   height: 92vh;
+  overflow: auto;
 }
 @media(max-width:991px){
   .side-bar{

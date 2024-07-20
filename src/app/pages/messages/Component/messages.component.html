@@ -8,7 +8,7 @@
       <span class="txt-lg main-heading">{{ 'MAIN_HEADING' | translate }}</span>
     </div>
     <div class="buttons_ ">
-      <us-button *ngIf="isChecked && isMessages"
+      <us-button *ngIf="isChecked && isChecked?.length > 0 && isMessages"
         class="m-2"
         label="{{ 'DELETE_LABEL' | translate }}"
         img="assets/icons/delete.svg"

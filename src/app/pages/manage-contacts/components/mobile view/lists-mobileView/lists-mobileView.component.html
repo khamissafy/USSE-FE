@@ -125,7 +125,7 @@
     
         <div class="row row-item" *ngIf=" displayedColumns.includes('Create At')">
           <div class="col row-header" >{{ 'CREATE_AT' | translate }}</div>
-          <div class="col">{{ element.createdAt | toLocalTime }}</div>
+          <div class="col">{{ element.createdAt | toLocalTime:selectedTimeZone  }}</div>
         </div>
 
         <div class="row row-item" *ngIf=" displayedColumns.includes('Total Contacts')">

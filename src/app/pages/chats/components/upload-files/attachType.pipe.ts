@@ -42,7 +42,7 @@ export class AttachTypePipe implements PipeTransform {
         'bin':'assets/icons/pdf-icon.svg'
     
       };
-      const audioTypes = ["mp3", "wav", "ogg", "aac", "flac"];
+      const audioTypes = ["mp3", "wav", "ogg","oga", "aac", "flac"];
       const fileExtension = value.split(".").pop().toLowerCase();
   
     if (videoTypes.includes(fileExtension)) {

@@ -98,6 +98,7 @@ bottomSortingOptions:any=[{opitonName:'ASC' ,lable:`${this.translate.instant('AS
   selectedItems: any[];
   isChecked: boolean;
   searchSub: any;
+  @Input() selectedTimeZone :number=0;
 
   constructor(private activeRoute:ActivatedRoute,public dialog: MatDialog,
     private toaster: ToasterServices,
@@ -210,6 +211,7 @@ createDynamicComponent(selectedContacts) {
   });
   let sub3 =  navActionsComponentInstance.updateData.subscribe((res) => {
     if(res){
+      this.pageIndex=0;
       this.getContacts();
       this.getListData();
       this.distroyDynamicComponent();
@@ -218,6 +220,7 @@ createDynamicComponent(selectedContacts) {
   });
   let sub4 = navActionsComponentInstance.updateCanceledData.subscribe((res)=>{
     if(res){
+      this.pageIndex=0;
       this.getContacts();
       this.getListData();
       this.distroyDynamicComponent();

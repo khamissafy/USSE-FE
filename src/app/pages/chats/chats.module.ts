@@ -10,6 +10,7 @@ import { TimeOnlyPipe } from './pipe/timeOnly.pipe';
 import { AttachmentsComponent } from './components/upload-files/attachments/attachments.component';
 import { AttachTypePipe } from './components/upload-files/attachType.pipe';
 import { LastMsgFileTypePipe } from './pipe/lastMsgFileType.pipe';
+import { SelectModule } from 'src/app/shared/components/select/select.module';
 
 
 @NgModule({
@@ -18,7 +19,7 @@ import { LastMsgFileTypePipe } from './pipe/lastMsgFileType.pipe';
     ChatsRoutes,
     SharedModule,
     PickerModule,
-    
+    SelectModule
     
   ],
   declarations: [

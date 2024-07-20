@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ViewChild, ElementRef, Output, EventEmitter, AfterViewInit, Input } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, ElementRef, Output, EventEmitter, AfterViewInit, Input, ChangeDetectorRef } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { CompaignsService } from '../../../compaigns.service';
@@ -7,6 +7,7 @@ import { parse, addMinutes } from 'date-fns';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { ContactsWarningComponent } from 'src/app/pages/messages/Components/contactsWarning/contactsWarning.component';
 import { Subscription } from 'rxjs';
+import { TimeZoneServiceService } from 'src/app/shared/services/timeZoneService.service';
 
 @Component({
   selector: 'app-stepFour',
@@ -29,10 +30,6 @@ export class StepFourComponent implements OnInit, OnDestroy ,AfterViewInit{
   disable: boolean = true;
   isSendingOutTimeChecked: boolean = false;
   isIntervalChecked: boolean = true;
-
-  time1Sub$;
-  time2Sub$;
-
   utcTime1;
   utcTime2;
   @Input() lastCampaignData:{
@@ -70,12 +67,15 @@ export class StepFourComponent implements OnInit, OnDestroy ,AfterViewInit{
     timeDifferenceWarning:false,
   }
   @Output() formValidityChange = new EventEmitter<boolean>(true);
-  formSubscription:Subscription;
-  
+ 
+  subscriptions:Subscription[]=[];
   constructor(private fb: FormBuilder, private datePipe: DatePipe,
     private campaignServeice: CompaignsService,
     private authService: AuthService,
-    private dialog: MatDialog) {
+    private dialog: MatDialog,
+    private timeZoneService:TimeZoneServiceService,
+    private cdr: ChangeDetectorRef
+  ) {
     this.form = this.fb.group(
       {
         intervalFrom: this.intervalFrom,
@@ -96,26 +96,29 @@ export class StepFourComponent implements OnInit, OnDestroy ,AfterViewInit{
     now.setMinutes(30); // Set default minutes to 30
     return this.datePipe.transform(now, 'HH:mm');
   }
+
   ngOnInit() {
     this.setDefaultTime();
-    this.formSubscription = this.form.valueChanges.subscribe(() => {
+    let formSubscription = this.form.valueChanges.subscribe(() => {
       
       this.checkValidIntervalRange(this.form.get("intervalFrom").value,this.form.get("intervalTo").value)
      
       this.formValidityChange.emit(this.form.valid);
     });
-
     this.utcTime1 = this.convertToUTC(this.time1);
     this.utcTime2 = this.convertToUTC(this.time2);
-    this.time1Sub$ = this.time1.valueChanges.subscribe(res => {
-      this.utcTime1 = this.convertToUTC(this.time1);
-      this.checkValidTimeDifference(this.time1,this.time2)
-    });
-    this.time2Sub$ = this.time2.valueChanges.subscribe(res => {
-      this.utcTime2 = this.convertToUTC(this.time2);
-      this.checkValidTimeDifference(this.time1,this.time2)
 
-    });
+let time1Sub$ = this.time1.valueChanges.subscribe(res => {
+  this.utcTime1 = this.convertToUTC(this.time1);
+  this.checkValidTimeDifference(this.time1,this.time2)
+});
+let time2Sub$ = this.time2.valueChanges.subscribe(res => {
+  this.utcTime2 = this.convertToUTC(this.time2);
+  this.checkValidTimeDifference(this.time1,this.time2)
+
+});
+this.subscriptions.push(time1Sub$,time2Sub$,formSubscription)
+
   }
 // set default campain settings
 setDefaultTime() {
@@ -176,17 +179,28 @@ setDefaultTime() {
   }
 
   ngOnDestroy(): void {
-    this.time1Sub$.unsubscribe();
-    this.time2Sub$.unsubscribe();
-    this.formSubscription.unsubscribe();
+  this.subscriptions.map((sub)=>sub.unsubscribe())
+
   }
-setTimeToDefault(){
-  const defaultTime = new Date();
-    defaultTime.setHours(9, 0, 0); 
-    
-    this.time1.setValue(defaultTime);
-    this.time2.setValue(defaultTime);
-}
+  setTimeToDefault(){
+    const defaultTime = new Date();
+      defaultTime.setHours(9, 0, 0); 
+      
+      this.time1.setValue(defaultTime);
+      this.time2.setValue(defaultTime);
+  }
+  onOkClick(timePicker): void {
+  // Force update the form control value
+  this.convertToUTC(timePicker)
+  this.cdr.detectChanges();  // Manually trigger change detection
+
+  // Close the time picker
+  timePicker.close();
+  }
+  setTimeToNow(timecontrol){
+    let currentTime = this.timeZoneService.getCurrentTime(this.timeZoneService.getTimezone());
+    timecontrol.setValue(currentTime)
+  }
   intervalInvalid(formGroup: FormGroup) {
     const intervalFrom = formGroup.get('intervalFrom')!.value;
     const intervalTo = formGroup.get('intervalTo')!.value;
@@ -297,8 +311,16 @@ setTimeToDefault(){
   }
   convertToUTC(timecontrol: any): any {
     const selectedTime = timecontrol.value;
-
+    let timezone = this.timeZoneService.getTimezone();
+   
     if (selectedTime) {
+       if(timezone !== null){
+       const utcTime = new Date(selectedTime.getTime() - timezone * 60 * 60 * 1000);
+  
+      const utcDateTime = this.datePipe.transform(utcTime, 'HH:mm:ss');
+      return utcDateTime;
+    }
+     else{
       const timeOnly = new Date();
       timeOnly.setHours(selectedTime.getHours());
       timeOnly.setMinutes(selectedTime.getMinutes());
@@ -307,8 +329,10 @@ setTimeToDefault(){
       const utcTime = this.datePipe.transform(timeOnly, 'HH:mm:ss', 'UTC');
 
       return utcTime;
+     }
     }
   }
+
   
   convertUTCToLocal(utcTime: string): Date {
     const [hoursStr, minutesStr] = utcTime.split(':');

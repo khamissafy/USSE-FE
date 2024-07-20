@@ -1,4 +1,4 @@
-import { Component, ElementRef, EventEmitter, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
+import {  Component, ElementRef, EventEmitter, OnDestroy, OnInit, Output, Renderer2, ViewChild } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { NbDateService } from '@nebular/theme';
 import { DevicesService } from 'src/app/pages/devices/devices.service';
@@ -7,49 +7,51 @@ import { DatePipe } from '@angular/common';
 import { AuthService } from 'src/app/shared/services/auth.service';
 import { MessagesService } from '../../../messages.service';
 import { DevicesPermissions } from 'src/app/pages/compaigns/compaigns.service';
+import { TimeZoneServiceService } from 'src/app/shared/services/timeZoneService.service';
+
 
 @Component({
   selector: 'app-send-message',
   templateUrl: './send-message.component.html',
   styleUrls: ['./send-message.component.scss']
 })
-export class SendMessageComponent implements OnInit ,OnDestroy{
+export class SendMessageComponent implements OnInit ,OnDestroy {
   @ViewChild("dateTime") dateTime!: ElementRef;
   devices:SelectOption[];
   deviceLoadingText:string='Loading ...';
   devicesData:any = new FormControl([]);
-  dateFormControl:any = new FormControl('');
+  dateFormControl:FormControl = new FormControl();
   @Output() isSelectedDevices = new EventEmitter<boolean>(true);
 
   // selectedDevices:string[]=[];
   deviceId:string;
   form = new FormGroup({
     devicesData:this.devicesData,
-    dateFormControl:this.dateFormControl
+    dateFormControl:this.dateFormControl,
+
   });
+
 utcDateTime;
 timeSub$;
 isUser: boolean;
   permission:DevicesPermissions[];
+  sub: any;
   constructor(private devicesService:DevicesService,
     private dateService:NbDateService<Date>,
     private datePipe: DatePipe,
     private messageService:MessagesService,
-    private authService:AuthService) {
+    private authService:AuthService,
+    private timeZoneService:TimeZoneServiceService,
+  ) {
 
     // this.selectedDate=dateService.today();
    }
-
+   
   ngOnInit() {
-
-    // this.getDevices();
+    this.getDevices();
     this.isSelectedDevices.emit(false);
-    this.convertToUTC(this.dateFormControl)
-    this.timeSub$ = this.dateFormControl.valueChanges.subscribe(res=>{
-     this.convertToUTC(this.dateFormControl);
+    this.setDefaultTime();
 
-
-    });
     this.permission =this.messageService.devicesPermissions;
 if(this.authService.getUserInfo()?.customerId!=""){
   this.isUser=true;
@@ -58,18 +60,33 @@ else{
   this.isUser=false;
 }
   }
-  ngOnDestroy(): void {
-    this.timeSub$.unsubscribe()
+
+  setDefaultTime(){
+    let currentTime = this.timeZoneService.getCurrentTime(this.timeZoneService.getTimezone());
+    this.dateFormControl.setValue(currentTime);
+    this.convertToUTC(this.dateFormControl)
   }
   convertToUTC(timecontrol) {
-    const selectedTime =timecontrol.value;
+    const selectedTime =new Date(timecontrol.value);
+    let timezone=this.timeZoneService.getTimezone(); 
     if (selectedTime) {
-      this.utcDateTime = this.datePipe.transform(selectedTime,`yyyy-MM-ddTHH:mm:ss`, 'UTC');
+      if(timezone !== null)
+        {  const utcTime = new Date(selectedTime.getTime() - timezone * 60 * 60 * 1000);
+          this.utcDateTime = this.datePipe.transform(utcTime,`yyyy-MM-ddTHH:mm:ss`);
+
+        }
+        else{
+          this.utcDateTime = this.datePipe.transform(selectedTime,`yyyy-MM-ddTHH:mm:ss`, 'UTC');
+        }
     }
-    else {
-      
+   
+  }
+  ngOnDestroy(): void {
+    if(this.sub){
+      this.sub.unsubscribe()
     }
   }
+
   getDevices(){
 
     this.authService.getDevices(this.authService.getUserInfo()?.email,10,0,"","").subscribe(
@@ -84,31 +101,7 @@ else{
           }
         });
         
-        // if(this.authService.selectedDeviceId ==""){
-
-        //   this.form.patchValue({
-        //   devicesData: {
-        //   title:this.devices[0]?.title,
-        //   value:this.devices[0]?.value
-        //   }
-
-        //   })
-        // }
-        // else{
-        //   let selected= this.devices.find((device)=>device.value==this.authService.selectedDeviceId);
-        //   if(selected){
-
-        //     this.deviceId=this.authService.selectedDeviceId;
-        //     this.form.patchValue({
-        //       devicesData: {
-        //       title:selected.title,
-        //       value:selected?.value
-        //       }
-  
-        //       })
-        //   }
-        // }
-        // console.log(this.devices)
+    
         if(activeDevices.length==0){
           this.deviceLoadingText='No Results'
         }
@@ -118,10 +111,7 @@ else{
 
        })
   }
-  setDefaultTime(){
-    this.dateFormControl.setValue(new Date());
 
-  }
   onSelect(event){
     this.deviceId=event.value;
     // this.authService.selectedDeviceId=event.value

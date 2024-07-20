@@ -17,6 +17,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { AuthService } from 'src/app/shared/services/auth.service';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { ListsMobileViewComponent } from '../mobile view/lists-mobileView/lists-mobileView.component';
+import { TimeZoneServiceService } from 'src/app/shared/services/timeZoneService.service';
 
 @Component({
   selector: 'app-lists',
@@ -58,6 +59,7 @@ subscribtions:Subscription[]=[];
   searchSub: Subscription;
   @ViewChild(ListsMobileViewComponent) mobileView :ListsMobileViewComponent
   isDataCalledInMobile: boolean;
+  selectedTimeZone:number=0;
 
   constructor(public dialog: MatDialog,
     private toaster: ToasterServices,
@@ -66,7 +68,9 @@ subscribtions:Subscription[]=[];
     private translate: TranslateService,
     private authService:AuthService,
     private router:Router,
-    private breakpointObserver: BreakpointObserver
+    private breakpointObserver: BreakpointObserver,
+    private timeZoneService:TimeZoneServiceService
+
     ) {
       this.display=this.listService.getUpdatedDisplayNumber();
       this.pageNum=this.listService.pageNum;
@@ -75,13 +79,10 @@ subscribtions:Subscription[]=[];
   @Output() isDelete = new EventEmitter<ListData[]>;
 
   ngOnInit() {
-   
-  
+    this.setTimeZone();
     if(!this.canEdit){
       this.displayedColumns = [ 'Name', 'Create At', 'Total Contacts'];
-
     }
-
     this.columns=new FormControl(this.displayedColumns)
     this.selection.changed.subscribe(
       (res) => {
@@ -95,7 +96,13 @@ subscribtions:Subscription[]=[];
       this.onChangeSecreanSizes();
 
   }
+  setTimeZone(){
+    let sub = this.timeZoneService.timezone$.subscribe(
+      res=> this.selectedTimeZone=res
 
+    )
+    this.subscribtions.push(sub)
+  }
   ngAfterViewInit() {
     if(this.paginator){
       this.paginator.pageSize=this.display
@@ -149,7 +156,7 @@ subscribtions:Subscription[]=[];
                 this.mobileView?.getDataFromParent(this.dataSource.data,'',this.length)
   
               }
-          }, 100);
+          }, 0);
           }
           else{
             setTimeout(() => {
@@ -157,7 +164,7 @@ subscribtions:Subscription[]=[];
               this.mobileView?.getListData('');
               this.isDataCalledInMobile=true;
 
-            }, 100);
+            }, 0);
           }
         
         
@@ -478,7 +485,6 @@ handleError(): void {
     this.destroy$.next();
     this.destroy$.complete();
     this.selection.clear();
-  
     this.subscribtions.map(e=>e.unsubscribe());
   }
 

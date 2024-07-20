@@ -158,7 +158,7 @@
           <!-- Start Date Column -->
           <div class="row row-item" *ngIf="displayedColumns.includes('Start Date')">
             <div class="col row-header">{{ 'startDateColumn' | translate }}</div>
-            <div class="col ">{{ element?.scheduledAt | toLocalTime }}</div>
+            <div class="col ">{{ element?.scheduledAt | toLocalTime:selectedTimeZone }}</div>
           </div>
     
           <!-- Action Column -->

@@ -4,12 +4,16 @@ import { Pipe, PipeTransform } from '@angular/core';
   name: 'toLocalTime'
 })
 export class ToLocalTimePipe implements PipeTransform {
-
-  transform(utcDate: string): any {
+constructor(){}
+  transform(utcDate: string,selectedTimeZone?:number): any {
+    let timezoneOffset = selectedTimeZone;
     if (utcDate) {
       utcDate = utcDate.indexOf('Z') > -1 ? utcDate : (utcDate + 'Z');
       const localDate = new Date(utcDate);
+      if(timezoneOffset !== null){
+        localDate.setHours(localDate.getUTCHours() + timezoneOffset);
 
+      }
       const day = localDate.getDate();
       const month = localDate.getMonth() + 1; // Months are 0-indexed, so add 1
       const year = localDate.getFullYear();

@@ -37,6 +37,7 @@ sendMessageData:any;
   attachments:string[];
   stepTwoValidate: boolean = true;
   showWarningMsg: boolean=false;
+  isSendMsg: boolean;
 
   constructor(private messageService:MessagesService,private toasterService:ToasterServices) { }
   ngAfterViewInit() {
@@ -67,11 +68,9 @@ sendMessageData:any;
     this.writeMessage.getTemplates();
   }
   toSendMessage(data){
+    this.isSendMsg=true
     this.message=data.message;
     this.attachments=data.files
-    this.sendMessage.getDevices();
-    this.sendMessage.setDefaultTime();
- 
     // this.message=this.writeMessage.form.value.message;
 
     // this.attachments=this.writeMessage.fileData.map((file)=>file.url);

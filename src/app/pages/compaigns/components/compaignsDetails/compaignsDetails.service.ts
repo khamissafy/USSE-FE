@@ -58,4 +58,40 @@ export class CompaignsDetailsService {
   resendCampaignFailedMessages(data):Observable<any>{
     return this.http.post<any>(`${this.api}Message/resendCampaignFailedMessages`,data);
   }
+  convertUTCToLocal(utcTime: string,timezone): string {
+    const [hoursStr, minutesStr] = utcTime.split(':');
+    const hours = parseInt(hoursStr, 10);
+    const minutes = parseInt(minutesStr, 10);
+  
+    // Get the current date and time in UTC
+    const utcDate = new Date(Date.UTC(0, 0, 0, hours, minutes));
+  if(timezone){
+
+    utcDate.setHours(utcDate.getUTCHours() + timezone);
+    
+    
+    let hour = utcDate.getHours();
+    // Convert hours to 12-hour format and determine AM/PM
+    const amPm = hour >= 12 ? 'PM' : 'AM';
+    hour = hour % 12 || 12; // Handle 0 as 12 for 12-hour format
+
+    // Add leading '0' if the hour is less than 10
+    const formattedHour = hour < 10 ? '0' + hour : hour;
+
+    // Create a formatted date string
+    const formattedTime = `${formattedHour}:${minutes} ${amPm}`;
+    // Return local hours and minutes as a string
+    return formattedTime;
+  }
+  else{
+    const timezoneOffset = new Date().getTimezoneOffset();
+
+  // Adjust hours and minutes for the local time zone offset
+  const localHours = (utcDate.getUTCHours() - Math.floor(timezoneOffset / 60)).toString().padStart(2, '0');
+  const localMinutes = (utcDate.getUTCMinutes() - (timezoneOffset % 60)).toString().padStart(2, '0');
+
+  // Return local hours and minutes as a string
+  return `${localHours}:${localMinutes}`;
+  }
+  }
 }

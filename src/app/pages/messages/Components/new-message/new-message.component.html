@@ -62,46 +62,49 @@
 
     <mat-step>
       <ng-template matStepLabel>{{ 'SEND_MESSAGE' | translate }}</ng-template>
-      <div class="position-relative d-flex align-items-between flex-column justify-content-between h-100" style="min-height: 100%;">
-        <app-send-message  (isSelectedDevices)="deviceSelected=$event" ></app-send-message>
-        <div class="d-flex flex-column justify-content-center w-100">
-          <div class=" buttons d-flex flex-column" >
-            <div class="bottons-container">
-              <button class="rest-style" matStepperPrevious>
-                <us-button
-                  class="m-2"
-                  [fullWidth]="true"
-                  label="{{ 'BACK' | translate }}"
-                  [fill]="false"
-                  [size]="'md'"
-                  [loading]="false"
-                  [disabled]="isLoading"
-                  [appearance]="'primary'"
-                >
-                </us-button>
-              </button>
-              <button class="rest-style" matStepperNext [disabled]="isLoading || !deviceSelected">
-                <us-button
-                  class="m-2"
-                  [fullWidth]="true"
-                  label="{{ 'SEND' | translate }}"
-                  [fill]="true"
-                  [size]="'md'"
-                  [loading]="isLoading"
-                  [appearance]="'primary'"
-                  (clicked)="sendMessages()"
-                  [disabled]="isLoading || !deviceSelected"
-                >
-                </us-button>
-              </button>
+      <ng-container *ngIf="isSendMsg">
+        <div class="position-relative d-flex align-items-between flex-column justify-content-between h-100" style="min-height: 100%;">
+          <app-send-message  (isSelectedDevices)="deviceSelected=$event" ></app-send-message>
+          <div class="d-flex flex-column justify-content-center w-100">
+            <div class=" buttons d-flex flex-column" >
+              <div class="bottons-container">
+                <button class="rest-style" matStepperPrevious>
+                  <us-button
+                    class="m-2"
+                    [fullWidth]="true"
+                    label="{{ 'BACK' | translate }}"
+                    [fill]="false"
+                    [size]="'md'"
+                    [loading]="false"
+                    [disabled]="isLoading"
+                    [appearance]="'primary'"
+                  >
+                  </us-button>
+                </button>
+                <button class="rest-style" matStepperNext [disabled]="isLoading || !deviceSelected">
+                  <us-button
+                    class="m-2"
+                    [fullWidth]="true"
+                    label="{{ 'SEND' | translate }}"
+                    [fill]="true"
+                    [size]="'md'"
+                    [loading]="isLoading"
+                    [appearance]="'primary'"
+                    (clicked)="sendMessages()"
+                    [disabled]="isLoading || !deviceSelected"
+                  >
+                  </us-button>
+                </button>
+              </div>
+  
+              <div *ngIf="showWarningMsg" class="waiting-msg">
+                <p>{{'waiting_msg' | translate}}</p>
+              </div> 
             </div>
-
-            <div *ngIf="showWarningMsg" class="waiting-msg">
-              <p>{{'waiting_msg' | translate}}</p>
-            </div> 
           </div>
         </div>
-      </div>
+      </ng-container>
+     
     </mat-step>
   </mat-stepper>
 </section>

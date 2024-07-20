@@ -18,6 +18,8 @@ export class UsButtonComponent implements OnInit ,AfterViewInit  {
   @Input() fill:boolean =true
   @Input() appearance:string ='primary'
   @Input() fullWidth?: boolean; // take full width of the parent
+  @Input() noMinHight?: boolean=false; 
+
   @Input() counter: number = 0;
   countdown: number = 0;
   @Output() clicked = new EventEmitter<any>();

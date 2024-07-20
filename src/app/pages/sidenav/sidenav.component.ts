@@ -80,12 +80,8 @@ this.permissions={
     //this.displaySetting=true;
     const dialogConfig = new MatDialogConfig();
     dialogConfig.height = this.isUser ? '50vh' : '77vh';
-    dialogConfig.width =  '90%';
-    dialogConfig.maxWidth = '400px';
-    dialogConfig.minWidth = '270px';
-    dialogConfig.maxHeight = '520px';
     dialogConfig.disableClose = true;
-    dialogConfig.panelClass = 'custom-mat-dialog-container';
+    dialogConfig.panelClass='settings-modal'
 
     const dialogRef = this.dialog.open(SettingComponent, dialogConfig);
     dialogRef.afterClosed().subscribe(result => {
@@ -100,9 +96,9 @@ this.permissions={
     const dialogConfig=new MatDialogConfig();
     dialogConfig.height='54vh';
     dialogConfig.width='90vw';
-    dialogConfig.maxWidth='365px';
-    dialogConfig.minWidth='80%';
-    dialogConfig.maxHeight='290px';
+    dialogConfig.maxWidth='600px';
+    dialogConfig.minWidth='200px';
+    dialogConfig.maxHeight='400px';
     dialogConfig.disableClose = true;
     dialogConfig.panelClass = 'custom-mat-dialog-container';
    

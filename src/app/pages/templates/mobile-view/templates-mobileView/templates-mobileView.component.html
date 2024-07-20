@@ -112,7 +112,7 @@
             <div class="py-2">
               <div class="d-flex justify-content-center align-items-center flex-column">
                 <p style="max-width: 150px; width: 140%;" style="font-size: 12px;" class="msg-body mb-0">
-                  {{ element.messageBody?.length > 20 ? (element?.messageBody | slice:0:20) + '...' : element?.messageBody }}
+                  {{ element.messageBody?.length > 20 ? (element?.messageBody | slice:0:20 |textMasking) + '...' : element?.messageBody|textMasking }}
                   <span *ngIf="element.messageBody?.length > 20" class="text-primary-800" (click)="$event.stopPropagation() ; displayMessage(element)">
                     {{ 'see_more' | translate }}
                   </span>
@@ -133,7 +133,7 @@
         <!-- Created At Column -->
         <div class="row row-item" *ngIf="displayedColumns.includes('Created At')">
           <div class="col row-header">{{ 'CREATED_AT' | translate }}</div>
-          <div class="col ">{{ element.createdAt | toLocalTime }}</div>
+          <div class="col ">{{ element.createdAt | toLocalTime:selectedTimeZone }}</div>
         </div>
   
         <!-- Action Column -->

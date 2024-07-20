@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 
 import { environment } from 'src/environments/environment';
 import { BehaviorSubject, Observable, Subject, shareReplay } from 'rxjs';
@@ -14,8 +14,11 @@ export class ChatsService {
   private api: string = `${environment.api}Chat`;
   private signalRlink = `${environment.signalR}`
   private hubConnection: signalR.HubConnection;
-  receivedMessages$=new BehaviorSubject<any>([]);
-  updatedStatus$ = new BehaviorSubject<any>([]);
+  receivedMessages=new BehaviorSubject<any>([]);
+  updatedStatus= new BehaviorSubject<any>([]);
+  receivedMessages$: Observable<any> = this.receivedMessages.asObservable();
+  updatedStatus$: Observable<any> = this.updatedStatus.asObservable();
+
 
 constructor(private http:HttpClient) { 
  
@@ -43,14 +46,14 @@ private startHubConnection (): void {
 }
 public onReceiveMessage = ()=>{
   this.hubConnection.on('ReceiveMessage',(email,message)=>{
-    this.receivedMessages$.next({userEmail:email,message:message});
+    this.receivedMessages.next({userEmail:email,message:message});
 
   })
 }
 
 public onStatusChange = ()=>{
   this.hubConnection.on('StatusUpdate',(email,message)=>{
-    this.updatedStatus$.next({userEmail:email,message:message});
+    this.updatedStatus.next({userEmail:email,message:message});
 
   })
 }
@@ -60,8 +63,28 @@ closeConnection(){
   }
 
 }
-listChats(email:string,showsNum:number,pageNum:number,search:string,deviceId:string):Observable<Chats[]>{
-  return this.http.get<Chats[]>(`${this.api}/listChats?email=${email}&take=${showsNum}&scroll=${pageNum}&search=${search}&deviceId=${deviceId}`)
+listChats(email:string,showsNum:number,pageNum:number,search:string,deviceId:string[]):Observable<Chats>{
+  let params = new HttpParams()
+  .set('email', email)
+  .set('take', showsNum.toString())
+  .set('scroll', pageNum.toString())
+  .set('search', search)
+
+  if (deviceId ) {
+    
+    if (Array.isArray(deviceId) && deviceId.length > 0){
+      deviceId.forEach((filter) => {
+        params = params.append('deviceId', filter);
+      });
+    }
+  
+  }
+  
+  const apiUrl = `${this.api}/listChats`;
+
+  return this.http.get<Chats>(apiUrl, { params: params });
+
+
 }
 deleteChat(id:string , email:string):Observable<any>{
   return this.http.put<any>(`${this.api}/deleteChat?email=${email}&id=${id}`,null)

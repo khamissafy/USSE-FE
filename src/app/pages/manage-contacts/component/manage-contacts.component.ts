@@ -1,5 +1,5 @@
 import { ToasterServices } from './../../../shared/components/us-toaster/us-toaster.component';
-import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, Renderer2, ViewChild } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, Renderer2, ViewChild } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { AddListComponent } from '../components/lists/addList/addList.component';
 import { ListsComponent } from '../components/lists/lists.component';
@@ -69,7 +69,8 @@ export class ManageContactsComponent implements OnInit, AfterViewInit,OnDestroy{
     private listService:ManageContactsService,
     private authService:AuthService,
     private translate:TranslateService,
-    private renderer: Renderer2){
+    private renderer: Renderer2,
+    private cdr: ChangeDetectorRef){
       this.initRouting()
 
 
@@ -204,6 +205,7 @@ else{
         if(result.errors == 'noErrors'){
           this.toaster.success( this.translate.instant("COMMON.SUCC_MSG"));
           this.lists.openSnackBar();
+          this.lists.pageNum=0
           this.lists.getListData();
         }
         else{
@@ -342,6 +344,8 @@ else{
         this.contacts.deletedContacts=result.data;
         if(result.errors == 'noErrors'){
           this.toaster.success( this.translate.instant("COMMON.SUCC_MSG"));
+          this.contacts.pageNum=0
+
           this.contacts.getContacts();
           
           this.contacts.openSnackBar();
@@ -439,6 +443,7 @@ else{
         this.contacts.canceledContacts=result.data;
         if(result.errors == 'noErrors'){
           this.toaster.success( this.translate.instant("COMMON.SUCC_MSG"));
+          this.lists.pageNum=0
           this.contacts.getContacts("" ,true);
           
           this.contacts.unCancelSnackBar();
@@ -472,7 +477,7 @@ else{
     // this.listService.pageNum=0;
     // this.listService.orderedBy='';
     this.listService.search='';
-
+    this.cdr.detectChanges(); 
  
   }
   // exportAllContacts(){

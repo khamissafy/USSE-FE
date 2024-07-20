@@ -123,7 +123,7 @@
                   <!-- Start Date Column -->
                   <ng-container matColumnDef="Start Date">
                     <th class="text-center" mat-header-cell *matHeaderCellDef>{{ 'startDateColumn' | translate }}</th>
-                    <td class="text-center" mat-cell *matCellDef="let element">{{ element?.scheduledAt | toLocalTime  }}</td>
+                    <td class="text-center" mat-cell *matCellDef="let element">{{ element?.scheduledAt | toLocalTime:selectedTimeZone   }}</td>
                   </ng-container>
 
                   <!-- Action Column -->
@@ -171,7 +171,7 @@
 
     </div>
     <div *ngIf="isSmallScreen" class="small-screen-view">
-      <app-campaigns-mobileView  #moibleView  (addCampaign)="addCampaigns()" ></app-campaigns-mobileView>
+      <app-campaigns-mobileView  #moibleView  [selectedTimeZone]="selectedTimeZone" (addCampaign)="addCampaigns()" ></app-campaigns-mobileView>
     </div>
  </section>
 

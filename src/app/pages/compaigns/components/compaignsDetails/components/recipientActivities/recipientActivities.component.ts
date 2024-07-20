@@ -14,6 +14,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { SelectOption } from 'src/app/shared/components/select/select-option.model';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { Subject, takeUntil } from 'rxjs';
+import { TimeZoneServiceService } from 'src/app/shared/services/timeZoneService.service';
 
 
 
@@ -42,6 +43,7 @@ filters:any;
   @ViewChild(MatPaginator) paginator: MatPaginator;
   display: number;
   pageNum: number;
+  selectedTimeZone:number=0;
 
   isSmallScreen: boolean = false;
 
@@ -78,12 +80,14 @@ filters:any;
   { opitonName: 'DEC', lable: `${this.translate.instant('DESCENDING')}`, isSelected: false }]
 
   destroy$: Subject<void> = new Subject<void>();
-
+  sub:any;
   constructor(private compaignDetailsService:CompaignsDetailsService,public dialog: MatDialog,
     private compaignsService:CompaignsService,
     private authService:AuthService,
     private translate:TranslateService,
-    private breakpointObserver: BreakpointObserver) {
+    private breakpointObserver: BreakpointObserver,
+    private timeZoneService:TimeZoneServiceService
+  ) {
       this.display=compaignsService.getUpdatedDisplayNumber();
       this.pageNum=this.compaignsService.pageNum;
       this.filters=[
@@ -96,6 +100,7 @@ filters:any;
       ]
     }
   ngOnInit() {
+    this.setTimeZone();
     this.breakpointObserver.observe(['(max-width: 768px)'])
 .pipe(takeUntil(this.destroy$))
 .subscribe(result => {
@@ -124,7 +129,13 @@ this.displayForm.patchValue({
     )
     this.getComMessages()
   }
+  setTimeZone(){
+    this.sub = this.timeZoneService.timezone$.subscribe(
+      res=> this.selectedTimeZone=res
 
+    )
+    
+  }
 
   getComMessages(filteredData?){
   let shows=this.compaignDetailsService.display;
@@ -226,7 +237,9 @@ this.displayForm.patchValue({
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
-  
+  if(this.sub){
+    this.sub.unsubscribe()
+  }
     this.compaignDetailsService.display=10;
     this.compaignDetailsService.pageNum=0;
   }

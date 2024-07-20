@@ -1,16 +1,17 @@
-import { AfterViewInit, Component, Input, OnChanges, OnInit, SimpleChanges, } from '@angular/core';
+import { AfterViewInit, Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, } from '@angular/core';
 import { CompaignStat, compaignDetails } from 'src/app/pages/compaigns/campaigns';
 import { CompaignsService } from 'src/app/pages/compaigns/compaigns.service';
 import { CompaignsDetailsService } from '../../compaignsDetails.service';
 import { AuthService } from 'src/app/shared/services/auth.service';
 import { MatTableDataSource } from '@angular/material/table';
+import { TimeZoneServiceService } from 'src/app/shared/services/timeZoneService.service';
 
 @Component({
   selector: 'app-reportSummary',
   templateUrl: './reportSummary.component.html',
   styleUrls: ['./reportSummary.component.scss']
 })
-export class ReportSummaryComponent implements OnInit , AfterViewInit , OnChanges {
+export class ReportSummaryComponent implements OnInit , AfterViewInit , OnChanges ,OnDestroy{
   @Input() compaign:compaignDetails;
   @Input() compaignId:string;
   campaignActions:{actionName:string, actionCriteras:any[]}[]=[];
@@ -22,9 +23,19 @@ export class ReportSummaryComponent implements OnInit , AfterViewInit , OnChange
   campainHasActions:boolean=false;
   constructor(private compaignDetailsService:CompaignsDetailsService,
     private compaignsService:CompaignsService,
-    private authService:AuthService) {
+    private authService:AuthService,
+    private timeZoneService:TimeZoneServiceService
+  ) {
 
   }
+  ngOnDestroy(): void {
+    }
+    convertFromUtcToLocal(utcTime){
+      if(this.compaign && utcTime){
+        this.compaign.sendingoutFrom=this.compaignDetailsService.convertUTCToLocal(utcTime.sendingoutFrom,this.timeZoneService.getTimezone())
+        this.compaign.sendingoutTo=this.compaignDetailsService.convertUTCToLocal(utcTime.sendingoutTo,this.timeZoneService.getTimezone())
+      }
+    }
   ngOnChanges(changes: SimpleChanges) {
     if(this.compaign){
       if(this.compaign?.actionCount > 0) {
@@ -47,9 +58,10 @@ export class ReportSummaryComponent implements OnInit , AfterViewInit , OnChange
   }
   ngOnInit() {
 this.getStatics();
-// this.getCompaignData();
+
 
   }
+
   getCompaignData(){
     this.compaignsService.getCampaignById(this.compaignId).subscribe(
     (res)=>{

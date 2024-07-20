@@ -257,7 +257,6 @@ calculateTimeDifference(startDate: Date, endDate: Date): number {
 
   // Convert the difference to hours
   const hoursDiff = timeDiff / (1000 * 60 * 60);
-  console.log('Time difference in hours:', hoursDiff);
 
   return hoursDiff;
 }
