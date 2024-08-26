@@ -247,7 +247,7 @@
                         <ng-container [ngSwitch]="chat?.direction">
                             <div *ngSwitchCase="false" class="received-chats">
                                 <div class="chat-contact-img">
-                                    <span>{{ isGroupe? chatIcon(chat?.targetPhoneNumber) : chatIcon(chatName) }}</span>
+                                    <span>{{ (chat?.chat?.channelType > 1 || chat?.groupName) ? chatIcon(chat?.targetPhoneNumber) : chatIcon(chatName) }}</span>
                                 </div>
                                 <div class="received-chats-msg">
                                     <span *ngIf="chat?.chat?.channelType > 1 || chat?.groupName" class="text-primary-800 font-w-700 txt-xs">
@@ -304,7 +304,7 @@
                             <div *ngSwitchCase="false" class="received-chats"
                                 [ngClass]="{'align-items-start':(chat?.fileName && chat?.fileName !== '') && chat?.msgBody == ''  && (!chat?.fileUrl.includes('image') || (chat?.fileName | type ) !=='assets/images/image.svg')}">
                                 <div class="chat-contact-img">
-                                    <span>{{ chatIcon(chatName) }}</span>
+                                    <span>{{ (chat?.chat?.channelType > 1 || chat?.groupName) ? chatIcon(chat?.targetPhoneNumber) : chatIcon(chatName) }}</span>
                                 </div>
                                 <div class="received-chats-msg"
                                     [ngClass]="{'received-files-only': (chat?.fileName && chat?.fileName !== '') && chat?.msgBody == '' && (chat?.chat?.channelType === 1 || !chat?.groupName) }">
