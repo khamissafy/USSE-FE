@@ -943,7 +943,8 @@ resetChatsOrder(chatContact){
           }, 0);
         },
         (err)=>{
-          this.resetForm()
+          this.disable=false;
+
         })
         
 
@@ -1077,9 +1078,10 @@ else{
           const messageDate = new Date(message.createdAt);
         
           const day = this.getGroupHeader(messageDate);
-          let foundMesg = this.groupedMessages[day].find(chat => chat.chat?.id === message.id);
+          let foundMesg = this.groupedMessages[day].find(chat => chat?.chat?.id === message?.id);
           console.log('msg',this.groupedMessages[day])
           if (foundMesg) {
+            console.log("found msg",foundMesg)
             if(message.status > foundMesg.status)
             {
 
