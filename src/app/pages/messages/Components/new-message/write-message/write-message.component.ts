@@ -50,7 +50,7 @@ export class WriteMessageComponent implements OnInit {
   }
   getTemplates(){
 
-    this.templateService.getTemplates(this.templateService.email,10,0,"","").subscribe(
+    this.templateService.getTemplates(10,0,"","").subscribe(
       (res)=>{
         this.allTemplates=res;
         this.templates = this.allTemplates.map(res=>{

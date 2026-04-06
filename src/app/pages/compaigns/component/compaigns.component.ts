@@ -275,7 +275,7 @@ this.onChangeSecreanSizes();
 
  // get devices data
  getDevices(){
-  this.authService.getDevices(this.authService.getUserInfo()?.email,10,0,"","").subscribe(
+  this.authService.getDevices(10,0,"","").subscribe(
     (res)=>{
       this.handleResponce(res)
      },
@@ -336,14 +336,13 @@ this.getCompaigns(this.deviceId);
   
   getCampaignsReq(deviceId:string,searchVal?){
     let shows=this.compaignsService.display;
-    let email=this.authService.getUserInfo()?.email;
     let search=searchVal?searchVal:"";
     this.loading = true;
     let pageNumber=searchVal?0:this.pageNum
     if(searchVal && this.paginator){
       this.paginator.pageIndex=0
     }
-  return  this.compaignsService.getCampaigns(email,shows,pageNumber,search,deviceId)
+  return  this.compaignsService.getCampaigns(shows,pageNumber,search,deviceId)
     }
 
   handleGetCampaignssResponse(deviceId,res,search): void {
@@ -376,8 +375,7 @@ this.getCompaigns(this.deviceId);
   }
 compaignsCount(deviceId){
   this.loading=true
-  let email=this.authService.getUserInfo()?.email;
-  this.compaignsService.compaignsCount(email,deviceId).subscribe(
+  this.compaignsService.compaignsCount(deviceId).subscribe(
     (res)=>{
       this.loading = false;
       this.length=res;

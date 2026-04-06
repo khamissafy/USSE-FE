@@ -14,8 +14,8 @@ export class   InfoService {
 constructor(private http:HttpClient,
 ) {
 }
-getUserSubscribtion(email:string):Observable<Info>{
-  return this.http.get<Info>(`${this.api}Auth/getUserSubscribtion?email=${email}`)
+getUserSubscribtion():Observable<Info>{
+  return this.http.get<Info>(`${this.api}Auth/getUserSubscription`)
 }
 
 }

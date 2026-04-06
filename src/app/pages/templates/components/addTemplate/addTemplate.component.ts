@@ -93,13 +93,12 @@ export class AddTemplateComponent implements OnInit , OnDestroy {
 
   submitAdd() {
     this.isLoading = true;
-    let email = this.email;
     let templateName = this.form.value.templateName;
     let messageBody = this.form.value.messageBody;
     let attachments = this.fileData.map((file) => file.url);
 
     this.templatesService
-      .addTemplate(templateName, messageBody, email, attachments)
+      .addTemplate(templateName, messageBody, attachments)
       .subscribe(
         (res) => {
           this.isLoading = false;
@@ -115,7 +114,6 @@ export class AddTemplateComponent implements OnInit , OnDestroy {
   }
 
   submitEdit() {
-    let email = this.email;
     let templateName = this.form.value.templateName;
     let messageBody = this.form.value.messageBody;
     let attachments = this.fileData.map((file) => file.url);
@@ -126,7 +124,6 @@ export class AddTemplateComponent implements OnInit , OnDestroy {
         this.data.id,
         templateName,
         messageBody,
-        email,
         attachments
       )
       .subscribe(

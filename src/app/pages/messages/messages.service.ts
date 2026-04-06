@@ -64,9 +64,8 @@ constructor(private http:HttpClient,private authService:AuthService) {
 }
 
 
-getMessages(email: string, msgCategory: string, showsNum: number, pageNum: number, search: string, deviceId: string[], StatusFilters?: number[]): Observable<Message> {
+getMessages(msgCategory: string, showsNum: number, pageNum: number, search: string, deviceId: string[], StatusFilters?: number[]): Observable<Message> {
   let params = new HttpParams()
-    .set('email', email)
     .set('msgCategory', msgCategory)
     .set('take', showsNum.toString())
     .set('scroll', pageNum.toString())
@@ -91,9 +90,8 @@ getMessages(email: string, msgCategory: string, showsNum: number, pageNum: numbe
 
   return this.http.get<Message>(apiUrl, { params: params });
 }
-getMessagesCount(email: string, msgCategory: string, deviceId: string, StatusFilters?: number[]): Observable<number> {
+getMessagesCount(msgCategory: string, deviceId: string, StatusFilters?: number[]): Observable<number> {
   let params = new HttpParams()
-    .set('email', email)
     .set('msgCategory', msgCategory)
     .set('deviceId', deviceId);
 
@@ -109,10 +107,9 @@ getMessagesCount(email: string, msgCategory: string, deviceId: string, StatusFil
   return this.http.get<number>(apiUrl, { params: params });
 }
 
-getScheduledMessages(email:string,showsNum:number,pageNum:number,deviceId:string[]):Observable<Shceduled>{
+getScheduledMessages(showsNum:number,pageNum:number,deviceId:string[]):Observable<Shceduled>{
   
   let params = new HttpParams()
-  .set('email', email)
   .set('take', showsNum.toString())
   .set('scroll', pageNum.toString())
   if (deviceId ) {
@@ -130,13 +127,13 @@ getScheduledMessages(email:string,showsNum:number,pageNum:number,deviceId:string
 
 }
 
-listScheduledMessagesCount(email:string,deviceId:string):Observable<number>{
-  return this.http.get<number>(`${this.api}Message/listScheduledMessagesCount?email=${email}&deviceId=${deviceId}`)
+listScheduledMessagesCount(deviceId:string):Observable<number>{
+  return this.http.get<number>(`${this.api}Message/listScheduledMessagesCount?deviceId=${deviceId}`)
 }
 deleteMessage(ids:string[]):Observable<any>{
 
 
-  return this.http.put<number>(`${this.api}Message/deleteMessage?email=${this.email}`,ids)
+  return this.http.put<number>(`${this.api}Message/deleteMessage`,ids)
 
 }
 
@@ -144,7 +141,6 @@ sendWhatsappBusinessMessage( deviceid: string,
   targetPhoneNumber: string[],
   msgBody: string,
   scheduledAt:string,
-  email: string,
   attachments:string[],
   chatMsg?:{channelType:number,groupName:string}):Observable<any>{
 
@@ -154,13 +150,11 @@ sendWhatsappBusinessMessage( deviceid: string,
     attachments:attachments,
     msgBody: msgBody,
     scheduledAt:scheduledAt,
-    email: email
   }:{
     deviceid: deviceid,
     targetPhoneNumber: targetPhoneNumber,
     msgBody: msgBody,
     scheduledAt:scheduledAt,
-    email: email
   }
   if(chatMsg){
     data.channelType=chatMsg.channelType;

@@ -126,14 +126,12 @@ getUsersReq(searchVal){
   let pageNum = searchVal ? 0 : this.userService.pageNum;
   let orderedBy = this.userService.orderedBy;
   let search = searchVal ? searchVal : "";
-  let token = this.userService.token;
-
   this.loading = true;
   if (searchVal && this.paginator) {
     this.paginator.pageIndex = 0
   }
 
- return this.userService.listCustomersUsers(token, shows, pageNum, orderedBy, search)
+ return this.userService.listCustomersUsers(shows, pageNum, orderedBy, search)
 }
 handleGetUsersResponce(res,search){
   this.loading = false;
@@ -212,9 +210,8 @@ setupSearchSubscription(){
   }
 
   UsersCount() {
-    let token = this.userService.token;
     this.loading = true;
-    this.userService.listCustomersUsersCount(token).subscribe(
+    this.userService.listCustomersUsersCount().subscribe(
       (res)=>{
         this.length=res;
         this.loading = false;

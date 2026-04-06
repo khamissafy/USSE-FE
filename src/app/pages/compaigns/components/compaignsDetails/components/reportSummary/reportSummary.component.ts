@@ -128,7 +128,7 @@ this.getStatics();
 }
 getStatics(){
 
-  this.compaignDetailsService.getCampaignStat(this.compaignId,this.authService.getUserInfo()?.email).subscribe(
+  this.compaignDetailsService.getCampaignStat(this.compaignId).subscribe(
     (res)=>{
       this.statics=res
     },

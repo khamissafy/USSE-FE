@@ -21,7 +21,7 @@ totalPrice:number=0;
     this.getSubscriptions()
   }
   getSubscriptions(){
-    this.infoService.getUserSubscribtion(this.email).subscribe(
+    this.infoService.getUserSubscribtion().subscribe(
       (res)=>{
         this.userSubscripitons=res;
         this.fullDetails=[

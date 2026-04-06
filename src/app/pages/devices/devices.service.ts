@@ -32,44 +32,43 @@ constructor(private http:HttpClient,
      this.DevicesPermission={name:"Devices",value:"FullAccess"}
    }
 }
-getDevices(email:string,showsNum:number,pageNum:number,orderedBy:string,search:string):Observable<DeviceData[]>{
-  return this.http.get<DeviceData[]>(`${this.api}Device/listDevices?email=${email}&take=${showsNum}&scroll=${pageNum}&orderedBy=${orderedBy}&search=${search}`)
+getDevices(showsNum:number,pageNum:number,orderedBy:string,search:string):Observable<DeviceData[]>{
+  return this.http.get<DeviceData[]>(`${this.api}Device/listDevices?take=${showsNum}&scroll=${pageNum}&orderedBy=${orderedBy}&search=${search}`)
 }
 
-initWhatsAppB(email : string, sessionName:string,port:number,serverId:number,host?:string):Observable<Init>{
+initWhatsAppB(sessionName:string,port:number,serverId:number,host?:string):Observable<Init>{
   const query=sessionName && !host?
-   `?email=${email}&sessionName=${sessionName}&port=${port}&serverId=${serverId}`
+   `?sessionName=${sessionName}&port=${port}&serverId=${serverId}`
    :sessionName && host?
-   `?email=${email}&sessionName=${sessionName}&port=${port}&host=${host}`
-   :`?email=${email}`
+   `?sessionName=${sessionName}&port=${port}&host=${host}`
+   :`?`
 
   return this.http.post<Init>(`${this.api}Device/InitializeWhatsappBisunessSession${query}`,"")
 }
 
 CheckWhatsappBisuness(sessionName:string,token:string,port:number,serverId:number):Observable<CheckCon>{
-  const data={
-    sessionName:sessionName,
-    token:token,
-    port:port,
-    serverId: serverId
-  }
+    const data={
+      sessionName:sessionName,
+      token:token,
+      port:port,
+      serverId: serverId
+    }
   return this.http.post<CheckCon>(`${this.api}Device/CheckWhatsappBisunessSession`,data)
 
 }
-getDevicesCount(email:string):Observable<number>{
-  return this.http.get<number>(`${this.api}Device/listDevicesCount?email=${email}`)
+getDevicesCount():Observable<number>{
+  return this.http.get<number>(`${this.api}Device/listDevicesCount`)
 }
 
-deleteDevice(email:string,id:string):Observable<DeviceData>{
-  return this.http.put<DeviceData>(`${this.api}Device/deleteDevice?email=${email}&id=${id}`,"")
+deleteDevice(id:string):Observable<DeviceData>{
+  return this.http.put<DeviceData>(`${this.api}Device/deleteDevice?id=${id}`,"")
 }
-reconnectWPPDevice(id:string,email:string):Observable<any>{
-  return this.http.put<any>(`${this.api}Device/reconnectWBSDevice?id=${id}&email=${email}`,"")
+reconnectWPPDevice(id:string):Observable<any>{
+  return this.http.put<any>(`${this.api}Device/reconnectWBSDevice?id=${id}`,"")
 }
 
-addNewWhatsappBisunessDevice( email: string,deviceName: string,phoneNumber: string,token: string,sessionName: string,port:number,serverId:number):Observable<any>{
+addNewWhatsappBisunessDevice(deviceName: string,phoneNumber: string,token: string,sessionName: string,port:number,serverId:number):Observable<any>{
   const data={
-    email: email,
     deviceName: deviceName,
     phoneNumber: phoneNumber,
     token: token,
@@ -80,11 +79,11 @@ addNewWhatsappBisunessDevice( email: string,deviceName: string,phoneNumber: stri
   return this.http.post<any>(`${this.api}Device/addNewWhatsappBisunessDevice`,data)
 }
 
-updateDeviceDelay(email:string,id:string ,delayIntervalInSeconds:number):Observable<DeviceData>{
-  return this.http.put<DeviceData>(`${this.api}Device/updateDeviceDelay?email=${email}&id=${id}&delay=${delayIntervalInSeconds}`,"")
+updateDeviceDelay(id:string ,delayIntervalInSeconds:number):Observable<DeviceData>{
+  return this.http.put<DeviceData>(`${this.api}Device/updateDeviceDelay?id=${id}&delay=${delayIntervalInSeconds}`,"")
 }
-extractChats(email: string, deviceId: string): Observable<any> {
-  const url = `${this.api}Device/extractChats?email=${email}&deviceId=${deviceId}`;
+extractChats(deviceId: string): Observable<any> {
+  const url = `${this.api}Device/extractChats?deviceId=${deviceId}`;
   const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
 
   return this.http.get(url, {
@@ -98,4 +97,3 @@ addTelegramDev(data):Observable<any>{
 reconnectTelegramDev(data):Observable<any>{
   return this.http.put<any>(`${this.api}Device/reconnectTelegramDevice`,data)
 }}
-

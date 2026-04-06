@@ -39,7 +39,7 @@ export class LayoutTwoComponent implements OnInit {
   
   }
   getDevices(){
-    this.authService.getDevices(this.authService.getUserInfo()?.email,100,0,"","").subscribe(
+    this.authService.getDevices(100,0,"","").subscribe(
       (res)=>{
         let alldevices=res;
         let numberOfInactiveDevices = alldevices.filter((dev)=>dev.isConnected == false).length;

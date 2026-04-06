@@ -25,7 +25,7 @@ export class UnCancelContactsComponent implements OnInit {
   }
   submit(){
     this.isLoading = true;
-    this.listService.unCancelContacts(this.email,this.contactsIds).subscribe(
+    this.listService.unCancelContacts(this.contactsIds).subscribe(
       (res) => {
         this.isLoading = false;
         if(res.numberOfErrors === 0){

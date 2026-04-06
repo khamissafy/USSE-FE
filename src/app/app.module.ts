@@ -1,4 +1,4 @@
-import { InjectionToken, NgModule } from '@angular/core';
+import { APP_INITIALIZER, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 
 import { AppRoutingModule } from './app-routing.module';
@@ -14,7 +14,14 @@ import { ErrorInterceptorService } from './interceptors/error-interceptor.servic
 import { ToasterServices } from './shared/components/us-toaster/us-toaster.component';
 import { TRANSLATE_SERVICE } from './shared/shared.module';
 import { TokenInterceptorService } from './interceptors/token-interceptor.service';
+import { ApiResultUnwrapInterceptor } from './interceptors/api-result-unwrap.interceptor';
 import { NZ_I18N, en_US } from 'ng-zorro-antd/i18n';
+import { AuthSessionService } from './shared/services/auth-session.service';
+import { firstValueFrom, of, catchError } from 'rxjs';
+
+export function initAuthSession(session: AuthSessionService) {
+  return () => firstValueFrom(session.tryRestoreSession().pipe(catchError(() => of(false))));
+}
 
 
 @NgModule({
@@ -44,8 +51,13 @@ import { NZ_I18N, en_US } from 'ng-zorro-antd/i18n';
   providers: [
     { provide: NZ_I18N, useValue: en_US },
     ToasterServices,
-
-     {
+    {
+      provide: APP_INITIALIZER,
+      useFactory: initAuthSession,
+      deps: [AuthSessionService],
+      multi: true,
+    },
+    {
       provide: HTTP_INTERCEPTORS,
       useClass: ErrorInterceptorService,
       multi: true,
@@ -53,6 +65,11 @@ import { NZ_I18N, en_US } from 'ng-zorro-antd/i18n';
     {
       provide: HTTP_INTERCEPTORS,
       useClass: TokenInterceptorService,
+      multi: true,
+    },
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: ApiResultUnwrapInterceptor,
       multi: true,
     },
     {

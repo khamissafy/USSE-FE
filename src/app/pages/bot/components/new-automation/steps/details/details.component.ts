@@ -44,7 +44,7 @@ export class DetailsComponent implements OnInit {
   }
   getDevices(){
 
-    this.authService.getDevices(this.email,10,0,"","").subscribe(
+    this.authService.getDevices(10,0,"","").subscribe(
       (res)=>{
 
         let activeDevices=res.filter((r)=>r.isConnected)

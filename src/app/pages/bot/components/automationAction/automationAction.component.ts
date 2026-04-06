@@ -32,7 +32,7 @@ export class AutomationActionComponent implements OnInit {
     }
   }
   stopAutomation(){
-    this.botService.stopWhatsappBusinessAutomation(this.data.id, this.authService.getUserInfo()?.email).subscribe(
+    this.botService.stopWhatsappBusinessAutomation(this.data.id).subscribe(
       (res) => {
         this.isLoading = false
 
@@ -52,7 +52,7 @@ export class AutomationActionComponent implements OnInit {
     
   }
   startAutomation(){
-    this.botService.startWhatsappBusinessAutomation(this.data.id, this.authService.getUserInfo()?.email).subscribe(
+    this.botService.startWhatsappBusinessAutomation(this.data.id).subscribe(
       (res) => {
         this.isLoading = false
 

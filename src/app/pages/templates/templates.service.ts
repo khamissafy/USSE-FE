@@ -30,15 +30,15 @@ constructor(private http:HttpClient,private authService:AuthService) {
    }
  }
 
-getTemplates(email:string,showsNum:number,pageNum:number,orderedBy:string,search:string):Observable<Templates[]>{
-  return this.http.get<Templates[]>(`${this.api}Template/listTemplates?email=${email}&take=${showsNum}&scroll=${pageNum}&orderedBy=${orderedBy}&search=${search}`)
+getTemplates(showsNum:number,pageNum:number,orderedBy:string,search:string):Observable<Templates[]>{
+  return this.http.get<Templates[]>(`${this.api}Template/listTemplates?take=${showsNum}&scroll=${pageNum}&orderedBy=${orderedBy}&search=${search}`)
 }
 
-deleteTemplates(email:string,id:string):Observable<Templates>{
-  return this.http.delete<Templates>(`${this.api}Template/deleteTemplate?email=${email}&id=${id}`)
+deleteTemplates(id:string):Observable<Templates>{
+  return this.http.delete<Templates>(`${this.api}Template/deleteTemplate?id=${id}`)
 }
-listTemplatesCount(email:string):Observable<number>{
-  return this.http.get<number>(`${this.api}Template/listTemplatesCount?email=${email}`)
+listTemplatesCount():Observable<number>{
+  return this.http.get<number>(`${this.api}Template/listTemplatesCount`)
 }
 
 
@@ -47,16 +47,14 @@ listTemplatesCount(email:string):Observable<number>{
 
 
 
-addTemplate(templateName:string,messageBody:string,email:string,attachments:string[]):Observable<Templates>{
+addTemplate(templateName:string,messageBody:string,attachments:string[]):Observable<Templates>{
   const data=attachments.length!=0?{
     templateName: templateName,
     messageBody: messageBody,
-    email: email,
     attachments:attachments
   }:{
     templateName: templateName,
     messageBody: messageBody,
-    email: email
   }
   return this.http.post<Templates>(`${this.api}Template/addNewTemplate`,data)
 }
@@ -65,18 +63,16 @@ addTemplate(templateName:string,messageBody:string,email:string,attachments:stri
 
 
 
-updateTemplate(id:string,templateName:string,messageBody:string,email:string, attachments:string[]):Observable<any>{
+updateTemplate(id:string,templateName:string,messageBody:string, attachments:string[]):Observable<any>{
   const data=attachments.length!=0?{
     id:id,
     templateName: templateName,
     messageBody: messageBody,
-    email: email,
     attachments:attachments
   }:{
     id:id,
     templateName: templateName,
     messageBody: messageBody,
-    email: email
   }
   return this.http.put(`${this.api}Template/updateTemplate`,data)
 }

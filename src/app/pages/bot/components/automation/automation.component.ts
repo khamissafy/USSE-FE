@@ -155,7 +155,7 @@ export class AutomationComponent implements OnInit,AfterViewInit ,OnDestroy {
         order:index
       }
     })
-    this.botService.reOrderAutomations(this.email,this.deviceId,orderedData).subscribe()
+    this.botService.reOrderAutomations(this.deviceId,orderedData).subscribe()
   
   }
 
@@ -198,7 +198,7 @@ export class AutomationComponent implements OnInit,AfterViewInit ,OnDestroy {
   
    // get devices data
  getDevices(){
-  this.authService.getDevices(this.authService.getUserInfo()?.email,10,0,"","").subscribe(
+  this.authService.getDevices(10,0,"","").subscribe(
     (res)=>{
       this.alldevices=res;
       this.devices = this.alldevices.map(res=>{
@@ -306,14 +306,13 @@ scrollLeft(element , wrapper){
 }
 getAutomationReq(deviceId,searchVal){
   let shows=this.display;
-  let email=this.authService.getUserInfo()?.email;
   let search=searchVal?searchVal:"";
   this.loading = true;
   let pageNumber=searchVal?0:this.pageNum
   if(searchVal && this.paginator){
     this.paginator.pageIndex=0
   }
-  return this.botService.getAutomations(email,shows,pageNumber,search,deviceId)
+  return this.botService.getAutomations(shows,pageNumber,search,deviceId)
 }
 handleGetAutomationsResponce(deviceId,res,search){
   this.loading = false;
@@ -375,8 +374,7 @@ setupSearchSubscription(): void {
   }
   getAutomationsCount(deviceId){
     this.loading=true
-    let email=this.authService.getUserInfo()?.email;
-    this.botService.getAutomationsCount(email,deviceId).subscribe(
+    this.botService.getAutomationsCount(deviceId).subscribe(
       (res)=>{
         this.loading = false;
         this.length=res;
@@ -481,7 +479,7 @@ setupSearchSubscription(): void {
 
 
   stopAutomation(automation){
-    this.botService.stopWhatsappBusinessAutomation(automation.id, this.authService.getUserInfo()?.email).subscribe(
+    this.botService.stopWhatsappBusinessAutomation(automation.id).subscribe(
       (res) => {
       
 
@@ -495,7 +493,7 @@ setupSearchSubscription(): void {
     
   }
   startAutomation(automation){
-    this.botService.startWhatsappBusinessAutomation(automation.id, this.authService.getUserInfo()?.email).subscribe(
+    this.botService.startWhatsappBusinessAutomation(automation.id).subscribe(
       (res) => {
      
 

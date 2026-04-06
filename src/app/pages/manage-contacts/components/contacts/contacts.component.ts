@@ -223,7 +223,7 @@ this.onChangeSecreanSizes()
         this.paginator.pageIndex=0
     }
    
-   return this.listService.getContacts(email,canceled,shows,pageNumber,orderedBy,searchVal,this.listId)
+   return this.listService.getContacts(canceled,shows,pageNumber,orderedBy,searchVal,this.listId)
   }
   
   handleContactsResponse(res: Contacts[], searchVal: string,canceled,count?): void {
@@ -316,7 +316,7 @@ this.onChangeSecreanSizes()
       let email=this.authService.getUserInfo()?.email;
       this.loading=true;
   
-      let sub2=this.listService.contactsCount(email,isCancel).subscribe(
+      let sub2=this.listService.contactsCount(isCancel).subscribe(
   
         (res)=>{
           this.length=res;
@@ -361,7 +361,7 @@ unCancelSnackBar(){
   }
   cancelContacts(){
     let email=this.authService.getUserInfo()?.email;
-    this.listService.cancelContacts(email,this.canceledContacts).subscribe(
+    this.listService.cancelContacts(this.canceledContacts).subscribe(
       (res)=>{
 
         this.getContacts("",true);
@@ -377,7 +377,7 @@ unCancelSnackBar(){
   }
   undoDelete(){
     let email=this.authService.getUserInfo()?.email;
-    this.listService.unDeleteContact(email,this.deletedContacts).subscribe(
+    this.listService.unDeleteContact(this.deletedContacts).subscribe(
       (res)=>{
 
         this.getContacts();

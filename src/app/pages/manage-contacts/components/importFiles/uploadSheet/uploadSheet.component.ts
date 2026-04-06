@@ -91,7 +91,7 @@ export class UploadSheetComponent implements OnInit {
  
   
   getLists(lisname?:string){
-    this.listService.getList(this.authService.getUserInfo()?.email,100,0,"","").subscribe(
+    this.listService.getList(100,0,"","").subscribe(
        (res)=>{
         let allLists=res;
         this.listsArr = res.map(res=>{
@@ -218,7 +218,7 @@ this.listId=event.value
   submitAddList(){
     this.isLoading = true
 
-    this.listService.addList(this.form.value.listName,this.authService.getUserInfo()?.email).subscribe(
+    this.listService.addList(this.form.value.listName).subscribe(
       (res)=>{
         this.clearForm();
 

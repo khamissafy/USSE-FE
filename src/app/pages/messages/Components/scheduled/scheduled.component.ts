@@ -258,7 +258,7 @@ export class ScheduledComponent implements OnInit ,AfterViewInit ,OnDestroy{
     }
  // get devices data
  getDevices(){
-  this.authService.getDevices(this.authService.getUserInfo()?.email,10,0,"","").subscribe(
+  this.authService.getDevices(10,0,"","").subscribe(
     (res)=>{
       this.handleResponce(res)
      },
@@ -289,9 +289,8 @@ export class ScheduledComponent implements OnInit ,AfterViewInit ,OnDestroy{
     }
     getMessages(deviceId?:string[]){
       let shows=this.messageService.display;
-      let email=this.messageService.email;
       this.loading=true;
-      let messagesSub=this.messageService.getScheduledMessages(email,shows,this.pageNum,deviceId).subscribe(
+      let messagesSub=this.messageService.getScheduledMessages(shows,this.pageNum,deviceId).subscribe(
         (res)=>{
           this.numRows=res.data.length;
           this.dataSource=new MatTableDataSource<ShceduledData>(res.data);
@@ -310,8 +309,7 @@ export class ScheduledComponent implements OnInit ,AfterViewInit ,OnDestroy{
     }
 
     getMessagesCount(deviceId){
-      let email=this.messageService.email;
-      this.messageService.listScheduledMessagesCount(email,deviceId).subscribe(
+      this.messageService.listScheduledMessagesCount(deviceId).subscribe(
         (res)=>{
           this.length=res;
           this.loading = false;

@@ -73,7 +73,7 @@ export class SubscribeToListComponent implements OnInit {
   }
   
   getLists(lisname?:string){
-    this.listService.getList(this.authService.getUserInfo()?.email,100,0,"","").subscribe(
+    this.listService.getList(100,0,"","").subscribe(
        (res)=>{
         this.allLists=res;
         this.listsArr = res.map(res=>{
@@ -117,7 +117,7 @@ export class SubscribeToListComponent implements OnInit {
   submitAddList(){
     this.isLoading = true
 
-    this.listService.addList(this.form.value.listName,this.authService.getUserInfo()?.email).subscribe(
+    this.listService.addList(this.form.value.listName).subscribe(
       (res)=>{
         this.clearForm();
         this.isLoading = false;

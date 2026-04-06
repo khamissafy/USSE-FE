@@ -25,7 +25,7 @@ export interface Login {
   apiId: string,
   timeZone:number,
   maskType:string,
-  isEmailAuthonticated: boolean,
+  isEmailAuthenticated: boolean,
   subscriptions: {
     name: string,
     value: string

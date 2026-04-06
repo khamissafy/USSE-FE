@@ -134,7 +134,7 @@ toThirdStep(data){
 
 }
 getLastCampaignData(){
-  this.compaignsService.getLastCampaign(this.authService.getUserInfo().email).subscribe(
+  this.compaignsService.getLastCampaign().subscribe(
     (res)=>{
       if(res){
        this.lastCampaignData=res;

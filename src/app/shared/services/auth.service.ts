@@ -8,7 +8,6 @@ import { environment } from 'src/environments/environment';
 
 import { PermissionsService } from './permissions.service';
 import { PluginsService } from 'src/app/services/plugins.service';
-import { LocalStorageService } from './localStorage.service';
 import { TimeZoneServiceService } from './timeZoneService.service';
 interface DeviceData {
   id: string,
@@ -44,6 +43,8 @@ export class AuthService {
   RoleAndRefreshtoken:any;
   userData!:UserData;
   resfreshToken!:string;
+  /** In-memory only; not persisted (reduces XSS exposure). */
+  private accessToken: string | null = null;
 userInfo!:UserData;
 subscriptionState:{
   isTrail:boolean,
@@ -58,23 +59,22 @@ allPermissions:PermissionData[]
 
 userData$:Observable<any>;
 showWarning:number=0;
+private userInfoExpiresAt = 0;
+private readonly userInfoTtlMs = 5 * 60 * 1000;
 constructor(private loginService:LoginService,
   private http:HttpClient,
   private permissionService:PermissionsService,
-  private localStorageService: LocalStorageService,
   private plugin:PluginsService,
   private timezoneService:TimeZoneServiceService
   ) {
-    this.setRefreshToken();
-    // this.getUserInfoFromRequest();
  }
 
  loadUserInfo(): Promise<any> {
   return new Promise((resolve, reject) => {
-    if (this.userInfo) {
+    if (this.userInfo && Date.now() < this.userInfoExpiresAt) {
       resolve(this.userInfo);
     } else if (this.checkExistenceAndValidation()) {
-      const decryptedEmail = this.localStorageService.getDecryptedData('email');
+      const decryptedEmail = localStorage.getItem('email');
       this.permissionService.getUserByEmail(decryptedEmail).subscribe(
         (res) => {
           const data={
@@ -122,6 +122,7 @@ constructor(private loginService:LoginService,
             messageCount:res.messageCount
       
           })
+          this.userInfoExpiresAt = Date.now() + this.userInfoTtlMs;
 
           resolve(this.userInfo);
         },
@@ -159,10 +160,33 @@ updatePermissions(permisions:any){
 
 async getPermission() {
   return new Promise<void>((resolve) => {
-    this.getUserDataObservable().subscribe((permissions) => {
-      this.updateUserPermisisons(permissions)
-      this.userPermissions = this.permissionService.executePermissions(permissions);
+    const obs = this.getUserDataObservable();
+    if (!obs) {
+      this.userPermissions = {
+        Templates: true,
+        Bots: true,
+        Devices: true,
+        Contacts: true
+      } as Permission;
       resolve();
+      return;
+    }
+    obs.subscribe({
+      next: (permissions) => {
+        this.updateUserPermisisons(permissions);
+        this.userPermissions = this.permissionService.executePermissions(permissions);
+        resolve();
+      },
+      error: () => {
+        // Allow route activation if permissions API fails (avoids hanging guard)
+        this.userPermissions = {
+          Templates: true,
+          Bots: true,
+          Devices: true,
+          Contacts: true
+        } as Permission;
+        resolve();
+      }
     });
   });
 }
@@ -249,40 +273,47 @@ return this.checkExistenceAndValidation()
 }
 
 saveDataToLocalStorage(data){
-  // encrypt email and save to local storage 
+  this.setAccessToken(data.token);
+  localStorage.setItem('email', data.email);
+  localStorage.setItem('role', data.roles);
+}
 
-  localStorage.setItem("token",data.token)
-  this.localStorageService.saveEncryptedData("email", data.email);
-  localStorage.setItem("role",data.roles)
+setAccessToken(token: string | null): void {
+  this.accessToken = token;
+}
 
-  // this.loginService.storeRefreshTokenInCookie(data.refreshToken);
+getAccessToken(): string | null {
+  return this.accessToken;
+}
 
+clearAccessToken(): void {
+  this.accessToken = null;
+}
 
-
-
+/** Clear client session (memory + non-sensitive localStorage). Refresh cookie cleared by server on logout. */
+clearSession(): void {
+  this.clearAccessToken();
+  ['email', 'token', 'refreshToken', 'role'].forEach((k) => localStorage.removeItem(k));
+  this.loginService.clearStoredRefreshToken();
+  this.userInfo = undefined as any;
+  this.userInfoExpiresAt = 0;
 }
 
  
  
  checkExistenceAndValidation(){
-  if(localStorage.getItem("token") && this.loginService.getCookieValue("refreshToken") && localStorage.getItem("email")){
-    const decryptedEmail = this.localStorageService.getDecryptedData("email");
-    return this.isEmailValid(decryptedEmail)
+  const emailStore = localStorage.getItem('email');
+  if (this.accessToken && emailStore) {
+    return this.isEmailValid(emailStore);
   }
-
-  else{
-    return false
-  }
+  return false;
 }
 isEmailValid(email:string){
   return this.plugin.emailReg.test(email)
 }
 
 clearUserInfo(){
-  let localData=['email',"token"]
-  localData.map((key)=>localStorage.removeItem(key));
-  this.loginService.removeCookie("refreshToken")
-
+  this.clearSession();
 }
 // setting user data from login or signup components
 setUserData(userData:any,token:any){
@@ -294,15 +325,10 @@ getUserData(){
   return this.userData
 }
 setRefreshToken(){
-  if(this.loginService.getCookieValue("refreshToken")){
-
-    this.resfreshToken=this.loginService.getCookieValue("refreshToken")
-  }
-
+  /* legacy — refresh token is HttpOnly cookie */
 }
 getRefreshToken(){
-  return this.resfreshToken
-
+  return this.resfreshToken;
 }
 
 devicesPermissions(permissions:PermissionData[],name:string){
@@ -311,8 +337,8 @@ devicesPermissions(permissions:PermissionData[],name:string){
   }
 
 
-  getDevices(email:string,showsNum:number,pageNum:number,orderedBy:string,search:string):Observable<DeviceData[]>{
-    return this.http.get<DeviceData[]>(`${this.api}Device/listDevices?email=${email}&take=${showsNum}&scroll=${pageNum}&orderedBy=${orderedBy}&search=${search}`)
+  getDevices(showsNum:number,pageNum:number,orderedBy:string,search:string):Observable<DeviceData[]>{
+    return this.http.get<DeviceData[]>(`${this.api}Device/listDevices?take=${showsNum}&scroll=${pageNum}&orderedBy=${orderedBy}&search=${search}`)
   }
   editProfile(data):Observable<any>{
     return this.http.put<any>(`${this.api}Auth/editProfile`,data)

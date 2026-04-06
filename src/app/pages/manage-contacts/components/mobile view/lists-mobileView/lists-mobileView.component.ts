@@ -149,7 +149,7 @@ getListsCount(){
 
   let email=this.authService.getUserInfo()?.email;
 
- let sub1= this.listService.ListsCount(email).subscribe(
+ let sub1= this.listService.ListsCount().subscribe(
   (res)=>{
     this.length=res;
     this.loading = false;
@@ -201,7 +201,7 @@ getListsReq(searchVal: string) {
 
 
   }
-  return this.listService.getList(email, shows, pageNumber, orderedBy, search);
+  return this.listService.getList(shows, pageNumber, orderedBy, search);
 }
 
 getListData(searchVal?: string): void {
@@ -393,7 +393,7 @@ selectAllRows(){
   undoDelete(){
     let email=this.authService.getUserInfo()?.email;
     let selectedItems = this.selectedItems.map((cont)=>cont.id)
-    this.listService.unDeleteList(email,selectedItems).subscribe(
+    this.listService.unDeleteList(selectedItems).subscribe(
       (res)=>{
         this.getListData();
         this.selectedItems=[]

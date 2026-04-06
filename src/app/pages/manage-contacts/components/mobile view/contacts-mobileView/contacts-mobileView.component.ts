@@ -209,7 +209,7 @@ bottomSortingOptions:any=[{opitonName:'ASC' ,lable:`${this.translate.instant('AS
   
   
     }
-  return  this.listService.getContacts(email,canceled,shows,pageNumber,orderedBy,searchVal,this.listId)
+  return  this.listService.getContacts(canceled,shows,pageNumber,orderedBy,searchVal,this.listId)
   }
   
   handleContactsResponse(res: Contacts[], search: string,canceled,count?): void {
@@ -437,7 +437,7 @@ onCheckboxChange(event,element: any) {
     cancelContacts(){
       let email=this.authService.getUserInfo()?.email;
       let selectedItems = this.selectedItems.map((cont)=>cont.id)
-      this.listService.cancelContacts(email,selectedItems).subscribe(
+      this.listService.cancelContacts(selectedItems).subscribe(
         (res)=>{
   
           this.getContacts("",true);
@@ -455,7 +455,7 @@ onCheckboxChange(event,element: any) {
     undoDelete(){
       let email=this.authService.getUserInfo()?.email;
       let selectedItems = this.selectedItems.map((cont)=>cont.id)
-      this.listService.unDeleteContact(email,selectedItems).subscribe(
+      this.listService.unDeleteContact(selectedItems).subscribe(
         (res)=>{
   
           this.getContacts();
@@ -476,7 +476,7 @@ onCheckboxChange(event,element: any) {
     let email=this.authService.getUserInfo()?.email;
     this.loading=true;
 
-    let sub2=this.listService.contactsCount(email,isCancel).subscribe(
+    let sub2=this.listService.contactsCount(isCancel).subscribe(
 
       (res)=>{
         this.length=res;

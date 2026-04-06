@@ -135,7 +135,7 @@ if(this.dataSource){
     this.setActions();
   }
   getAutomations(){
-    this.botService.getAutomations(this.email,100,0,"",this.deviceId).subscribe(
+    this.botService.getAutomations(100,0,"",this.deviceId).subscribe(
       (res)=>{
         let autWithActions = res.filter((withActions)=>withActions.botActionCount>0);
         if(autWithActions.length==0){
@@ -176,7 +176,7 @@ if(this.dataSource){
         })
     }
   getCampaings(){
-    this.campaignsService.getCampaigns(this.email,100,0,"",this.deviceId).subscribe(
+    this.campaignsService.getCampaigns(100,0,"",this.deviceId).subscribe(
       (res)=>{
         let campWithActions = res.filter((withActions)=>withActions.actionCount>0);
         if(campWithActions.length==0){

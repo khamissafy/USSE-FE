@@ -13,7 +13,7 @@ export class ResetPassService {
 
   constructor(private http:HttpClient) { }
   changePassword(email:string, code:string, newPassword:string):Observable<any>{
-    return this.http.put<any>(`${this.api}Auth/changePassword?email=${email}&code=${code}&newPassword=${newPassword}`,null)
+    return this.http.put<any>(`${this.api}Auth/changePassword`, { email, code, newPassword })
   }
 
 }

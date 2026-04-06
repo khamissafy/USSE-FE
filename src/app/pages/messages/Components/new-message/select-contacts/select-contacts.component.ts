@@ -135,7 +135,7 @@ if(this.searchSub){
     );
   }
   getNonListContacts() {
-    return this.listService.getNonListContacts(this.listService.email, false, 100, 0, "", "");
+    return this.listService.getNonListContacts(false, 100, 0, "", "");
   }
   
 
@@ -143,7 +143,7 @@ if(this.searchSub){
 
   getLists(orderBy?:string) {
     let sorting=orderBy?orderBy:"";
-    this.listService.getList(this.listService.email, 500, 0,sorting,"").subscribe(
+    this.listService.getList(500, 0,sorting,"").subscribe(
       (res) => {
 
         let filteredLlist = res.filter((e) => e.totalContacts != 0);
@@ -168,7 +168,7 @@ if(this.searchSub){
   }
   async fetchListContacts(list,isCheck): Promise<Contacts[]> {
     try {
-      const res = await this.listService.getContacts(this.listService.email, false, 50, 0, "", "", list.id).toPromise();
+      const res = await this.listService.getContacts(false, 50, 0, "", "", list.id).toPromise();
       const contacts = res as Contacts[];
       contacts.map((contact) => {
 
@@ -554,7 +554,7 @@ else{
 
   async fetchAllContacts(search:string): Promise<Contacts[]> {
     try {
-      const res = await this.listService.getContacts(this.listService.email,false,50,0,"",search,"").toPromise();
+      const res = await this.listService.getContacts(false,50,0,"",search,"").toPromise();
       const contacts = res as Contacts[];
 
       return contacts;
@@ -565,7 +565,7 @@ else{
 
   }
   getAllContactsReq(search){
-    return this.listService.getContacts(this.listService.email,false,50,0,"",search,"")
+    return this.listService.getContacts(false,50,0,"",search,"")
   }
   getAllContactsRes(res,search){
     this.allContactsData=res;

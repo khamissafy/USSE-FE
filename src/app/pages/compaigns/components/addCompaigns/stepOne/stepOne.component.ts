@@ -45,7 +45,7 @@ if(this.searchSub){
   }
   getListsReq(searchVal?){
 
-    return this.listService.getList(this.listService.email, 100, 0,"",searchVal)
+    return this.listService.getList(100, 0,"",searchVal)
     }
 
   handleGetListssResponse(res): void {

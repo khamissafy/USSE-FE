@@ -189,7 +189,7 @@ getListsCount(){
 
   let email=this.authService.getUserInfo()?.email;
 
- let sub1= this.listService.ListsCount(email).subscribe(
+ let sub1= this.listService.ListsCount().subscribe(
   (res)=>{
     this.length=res;
     this.loading = false;
@@ -235,7 +235,7 @@ getListsReq(searchVal: string) {
   if(this.selection){
     this.selection.clear();
   }
-  return this.listService.getList(email, shows, pageNumber, orderedBy, search);
+  return this.listService.getList(shows, pageNumber, orderedBy, search);
 }
 
 getListData(searchVal?: string): void {
@@ -373,7 +373,7 @@ handleError(): void {
   }
   undoDelete(){
     let email=this.authService.getUserInfo()?.email;
-    this.listService.unDeleteList(email,this.deletedLists).subscribe(
+    this.listService.unDeleteList(this.deletedLists).subscribe(
       (res)=>{
 
 

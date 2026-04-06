@@ -6,7 +6,7 @@ import { UsersService } from './pages/users/users.service';
 import { TranslationService } from './shared/services/translation.service';
 import { InitPaginationService } from './shared/services/initPagination.service';
 import { PermissionsService } from './shared/services/permissions.service';
-import { LoginService } from './pages/login/login.service';
+import { AuthSessionService } from './shared/services/auth-session.service';
 
 @Component({
   selector: 'app-root',
@@ -22,8 +22,8 @@ export class AppComponent implements OnInit ,OnDestroy {
   constructor(private plugin:PluginsService,
     public translate:TranslateService,
     private initPaginationService:InitPaginationService,
-    private loginService:LoginService,
-    private authService:AuthService){
+    private authService:AuthService,
+    private authSession: AuthSessionService){
     this.currentLang = localStorage.getItem('currentLang') || 'en';
     this.translate.use(this.currentLang);
     document.documentElement.dir=  this.currentLang === 'ar' ? 'rtl' : 'ltr'
@@ -38,34 +38,12 @@ export class AppComponent implements OnInit ,OnDestroy {
 
 
   ngOnInit(): void {
-
-    setInterval(() => {
-      this.refreshToken();
-    }, 60 * 60 * 1000); // 1 hour in milliseconds
-
-    // if(localStorage.getItem("customerId")){
-
-    //   if(this.authService.getUserInfo()?.customerId!=""){
-    //     this.authService.setUserDataObservable(this.permissionService.getUserByEmail());
-    //   }
-    // }
+    const t = this.authService.getAccessToken();
+    if (t) {
+      this.authSession.scheduleRefreshBeforeExpiry(t);
+    }
     this.initMode();
 
-  }
-  refreshToken() {
-    let refreshToken=this.loginService.getCookieValue('refreshToken')
-    if(refreshToken){
-
-      this.loginService.refreshToken(refreshToken).subscribe(
-        (res) => {
-          // Update the refresh token in the cookie
-          this.loginService.storeRefreshTokenInCookie(res.refreshToken);
-          this.authService.setRefreshToken();
-        },
-        (err) => {
-        }
-      );
-    }
   }
 
   initMode(){

@@ -59,18 +59,18 @@ getPermissionsFromRoute(): { name: string, value: string }[] | undefined {
     return undefined; // Handle the case where permissions are not available
   }
 }
-getCampaigns(email:string,showsNum:number,pageNum:number,search:string,deviceId:string):Observable<compaignDetails[]>{
-  return this.http.get<compaignDetails[]>(`${this.api}Message/listCampaigns?email=${email}&take=${showsNum}&scroll=${pageNum}&search=${search}&deviceId=${deviceId}`)
+getCampaigns(showsNum:number,pageNum:number,search:string,deviceId:string):Observable<compaignDetails[]>{
+  return this.http.get<compaignDetails[]>(`${this.api}Message/listCampaigns?take=${showsNum}&scroll=${pageNum}&search=${search}&deviceId=${deviceId}`)
 }
-compaignsCount(email:string,deviceId:string):Observable<number>{
-  return this.http.get<number>(`${this.api}Message/listCampaignsCount?email=${email}&deviceId=${deviceId}`)
+compaignsCount(deviceId:string):Observable<number>{
+  return this.http.get<number>(`${this.api}Message/listCampaignsCount?deviceId=${deviceId}`)
 }
 
 addMewCampain(data:any):Observable<any>{
-  return this.http.post<any>(`${this.api}Message/createWhatsappBusinessCampaign?email=${data.email}`,data)
+  return this.http.post<any>(`${this.api}Message/createWhatsappBusinessCampaign`,data)
 }
-stopWhatsappBusinessCampaign(id:string,email:string):Observable<any>{
-  return this.http.put<any>(`${this.api}Message/stopWhatsappBusinessCampaign?id=${id}&email=${email}`,'')
+stopWhatsappBusinessCampaign(id:string):Observable<any>{
+  return this.http.put<any>(`${this.api}Message/stopWhatsappBusinessCampaign?id=${id}`,'')
 }
 getCampaignById(id:string):Observable<compaignDetails>{
   return this.http.get<compaignDetails>(`${this.api}Message/getCampaignById?id=${id}`).pipe(
@@ -78,8 +78,8 @@ getCampaignById(id:string):Observable<compaignDetails>{
   )
 }
 
-deleteWhatsappBusinessCampaign(id:string,email:string):Observable<any>{
-  return this.http.put<any>(`${this.api}Message/deleteWhatsappBusinessCampaign?id=${id}&email=${email}`,'')
+deleteWhatsappBusinessCampaign(id:string):Observable<any>{
+  return this.http.put<any>(`${this.api}Message/deleteWhatsappBusinessCampaign?id=${id}`,'')
 }
 updateDisplayNumber(displayNum){
   displayNum=this.display;
@@ -87,8 +87,8 @@ updateDisplayNumber(displayNum){
 getUpdatedDisplayNumber(){
   return this.display
 }
-getLastCampaign(email):Observable<compaignDetails>{
-  return this.http.get<compaignDetails>(`${this.api}Message/getLastCampaign?email=${email}`).pipe(
+getLastCampaign():Observable<compaignDetails>{
+  return this.http.get<compaignDetails>(`${this.api}Message/getLastCampaign`).pipe(
     shareReplay()
   );
 }

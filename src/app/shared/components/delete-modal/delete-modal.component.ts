@@ -213,7 +213,7 @@ export class DeleteModalComponent implements OnInit {
 
   deleteCon() {
 
-    this.listService.deleteContact(this.authService.getUserInfo()?.email, this.body).subscribe(
+    this.listService.deleteContact(this.body).subscribe(
       (res) => {
         this.isLoading = false
         if(res.numberOfErrors === 0){
@@ -234,7 +234,7 @@ export class DeleteModalComponent implements OnInit {
   }
   // this.translate.instant("COMMON.SUCC_MSG")
 deleteAutomation(){
-this.botService.deleteAutomation(this.data.automationData.automationId,this.authService.getUserInfo()?.email).subscribe(
+this.botService.deleteAutomation(this.data.automationData.automationId).subscribe(
   (res) => {
     this.isLoading = false
 
@@ -252,7 +252,7 @@ this.botService.deleteAutomation(this.data.automationData.automationId,this.auth
 )
 }
   removeLists() {
-    this.listService.removeContactsFromLists(this.body,this.authService.getUserInfo()?.email).subscribe(
+    this.listService.removeContactsFromLists(this.body).subscribe(
       (res) => {
         this.isLoading = false
         if(res.numberOfErrors === 0){
@@ -274,7 +274,7 @@ this.botService.deleteAutomation(this.data.automationData.automationId,this.auth
   }
 
 deleteChat(){
-  this.chatService.deleteChat(this.data.chatData.chat.chat.id,this.authService.getUserInfo()?.email).subscribe(
+  this.chatService.deleteChat(this.data.chatData.chat.chat.id).subscribe(
     (res) => {
       this.isLoading = false
 
@@ -293,7 +293,7 @@ deleteChat(){
 
 }
   deleteDevice() {
-    this.devicesService.deleteDevice(this.authService.getUserInfo()?.email, this.data.deviceData.deviceId).subscribe(
+    this.devicesService.deleteDevice(this.data.deviceData.deviceId).subscribe(
       (res) => {
         this.isLoading = false
 
@@ -314,7 +314,7 @@ deleteChat(){
 
 
   deleteCompaign() {
-    this.compaignsService.deleteWhatsappBusinessCampaign(this.data.compaignData.compaignId, this.authService.getUserInfo()?.email).subscribe(
+    this.compaignsService.deleteWhatsappBusinessCampaign(this.data.compaignData.compaignId).subscribe(
       (res) => {
         this.isLoading = false
 
@@ -337,7 +337,7 @@ deleteChat(){
 
   }
   stopComaign() {
-    this.compaignsService.stopWhatsappBusinessCampaign(this.data.compaignData.compaignId, this.authService.getUserInfo()?.email).subscribe(
+    this.compaignsService.stopWhatsappBusinessCampaign(this.data.compaignData.compaignId).subscribe(
       (res) => {
         this.isLoading = false
 
@@ -360,7 +360,7 @@ deleteChat(){
 
 
   deleteTemplates() {
-    this.templatesService.deleteTemplates(this.authService.getUserInfo()?.email, this.data.templatesData.templatesId).subscribe(
+    this.templatesService.deleteTemplates(this.data.templatesData.templatesId).subscribe(
       (res) => {
         this.isLoading = false
 
@@ -384,7 +384,7 @@ deleteChat(){
   deleteList() {
     this.isLoading = true
     let body = this.data.listsData.lists.map(res => res.id)
-    this.listService.deleteList(this.authService.getUserInfo()?.email, body).subscribe(
+    this.listService.deleteList(body).subscribe(
       (res) => {
         this.isLoading = false
         if(res.numberOfErrors === 0){
@@ -405,7 +405,7 @@ deleteChat(){
     )
   }
   removeContacts() {
-    this.listService.removeContactsFromOneList(this.contacts, this.list,this.authService.getUserInfo()?.email).subscribe(
+    this.listService.removeContactsFromOneList(this.contacts, this.list).subscribe(
       (res) => {
         this.isLoading = false
         if(res.numberOfErrors === 0){

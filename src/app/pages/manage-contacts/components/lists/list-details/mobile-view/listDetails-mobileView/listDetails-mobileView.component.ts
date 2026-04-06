@@ -314,7 +314,7 @@ getContactsReq(searchVal: string) {
 
 
   }
-  return this.listService.getContacts(email, this.isCanceled, shows, pageNumber, orderedBy, search, this.listId);
+  return this.listService.getContacts(this.isCanceled, shows, pageNumber, orderedBy, search, this.listId);
 }
 
 getContacts(searchVal?: string): void {

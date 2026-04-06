@@ -7,6 +7,7 @@ import { PluginsService } from 'src/app/services/plugins.service';
 import { UserData } from '../../users/users';
 import { Subject, Subscription, takeUntil } from 'rxjs';
 import { TranslationService } from 'src/app/shared/services/translation.service';
+import { AuthSessionService } from 'src/app/shared/services/auth-session.service';
 
 @Component({
   selector: 'app-login',
@@ -29,7 +30,8 @@ unsubscribe$ = new Subject<void>();
     private authService:AuthService,
     private loginService:LoginService,
     private router:Router,
-    private languageService:TranslationService) {
+    private languageService:TranslationService,
+    private authSession: AuthSessionService) {
 
   }
   ngOnInit() {
@@ -106,7 +108,7 @@ let isTrialUser:boolean;
   
     // check autheraization
 
-    if(!res.isEmailAuthonticated){
+    if(!res.isEmailAuthenticated){
       this.authService.setUserData(this.userInfo,res.refreshToken);
       // localStorage.removeItem("email")
       // localStorage.setItem("email",res.email)
@@ -115,18 +117,26 @@ let isTrialUser:boolean;
       this.sendCode();
 
     }
-   else if(res.isEmailAuthonticated && (res.isActive || res.isTrial)){
+   else if(res.isEmailAuthenticated && (res.isActive || res.isTrial)){
       // update local storage
       this.authService.saveDataToLocalStorage(this.userInfo);
       this.authService.updateUserInfo(this.userInfo);
-  
-      this.loginService.storeRefreshTokenInCookie(res.refreshToken);
-      this.authService.setRefreshToken()
+      this.authSession.scheduleRefreshBeforeExpiry(res.token);
 
       
         this.languageService.setAppDirection();
-        
-        this.router.navigateByUrl('devices')
+        this.loading=false;
+        this.router.navigate(['/devices']).then(
+          (ok) => {
+            if (!ok) {
+              this.hintMessage = 'Unable to open the app. Please try again.';
+              this.invalid = true;
+            }
+          }
+        ).catch(() => {
+          this.hintMessage = 'Unable to open the app. Please try again.';
+          this.invalid = true;
+        });
 
 
     }
@@ -163,16 +173,12 @@ let isTrialUser:boolean;
 
 
   refreshToken() {
-    let token=this.loginService.getCookieValue('refreshToken')
-    this.loginService.refreshToken(token).subscribe(
+    this.loginService.refreshToken().subscribe(
       (res) => {
-        // Update the refresh token in the cookie
-        this.loginService.storeRefreshTokenInCookie(res.refreshToken);
-        this.authService.setRefreshToken();
-
+        this.authService.setAccessToken(res.token);
+        this.authSession.scheduleRefreshBeforeExpiry(res.token);
       },
-      (err) => {
-      }
+      () => {}
     );
   }
 

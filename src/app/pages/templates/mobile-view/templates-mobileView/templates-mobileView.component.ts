@@ -187,14 +187,13 @@ export class TemplatesMobileViewComponent implements OnInit ,OnDestroy{
   getTemplatesReq(searchVal){
     let showsNum=this.templatesService.showsNum;
     let pageNum=searchVal?0 :this.templatesService.pageNum;
-    let email=this.templatesService.email;
     let orderedBy=this.templatesService.orderedBy;
     let search=searchVal?searchVal:"";
     this.loading = true;
     if(searchVal && this.paginator){
       this.paginator.pageIndex=0
     }
-     return this.templatesService.getTemplates(email,showsNum,pageNum,orderedBy,search)
+     return this.templatesService.getTemplates(showsNum,pageNum,orderedBy,search)
   }
   getDataFromParent(data,search,length){
     if(this.searchSub){
@@ -291,10 +290,9 @@ getTemplates(searchVal?){
 
 
 templatesCount(){
-  let email=this.templatesService.email;
   this.loading = true;
 
-  this.templatesService.listTemplatesCount(email).subscribe(
+  this.templatesService.listTemplatesCount().subscribe(
     (res)=>{
       this.length=res;
       this.loading = false;

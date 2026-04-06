@@ -239,7 +239,7 @@ return sectionsLevels
 }
 
 getDevices(){
-  this.authService.getDevices(this.email,10,0,"","").subscribe(
+  this.authService.getDevices(10,0,"","").subscribe(
     (res)=>{
      
     let devicesData=res;

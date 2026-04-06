@@ -132,7 +132,7 @@ if(!this.isFromListDetails){
   let orderedBy="";
   let search=searchVal?searchVal:"";
   
-sup$= this.listService.getList(email,shows,pageNum,orderedBy,search)
+sup$= this.listService.getList(shows,pageNum,orderedBy,search)
 }
 else{
   let shows=50;
@@ -141,7 +141,7 @@ else{
   let orderedBy="";
   let search=searchVal?searchVal:"";
 
-  sup$=  this.listService.getContacts(email,false,shows,pageNum,orderedBy,search,"")
+  sup$=  this.listService.getContacts(false,shows,pageNum,orderedBy,search,"")
 }
 return sup$
 }
@@ -268,7 +268,7 @@ onSearch(search){
 
   submitAdd(){
     this.isLoading = true
-    this.listService.addOrMoveContacts(this.contactsIds,this.listIds,this.authService.getUserInfo()?.email).subscribe(
+    this.listService.addOrMoveContacts(this.contactsIds,this.listIds).subscribe(
       (res)=>{
         this.isLoading = false
         if(res.numberOfErrors === 0){

@@ -149,7 +149,6 @@ this.displayedColumns=this.canEdit?['Device Name', 'Device Type', 'Number',"Crea
  getDevicesReq(searchVal?){
     let shows=this.devicesService.display;
     let pageNum=searchVal? 0 : this.devicesService.pageNum;
-    let email=this.authService.getUserInfo()?.email;
     let orderedBy=this.orderedBy;
     let search=searchVal?searchVal:"";
     this.loading = true;
@@ -158,7 +157,7 @@ this.displayedColumns=this.canEdit?['Device Name', 'Device Type', 'Number',"Crea
       this.paginator.pageIndex=0
     }
     
-    return this.devicesService.getDevices(email,shows,pageNum,orderedBy,search)
+    return this.devicesService.getDevices(shows,pageNum,orderedBy,search)
  }
  handleGetDevicesResponce(res,search){
   this.numRows=res.length;
@@ -236,7 +235,7 @@ else{
 
   getDevicesCount(){
     this.loading = true;
-    this.devicesService.getDevicesCount(this.authService.getUserInfo()?.email).subscribe(
+    this.devicesService.getDevicesCount().subscribe(
       (res)=>{
        this.length=res;
        this.loading = false;
@@ -306,7 +305,7 @@ onPageChange(event){
     this.getDevices(event.value);
   }
   exportChats(device:DeviceData){
-    this.devicesService.extractChats(this.email,device.id).subscribe(
+    this.devicesService.extractChats(device.id).subscribe(
       (response: any) => {
         // Use FileSaver.js to save the Excel file
         let filename;
@@ -324,7 +323,7 @@ onPageChange(event){
   reconnect(device:DeviceData){
     this.loading=true;
     this.isReonnect=true;
-    this.devicesService.reconnectWPPDevice(device.id,this.email).subscribe(
+    this.devicesService.reconnectWPPDevice(device.id).subscribe(
       (res)=>{
         this.getDevices();
       },
@@ -367,7 +366,7 @@ onPageChange(event){
   updateDeviceDelay(id: string) {
 
      //console.log(this.delay)
-    this.devicesService.updateDeviceDelay(this.authService.getUserInfo()?.email, id, this.delay).subscribe(
+    this.devicesService.updateDeviceDelay(id, this.delay).subscribe(
       (res) => {
 
         this.delay=  res.delayIntervalInSeconds ;

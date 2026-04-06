@@ -63,10 +63,9 @@ export class ChatContactsComponent implements OnInit {
   getContacts(searchVal?){
     let shows=100;
     let pageNum=0;
-    let email=this.authService.getUserInfo()?.email;
     let orderedBy="";
     let search=searchVal?searchVal:"";
-    return this.listService.getContacts(email,false,shows,pageNum,orderedBy,search,"")
+    return this.listService.getContacts(false,shows,pageNum,orderedBy,search,"")
   
   }
   async addNewContact(contact: Contacts) {
@@ -151,7 +150,7 @@ toggleSearch(isSearch){
 }
 async getChat(chatName) {
   try {
-      let res = await this.chatService.listChats(this.authService.getUserInfo()?.email, 30, 0, chatName, this.data.deviceId).toPromise();
+      let res = await this.chatService.listChats(30, 0, chatName, this.data.deviceId).toPromise();
       if (res.data.length > 0) {
           let found:chatsData =res.data.find((chat: chatsData) => (chat.chat.chatName === chatName) 
           && chat.device.id == this.data.deviceId)

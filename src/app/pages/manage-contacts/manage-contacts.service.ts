@@ -32,33 +32,31 @@ export class ManageContactsService {
    }
 
 // lists methods
-addList(name:string,email:string): Observable<ListData>{
+addList(name:string): Observable<ListData>{
     const data ={
     name:name,
-    email:email
   }
   return this.http.post<ListData>(`${this.api}Contacts/addNewList`,data)
 }
 
-updateList(id:string,name:string,email:string): Observable<ListData>{
+updateList(id:string,name:string): Observable<ListData>{
 const data ={
     id:id,
     name:name,
-    email:email
   }
   return this.http.put<ListData>(`${this.api}Contacts/updateList`,data)
 }
 
-deleteList(email:string,listArr:string[]): Observable<ErrSucc>{
-  return this.http.put<ErrSucc>(`${this.api}Contacts/deleteList?email=${email}`,listArr)
+deleteList(listArr:string[]): Observable<ErrSucc>{
+  return this.http.put<ErrSucc>(`${this.api}Contacts/deleteList`,listArr)
 }
-getList(email:string,showsNum:number,pageNum:number,orderedBy:string,search:string):Observable<ListData[]>{
-  return this.http.get<ListData[]>(`${this.api}Contacts/listLists?email=${email}&take=${showsNum}&scroll=${pageNum}&orderedBy=${orderedBy}&search=${search}`).pipe(
+getList(showsNum:number,pageNum:number,orderedBy:string,search:string):Observable<ListData[]>{
+  return this.http.get<ListData[]>(`${this.api}Contacts/listLists?take=${showsNum}&scroll=${pageNum}&orderedBy=${orderedBy}&search=${search}`).pipe(
     shareReplay()
   )
 }
-ListsCount(email:string):Observable<number>{
-  return this.http.get<number>(`${this.api}Contacts/listListsCount?email=${email}`).pipe(
+ListsCount():Observable<number>{
+  return this.http.get<number>(`${this.api}Contacts/listListsCount`).pipe(
     shareReplay()
   )
 }
@@ -70,29 +68,25 @@ getListById(listId:string): Observable<ListData>{
   }
 
 // contacts methods
-getContacts(email:string,isCanceled:boolean,showsNum:number,pageNum:number,orderedBy:string,search:string,listId?:string):Observable<Contacts[]>{
-  return this.http.get<Contacts[]>(`${this.api}Contacts/listContacts?email=${email}&listId=${listId}&isCanceled=${isCanceled}&take=${showsNum}&scroll=${pageNum}&orderedBy=${orderedBy}&search=${search}`).pipe(
+getContacts(isCanceled:boolean,showsNum:number,pageNum:number,orderedBy:string,search:string,listId?:string):Observable<Contacts[]>{
+  return this.http.get<Contacts[]>(`${this.api}Contacts/listContacts?listId=${listId}&isCanceled=${isCanceled}&take=${showsNum}&scroll=${pageNum}&orderedBy=${orderedBy}&search=${search}`).pipe(
     shareReplay()
   )
 }
 
-getNonListContacts(email:string,isCanceled:boolean,showsNum:number,pageNum:number,orderedBy:string,search:string):Observable<Contacts[]>{
-  return this.http.get<Contacts[]>(`${this.api}Contacts/listContactsWithNoLists?email=${email}&isCanceled=${isCanceled}&take=${showsNum}&scroll=${pageNum}&orderedBy=${orderedBy}&search=${search}`)
+getNonListContacts(isCanceled:boolean,showsNum:number,pageNum:number,orderedBy:string,search:string):Observable<Contacts[]>{
+  return this.http.get<Contacts[]>(`${this.api}Contacts/listContactsWithNoLists?isCanceled=${isCanceled}&take=${showsNum}&scroll=${pageNum}&orderedBy=${orderedBy}&search=${search}`)
 }
 
-addContact(name:string,mobileNumber:string,email:string,listId:string[],additionalContactParameters?:{name:string,value:string}[]):Observable<Contacts>{
+addContact(name:string,mobileNumber:string,listId:string[],additionalContactParameters?:{name:string,value:string}[]):Observable<Contacts>{
   const data=additionalContactParameters && additionalContactParameters.length>0?{
     name:name,
     mobileNumber:mobileNumber,
-   
-    email: email,
     listId:listId,
     additionalContactParameters: additionalContactParameters
   }:{
     name:name,
     mobileNumber:mobileNumber,
-   
-    email: email,
     listId:listId,
   }
 
@@ -105,74 +99,68 @@ updateContact(data):Observable<any>{
 }
 
 
-deleteContact(email:string,listIDs:string[]): Observable<ErrSucc>{
-  return this.http.put<ErrSucc>(`${this.api}Contacts/deleteContact?email=${email}`,listIDs)
+deleteContact(listIDs:string[]): Observable<ErrSucc>{
+  return this.http.put<ErrSucc>(`${this.api}Contacts/deleteContact`,listIDs)
 }
 
-removeContactsFromOneList(contactsId:string[],listId:string[],email:string): Observable<ErrSucc>{
+removeContactsFromOneList(contactsId:string[],listId:string[]): Observable<ErrSucc>{
   const data={
     id:contactsId,
     newListId:listId,
-    email:email
   }
     return this.http.put<ErrSucc>(`${this.api}Contacts/removeContactsFromOneList`,data)
 
 }
-removeContactsFromLists(id:string[],email:string): Observable<ErrSucc>{
+removeContactsFromLists(id:string[]): Observable<ErrSucc>{
   const data={
     id:id,
-    email:email
   }
   return this.http.put<ErrSucc>(`${this.api}Contacts/removeContactsFromLists`,data)
 }
-addOrMoveContacts(ids:string[],newListIds:string[],email:string): Observable<ErrSucc>{
+addOrMoveContacts(ids:string[],newListIds:string[]): Observable<ErrSucc>{
   const data ={
   id:ids,
   newListId:newListIds,
-  email:email
 }
 return this.http.put<ErrSucc>(`${this.api}Contacts/addOrMoveContactsFromLists`,data)
 }
-contactsCount(email:string,isCanceled:boolean):Observable<number>{
-  return this.http.get<number>(`${this.api}Contacts/listContactsCount?email=${email}&isCanceled=${isCanceled}`).pipe(
+contactsCount(isCanceled:boolean):Observable<number>{
+  return this.http.get<number>(`${this.api}Contacts/listContactsCount?isCanceled=${isCanceled}`).pipe(
     shareReplay()
   )
 }
-cancelContacts(email:string,cantactsIds:string[]):Observable<any>{
-  return this.http.put<any>(`${this.api}Contacts/CancelContact?email=${email}`,cantactsIds)
+cancelContacts(cantactsIds:string[]):Observable<any>{
+  return this.http.put<any>(`${this.api}Contacts/CancelContact`,cantactsIds)
 }
-unCancelContacts(email:string,cantactsIds:string[]):Observable<any>{
-  return this.http.put<any>(`${this.api}Contacts/unCancelContact?email=${email}`,cantactsIds)
+unCancelContacts(cantactsIds:string[]):Observable<any>{
+  return this.http.put<any>(`${this.api}Contacts/unCancelContact`,cantactsIds)
 }
-unDeleteList(email:string,ids:string[]):Observable<ErrSucc>{
-  return this.http.put<ErrSucc>(`${this.api}Contacts/unDeleteList?email=${email}`,ids)
+unDeleteList(ids:string[]):Observable<ErrSucc>{
+  return this.http.put<ErrSucc>(`${this.api}Contacts/unDeleteList`,ids)
 }
-unDeleteContact(email:string,ids:string[]):Observable<ErrSucc>{
-  return this.http.put<ErrSucc>(`${this.api}Contacts/unDeleteContact?email=${email}`,ids)
+unDeleteContact(ids:string[]):Observable<ErrSucc>{
+  return this.http.put<ErrSucc>(`${this.api}Contacts/unDeleteContact`,ids)
 }
 exportSelectedContacts(data: any, fileType: string): Observable<Blob> {
-  const url = `${this.api}Contacts/exportSelectedContacts`;
+  const url = `${this.api}Contacts/exPortSelectedContacts`;
   const params = new HttpParams().set('fileType', fileType);
   return this.http.post(url, data, { responseType: 'blob', params });
 }
 
 exportAllContacts(fileType: string): Observable<Blob> {
-  const url = `${this.api}Contacts/exportAllContacts`;
-  const params = new HttpParams().set('email', this.email).set('fileType', fileType);
+  const url = `${this.api}Contacts/exPortAllContacts`;
+  const params = new HttpParams().set('fileType', fileType);
 
   return this.http.post(url, {}, { responseType: 'blob', params });
 }
 
 
 exportContactsInList(listId: string,fileType:string): Observable<Blob> {
-  // Create a URL-encoded query parameter string
   const queryParams = new HttpParams()
-    .set('listId', listId)
-    .set('email', this.email)
+    .set('ListId', listId)
     .set('fileType', fileType);
-  const url = `${this.api}Contacts/exportContactsInList`;
+  const url = `${this.api}Contacts/exPortContactsInList`;
 
-  // Set responseType to 'blob' to expect a binary response
   return this.http.post(url, null, {
     responseType: 'blob',
     params: queryParams
@@ -180,7 +168,7 @@ exportContactsInList(listId: string,fileType:string): Observable<Blob> {
 }
 
 importFile(data):Observable<any>{
-  return this.http.post<any>(`${this.api}Contacts/importFile`,data)
+  return this.http.post<any>(`${this.api}Contacts/imPortFile`,data)
 
 }
 

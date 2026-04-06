@@ -171,7 +171,6 @@ this.selectedZone=this.timeZones.find((time)=>time.index==zone.value).value;
       this.loading=true;
       let mobile=this.form.value.mobile? this.form.value.mobile.e164Number:null;
       const data={
-        token: this.authService.getRefreshToken(),
         apiToken: this.apiToken.value,
         contactName: this.form.value.contactName,
         organisationName: this.form.value.organisationName,

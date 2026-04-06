@@ -54,7 +54,7 @@ export class AddDeviceComponent implements OnInit {
     this.isLoading=true;
     let deviceN=this.form.value.deviceName;
     let phoneNumber=this.form.value.mobile.e164Number;
-    this.devicesService.addNewWhatsappBisunessDevice(this.authService.getUserInfo()?.email,deviceN,phoneNumber,this.token,this.sessionName,this.port,this.serverId).subscribe(
+    this.devicesService.addNewWhatsappBisunessDevice(deviceN,phoneNumber,this.token,this.sessionName,this.port,this.serverId).subscribe(
       (res)=>{
         this.isLoading = false;
         this.isClose.emit(true);

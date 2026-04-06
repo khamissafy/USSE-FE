@@ -1,104 +1,80 @@
 import { Injectable } from '@angular/core';
-import { ActivatedRouteSnapshot, CanActivate, Router, RouterStateSnapshot} from '@angular/router';
+import { ActivatedRouteSnapshot, CanActivate, Router, RouterStateSnapshot, UrlTree } from '@angular/router';
 import { AuthService } from './auth.service';
 import { PermissionsService } from './permissions.service';
-import { __values } from 'tslib';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthGuard implements CanActivate {
-  isAllowed:boolean=true;
-  constructor(private authService:AuthService,
-    private router:Router,
-    private permissionService:PermissionsService)
-    {
+  constructor(
+    private authService: AuthService,
+    private router: Router,
+    private permissionService: PermissionsService
+  ) {}
 
-  }
-async  canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot) {
+  async canActivate(
+    route: ActivatedRouteSnapshot,
+    state: RouterStateSnapshot
+  ): Promise<boolean | UrlTree> {
     const routeName = route.data['name'];
 
-    if(routeName==="verification"){
-      if(this.authService.getFromValue()){
-        return true
-      }
-      else{
-        this.authService.clearUserInfo();
-        this.router.navigate(['login'])
-
-        return false
-      }
-    }
-    if(routeName==="change-Passward"){
-      if(this.authService.getAccessToReset()){
-        return true
-
-      }
-      else{
-        this.authService.clearUserInfo();
-        this.router.navigate(['login'])
-        return false
-
-      }
-    }
-    if(routeName=="login"){
-      if(this.authService.checkExistenceAndValidation()){
-        if (!this.authService.getRedirectURL() || this.authService.getRedirectURL() === "" ) {
-          this.router.navigate(['devices']);
-        }
-      
-        return false;
-      }
-      else{
-        this.authService.setRedirectURL( state.url.slice(state.url.lastIndexOf("/")))
+    if (routeName === 'verification') {
+      if (this.authService.getFromValue()) {
         return true;
-
       }
-    }
-    if(this.authService.checkExistenceAndValidation()){
-
-      await this.authService.loadUserInfo().then(() => true);
-      
-      if(this.authService.isLoggedIn()){
-        const customerId=this.authService.getUserInfo()?.customerId;
-        const email =this.authService.getUserInfo()?.email;
-        if(customerId){
-
-          if(customerId!="" ){
-            this.authService.setUserDataObservable(this.permissionService.getUserByEmail(email));
-            await this.authService.hasPermission(routeName).then((__values)=>this.isAllowed=__values)
-          }
-        }
-        if( this.isAllowed )
-        {
-          this.authService.setRedirectURL( state.url.slice(state.url.lastIndexOf("/")))
-          return true;
-        }
-        else if(!this.isAllowed)
-        {
-          this.authService.setRedirectURL( state.url.slice(state.url.lastIndexOf("/")))
-          this.router.navigate(['messages'])
-          return false;
-        }
-        else{
-          this.authService.clearUserInfo();
-          this.router.navigate(['login'])
-          return false;
-        }
-      }
-      else{
-        this.authService.clearUserInfo();
-        this.router.navigate(['login'])
-        return false;
-      }
-    }
-    else{
       this.authService.clearUserInfo();
-      this.router.navigate(['login'])
-      return false;
+      return this.router.createUrlTree(['/login']);
     }
-  }
- 
-  
 
+    if (routeName === 'change-Passward') {
+      if (this.authService.getAccessToReset()) {
+        return true;
+      }
+      this.authService.clearUserInfo();
+      return this.router.createUrlTree(['/login']);
+    }
+
+    if (routeName === 'login') {
+      if (this.authService.checkExistenceAndValidation()) {
+        return this.router.createUrlTree(['/devices']);
+      }
+      this.authService.setRedirectURL(state.url.slice(state.url.lastIndexOf('/')));
+      return true;
+    }
+
+    if (!this.authService.checkExistenceAndValidation()) {
+      this.authService.clearUserInfo();
+      return this.router.createUrlTree(['/login']);
+    }
+
+    try {
+      await this.authService.loadUserInfo();
+    } catch {
+      this.authService.setRedirectURL(state.url.slice(state.url.lastIndexOf('/')));
+      return true;
+    }
+
+    if (!this.authService.isLoggedIn()) {
+      this.authService.clearUserInfo();
+      return this.router.createUrlTree(['/login']);
+    }
+
+    const customerId = this.authService.getUserInfo()?.customerId;
+    const email = this.authService.getUserInfo()?.email;
+    let allowed = true;
+
+    if (customerId && customerId !== '') {
+      this.authService.setUserDataObservable(this.permissionService.getUserByEmail(email));
+      allowed = await this.authService.hasPermission(routeName);
+    }
+
+    if (allowed) {
+      this.authService.setRedirectURL(state.url.slice(state.url.lastIndexOf('/')));
+      return true;
+    }
+
+    this.authService.setRedirectURL(state.url.slice(state.url.lastIndexOf('/')));
+    return this.router.createUrlTree(['/messages']);
+  }
 }

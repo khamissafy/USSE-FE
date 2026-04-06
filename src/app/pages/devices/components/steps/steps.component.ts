@@ -82,7 +82,7 @@ onAddClose(event){
 }
 
 initSessionAndCheckStatus(){
-  this.initSessionSubscription= this.devicesService.initWhatsAppB(this.email,this.sessionNB,this.portWB,this.servierIDwB,this.host).subscribe(
+  this.initSessionSubscription= this.devicesService.initWhatsAppB(this.sessionNB,this.portWB,this.servierIDwB,this.host).subscribe(
   (res)=>{
           this.isLoading=false;
           this.addDevice=false;

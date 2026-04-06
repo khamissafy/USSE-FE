@@ -89,7 +89,7 @@ else{
 
   getDevices(){
 
-    this.authService.getDevices(this.authService.getUserInfo()?.email,10,0,"","").subscribe(
+    this.authService.getDevices(10,0,"","").subscribe(
       (res)=>{
         let filterdDevices=this.isUser && this.permission? res.filter((dev)=>this.permission.find((devP)=>devP.deviceId==dev.id && devP.value=="FullAccess")):res;
         let activeDevices=filterdDevices.filter((r)=>r.isConnected)

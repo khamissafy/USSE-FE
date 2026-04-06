@@ -19,14 +19,13 @@ export class CompaignsDetailsService {
   constructor(private http:HttpClient,private authService:AuthService) {
 
   }
-  getCampaignStat(id:string,email:string):Observable<CompaignStat>{
-    return this.http.get<CompaignStat>(`${this.api}Message/getCampaignStat?id=${id}&email=${email}`);
+  getCampaignStat(id:string):Observable<CompaignStat>{
+    return this.http.get<CompaignStat>(`${this.api}Message/getCampaignStat?id=${id}`);
   }
 
-  listCampaignMessages(id: string, email: string, showsNum: number, pageNum: number, StatusFilters?: number[]): Observable<CompainMessages[]> {
+  listCampaignMessages(id: string, showsNum: number, pageNum: number, StatusFilters?: number[]): Observable<CompainMessages[]> {
     let params = new HttpParams()
       .set('id', id)
-      .set('email', email)
       .set('take', showsNum.toString())
       .set('scroll', pageNum.toString());
   

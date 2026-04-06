@@ -6,6 +6,7 @@ import { Router } from '@angular/router';
 import { AuthService } from 'src/app/shared/services/auth.service';
 import { UsersService } from 'src/app/pages/users/users.service';
 import { TranslationService } from 'src/app/shared/services/translation.service';
+import { AuthSessionService } from 'src/app/shared/services/auth-session.service';
 
 @Component({
   selector: 'app-verify',
@@ -24,7 +25,8 @@ export class VerifyComponent implements OnInit ,AfterViewInit,OnDestroy{
     private formBuilder: FormBuilder,
     private userServiece:UsersService,
     private verificatioinService:VerifyService,
-    private languageService:TranslationService) {
+    private languageService:TranslationService,
+    private authSession: AuthSessionService) {
     this.verificationForm = this.formBuilder.group({
       digit0: ['', Validators.required],
       digit1: ['', Validators.required],
@@ -130,11 +132,9 @@ export class VerifyComponent implements OnInit ,AfterViewInit,OnDestroy{
       if(from == "login" || from == "signUp"){
         
         // Send verification request using code
-        let token=this.authService.getRefreshToken()
         this.isLoading=true
   
-        // const token=localStorage.getItem("token");
-        this.verificatioinService.confirmEmail(code,token).subscribe(
+        this.verificatioinService.confirmEmail(code, this.authService.getUserData()?.token).subscribe(
           (res)=>{
             this.isLoading=false
 
@@ -143,12 +143,10 @@ export class VerifyComponent implements OnInit ,AfterViewInit,OnDestroy{
             // update local storage
             this.authService.saveDataToLocalStorage(this.authService.getUserData());
             this.authService.updateUserInfo(this.authService.getUserData())
-            this.loginService.storeRefreshTokenInCookie(token);
-            this.authService.setRefreshToken()
-
-            setInterval(() => {
-              this.refreshToken();
-            }, 60 * 60 * 1000); // 1 hour in milliseconds
+            const t = this.authService.getAccessToken();
+            if (t) {
+              this.authSession.scheduleRefreshBeforeExpiry(t);
+            }
             this.languageService.setAppDirection();
 
             this.router.navigateByUrl('devices')
@@ -180,16 +178,12 @@ export class VerifyComponent implements OnInit ,AfterViewInit,OnDestroy{
     }
   }
   refreshToken() {
-    let token=this.loginService.getCookieValue('refreshToken')
-    this.loginService.refreshToken(token).subscribe(
+    this.loginService.refreshToken().subscribe(
       (res) => {
-        // Update the refresh token in the cookie
-        this.loginService.storeRefreshTokenInCookie(res.refreshToken);
-        this.authService.setRefreshToken();
-
+        this.authService.setAccessToken(res.token);
+        this.authSession.scheduleRefreshBeforeExpiry(res.token);
       },
-      (err) => {
-      }
+      () => {}
     );
   }
   resetData(){

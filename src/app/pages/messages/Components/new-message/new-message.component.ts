@@ -97,7 +97,7 @@ sendMessageData:any;
       this.showWarningMsg=false;
     
     }
-    this.messageService.sendWhatsappBusinessMessage(this.deviceId,this.addedContacts,this.message,this.dateTime,this.messageService.email,this.attachments).subscribe(
+    this.messageService.sendWhatsappBusinessMessage(this.deviceId,this.addedContacts,this.message,this.dateTime,this.attachments).subscribe(
       (res)=>{
         this.toasterService.success("Success");
         this.back.emit(true)

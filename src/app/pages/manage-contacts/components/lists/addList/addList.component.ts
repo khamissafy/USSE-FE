@@ -49,7 +49,7 @@ export class AddListComponent implements OnInit {
   submitAdd(){
     this.isLoading = true
 
-    this.listService.addList(this.form.value.name,this.email).subscribe(
+    this.listService.addList(this.form.value.name).subscribe(
       (res)=>{
         this.isLoading = false
         this.onClose(true);
@@ -64,7 +64,7 @@ export class AddListComponent implements OnInit {
   }
   submitEdit(){
     this.isLoading = true
-    this.listService.updateList(this.data.id,this.form.value.name,this.email).subscribe(
+    this.listService.updateList(this.data.id,this.form.value.name).subscribe(
       (res)=>{
         this.isLoading = false
         this.onClose(true);

@@ -338,7 +338,7 @@ this.getMessages(this.filteredDevices);
    // get devices data
    getDevices(megtype:string){
     this.msgCategory=megtype;
-    this.authService.getDevices(this.authService.getUserInfo()?.email,10,0,"","").subscribe(
+    this.authService.getDevices(10,0,"","").subscribe(
       (res)=>{
       this.handleResponce(res)
     },
@@ -448,7 +448,6 @@ setupSearchSubscription(): void {
 
 getMessagesReq(deviceId:string[],msgCat?,filterdItems?,searchVal?){
   let shows=this.messageService.display;
-  let email=this.messageService.email;
   let msgCategory=msgCat? msgCat : this.msgCategory;
   let pageNumber=searchVal?0:this.pageIndex
   if(searchVal && this.paginator){
@@ -466,7 +465,7 @@ getMessagesReq(deviceId:string[],msgCat?,filterdItems?,searchVal?){
   }
  
   this.loading=true;
-  return this.messageService.getMessages(email,msgCategory,shows,pageNumber,searchVal,deviceId,filterdItems)
+  return this.messageService.getMessages(msgCategory,shows,pageNumber,searchVal,deviceId,filterdItems)
    
 
 }

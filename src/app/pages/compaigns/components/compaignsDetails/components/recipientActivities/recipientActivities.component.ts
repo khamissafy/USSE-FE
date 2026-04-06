@@ -139,13 +139,12 @@ this.displayForm.patchValue({
 
   getComMessages(filteredData?){
   let shows=this.compaignDetailsService.display;
-  let email=this.authService.getUserInfo()?.email;
 
 
   this.loading = true;
   this.getComMessagesCount(filteredData);
 
-    this.compaignDetailsService.listCampaignMessages(this.compaignId,email,shows,this.pageNum,filteredData).subscribe(
+    this.compaignDetailsService.listCampaignMessages(this.compaignId,shows,this.pageNum,filteredData).subscribe(
       (res)=>{
         this.loading = false;
 

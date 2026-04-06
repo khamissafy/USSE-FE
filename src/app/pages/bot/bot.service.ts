@@ -17,26 +17,26 @@ export class BotService  {
 constructor(private http:HttpClient,
   private authService:AuthService) {}
 
-  getAutomations(email:string,showsNum:number,pageNum:number,search:string,deviceId:string):Observable<Automation[]>{
-    return this.http.get<Automation[]>(`${this.api}Bot/listAutomations?email=${email}&deviceId=${deviceId}&take=${showsNum}&scroll=${pageNum}&search=${search}`)
+  getAutomations(showsNum:number,pageNum:number,search:string,deviceId:string):Observable<Automation[]>{
+    return this.http.get<Automation[]>(`${this.api}Bot/listAutomations?deviceId=${deviceId}&take=${showsNum}&scroll=${pageNum}&search=${search}`)
   }
-  getAutomationsCount(email:string,deviceId:string):Observable<number>{
-    return this.http.get<number>(`${this.api}Bot/listAutomationsCount?email=${email}&deviceId=${deviceId}`)
+  getAutomationsCount(deviceId:string):Observable<number>{
+    return this.http.get<number>(`${this.api}Bot/listAutomationsCount?deviceId=${deviceId}`)
   }
-  deleteAutomation(id:string,email:string):Observable<any>{
-    return this.http.put<any>(`${this.api}Bot/deleteAutomation?id=${id}&email=${email}`,null)
+  deleteAutomation(id:string):Observable<any>{
+    return this.http.put<any>(`${this.api}Bot/deleteAutomation?id=${id}`,null)
   }
   createNewAutomation(data:any):Observable<any>{
     return this.http.post<any>(`${this.api}Bot/createNewAutomation`,data)
   }
-  stopWhatsappBusinessAutomation(id:string,email:string):Observable<any>{
-    return this.http.put<any>(`${this.api}Bot/stopWhatsappBusinessAutomation?id=${id}&email=${email}`,null)
+  stopWhatsappBusinessAutomation(id:string):Observable<any>{
+    return this.http.put<any>(`${this.api}Bot/stopWhatsappBusinessAutomation?id=${id}`,null)
   }
-  startWhatsappBusinessAutomation(id:string,email:string):Observable<any>{
-    return this.http.put<any>(`${this.api}Bot/startWhatsappBusinessAutomation?id=${id}&email=${email}`,null)
+  startWhatsappBusinessAutomation(id:string):Observable<any>{
+    return this.http.put<any>(`${this.api}Bot/startWhatsappBusinessAutomation?id=${id}`,null)
   }
-  reOrderAutomations(email:string,deviceId:string,data:{automationId: string,order: number}[]):Observable<any>{
-    return this.http.put<any>(`${this.api}Bot/reOrderAutomations?email=${email}&deviceId=${deviceId}`,data)
+  reOrderAutomations(deviceId:string,data:{automationId: string,order: number}[]):Observable<any>{
+    return this.http.put<any>(`${this.api}Bot/reOrderAutomations?deviceId=${deviceId}`,data)
   }
   getAutomationById(id:string):Observable<any>{
     return this.http.get<any>(`${this.api}Bot/getAutomationById?id=${id}`)

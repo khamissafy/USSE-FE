@@ -309,7 +309,7 @@ onScrollToTop() {
       const previousScrollHeight = container.scrollHeight;
       const previousScrollTop = container.scrollTop;
       
-      this.chatService.getChatById(this.email, this.selectedChatId, this.chatMessagesCount, 0, this.searchVal, this.deviceId)
+      this.chatService.getChatById(this.selectedChatId, this.chatMessagesCount, 0, this.searchVal, this.deviceId)
         .subscribe(
           (res) => {
             if (res.length === 0) {
@@ -355,7 +355,7 @@ onScrollToBottom(){
     let prevContainerHeight = container.scrollHeight;
     let prevScrollTop = container.scrollTop;
 
-    this.chatService.listChats(this.email, this.contactsCount, 0, '', this.deviceId)
+    this.chatService.listChats(this.contactsCount, 0, '', this.deviceId)
       .subscribe(
         (res) => {
           if (res.data.length === 0) {
@@ -452,14 +452,14 @@ getGroupHeader(messageDate: Date): string {
 }
 
 chatRec(search){
-    return this.chatService.getChatById(this.email,this.selectedChatId,30,0,search,this.deviceId) 
+    return this.chatService.getChatById(this.selectedChatId,30,0,search,this.deviceId) 
 
 }
   getChatById(chatId,search?)
   {
     this.searchVal = search || '';
 
-    this.chatService.getChatById(this.email,chatId,30,0,this.searchVal,this.deviceId) 
+    this.chatService.getChatById(chatId,30,0,this.searchVal,this.deviceId) 
     .subscribe(
       (res)=>{
         
@@ -487,7 +487,7 @@ chatRec(search){
 
   }
   getDevices(){
-    this.devicesSub$= this.authService.getDevices(this.authService.getUserInfo()?.email,10,0,"","");
+    this.devicesSub$= this.authService.getDevices(10,0,"","");
     this.devicesSub$.subscribe(
       (res)=>{
         let alldevices=res;
@@ -541,10 +541,10 @@ chatRec(search){
         })
   }
   listChatsReq(search){
-    return  this.chatService.listChats(this.email , 30,0,search,this.filteredDevices);
+    return  this.chatService.listChats(30,0,search,this.filteredDevices);
   }
   getListChats(){
-  this.listChatsSub$= this.chatService.listChats(this.email , 30,0,this.searchKey,this.filteredDevices);
+  this.listChatsSub$= this.chatService.listChats(30,0,this.searchKey,this.filteredDevices);
   if(this.searchSub){
     this.searchSub.unsubscribe();
     this.searchSub=null;
@@ -850,16 +850,23 @@ resetChatsOrder(chatContact){
           channelType:this.activeChat.chat.channelType,
           groupName:this.activeChat.chat.chatName
         }:null
-          this.messageService.sendWhatsappBusinessMessage(this.deviceId,[this.targetPhoneNumber],message,null,this.email,attachements,chatMsg).subscribe(
+          this.messageService.sendWhatsappBusinessMessage(this.deviceId,[this.targetPhoneNumber],message,null,attachements,chatMsg).subscribe(
             (res)=>{
-          let mainData:any={id: this.selectedChatId,
-            deviceid: this.deviceId,
+          const messageIds: string[] = Array.isArray(res) ? res : [];
+          const messageId = messageIds[0] ?? `pending-${Date.now()}`;
+          let mainData:any={
+            id: messageId,
+            deviceId: this.deviceId,
+            chatId: this.selectedChatId,
+            chatName: this.chatName,
             targetPhoneNumber: this.targetPhoneNumber,
             direction: true,
-            chat:{chatName:this.chatName,id:res[0]},
+            chat:{chatName:this.chatName,id:this.selectedChatId},
             msgBody: message,
             createdAt:String(this.convertToUTC(new Date())) ,
-            status: 0
+            updatedAt:String(this.convertToUTC(new Date())) ,
+            status: 0,
+            msgType: 'WBS',
           }
 
             // in case of uplaoded files 
@@ -1039,128 +1046,81 @@ else{
       this.fileInputRef.nativeElement.click(); // Programmatically trigger file input click
     }
     onRecieveMessages(){
-      this.chatService.receivedMessages$.subscribe((res)=>{
+      console.log('[SIGNALR-DIAG] onRecieveMessages() subscriber registered, this.email=', this.email);
+      const sub = this.chatService.receivedMessages$.subscribe((res)=>{
+        if (!res?.userEmail) {
+          console.log('[SIGNALR-DIAG] receivedMessages$ emitted null/no-email, skipping');
+          return;
+        }
+        console.log('[SIGNALR-DIAG] receivedMessages$ emitted: userEmail=', res.userEmail, '| this.email=', this.email, '| match=', res.userEmail === this.email);
         if(res.userEmail === this.email){
           this.updateMessagesOnReceive(res.message);
-
         }
-      })
+      });
+      this.subscriptions.push(sub);
     }
    
     onStatusChange(){
-      this.chatService.updatedStatus$.subscribe(
+      console.log('[SIGNALR-DIAG] onStatusChange() subscriber registered, this.email=', this.email);
+      const sub = this.chatService.updatedStatus$.subscribe(
         (res)=>{
+          if (!res?.userEmail) {
+            console.log('[SIGNALR-DIAG] updatedStatus$ emitted null/no-email, skipping');
+            return;
+          }
+          console.log('[SIGNALR-DIAG] updatedStatus$ emitted: userEmail=', res.userEmail, '| this.email=', this.email, '| match=', res.userEmail === this.email);
           if(res.userEmail === this.email){
             this.updateMessageStatus(res.message);
-  
           }
         }
-      )
+      );
+      this.subscriptions.push(sub);
     }
   
-    updateMessageStatus(newMessage){
-
-      let message:chatHub=JSON.parse(newMessage)
-      console.log('status update',message)
-      if(this.filteredDevices.length==0 || (this.filteredDevices.length > 0 && this.filteredDevices.includes(message.Deviceid))){
-
-        // update Status on list chats
-        let findChat = this.listChats.find((chat)=>chat.chat.id == message.ChatId);
-        if(findChat){
-          console.log('chat in list chats',findChat)
-          findChat.lastMessageStatus=message.status;
-          findChat.lastMessageContent=message.msgBody;
-          findChat.lastMessageDate=newMessage.createdAt;
-
-        }
-        // in case the message is sent from the current opend chat
-        if(this.selectedChatId === message.ChatId){
-          const messageDate = new Date(message.createdAt);
-        
-          const day = this.getGroupHeader(messageDate);
-          let foundMesg = this.groupedMessages[day].find(chat => chat?.chat?.id === message?.id);
-          console.log('msg',this.groupedMessages[day])
-          if (foundMesg) {
-            console.log("found msg",foundMesg)
-            if(message.status > foundMesg.status)
-            {
-
-              foundMesg.status=message.status;
-            }
-            foundMesg.updatedAt=message.updatedAt;
-          }
-          }
-
+    updateMessageStatus(payload: string){
+      if (!payload) return;
+      const message: chatHub = JSON.parse(payload);
+      console.log('status update', message);
+      if (this.filteredDevices.length > 0 && !this.filteredDevices.includes(message.deviceId)) {
+        return;
       }
-      // this.groupMessagesByDay();
-      if(newMessage.Deviceid == this.deviceId){
-        // in case the message is sent from the current opend chat
-        if(this.selectedChatId === newMessage.ChatId){
-          this.selectedChat.push(newMessage);
-          setTimeout(() => {
-            this.scrollToBottom();
-          }, 0);        
+
+      const findChat = this.listChats.find((chat) => chat.chat.id === message.chatId);
+      if (findChat) {
+        findChat.lastMessageStatus = message.status;
+        findChat.lastMessageContent = message.msgBody;
+        findChat.lastMessageDate = message.createdAt;
+      }
+
+      if (this.selectedChatId === message.chatId) {
+        const foundMesg = this.selectedChat.find((m) => m.id === message.id);
+        if (foundMesg) {
+          if (message.status > (foundMesg.status ?? 0)) {
+            foundMesg.status = message.status;
+          }
+          foundMesg.updatedAt = message.updatedAt;
+          this.groupMessagesByDay();
         }
-
-        // in case the message is sent from closedChat and same device
-
-          let foundChat = this.listChats.find((chat)=>chat.chat.id == newMessage.ChatId);
-            if (foundChat) {
-              foundChat.lastMessageContent='';
-              foundChat.lastMessageFileName='';
-              foundChat.lastMessageFileUrl='';
-              foundChat.fileType='';
-              if(this.selectedChatId !== newMessage.ChatId){
-                foundChat.unseenMessagesCount+=1;
-
-              }
-              foundChat.lastMessageStatus=newMessage.status;
-              foundChat.lastMessageContent=newMessage.msgBody;
-              foundChat.lastMessageDate=newMessage.createdAt;
-              foundChat.lastMessageFileName = newMessage.fileName;
-              foundChat.lastMessageFileUrl = newMessage.fileUrl;
-              if(this.listChats.indexOf(foundChat) !== 0){
-                // Remove the element from its current position
-                this.listChats.splice(this.listChats.indexOf(foundChat), 1);
-                // Add the element to the beginning of the array
-                this.listChats.unshift(foundChat);
-              }
-          
-            }
-            else{
-              this.listChats.unshift({
-                chat: {
-                  id: newMessage.ChatId,
-                  chatName: newMessage.ChatName,
-                  targetPhoneNumber: newMessage.targetPhoneNumber,
-                  createdAt: newMessage.createdAt,
-                },
-                lastMessageDate: newMessage.createdAt,
-                lastMessageContent: newMessage.msgBody,
-                lastMessageFileName:newMessage.fileName,
-                lastMessageFileUrl:newMessage.fileUrl,
-                fileType:'',
-                lastMessageDirection: false,
-                lastMessageStatus: null,
-                unseenMessagesCount: 1,
-              })
-            }
-        
+      }
     }
-      }
 
       updateMessagesOnReceive(message){
+        console.log('[SIGNALR-DIAG] updateMessagesOnReceive() called, raw payload=', message);
         let newMessage:chatHub=JSON.parse(message);
-        console.log('new message',newMessage)
-        if(this.filteredDevices.length==0 || (this.filteredDevices.length > 0 && this.filteredDevices.indexOf(newMessage.Deviceid)>-1)){
+        console.log('[SIGNALR-DIAG] parsed newMessage=', newMessage, '| selectedChatId=', this.selectedChatId, '| newMessage.chatId=', newMessage.chatId);
+        if(this.filteredDevices.length==0 || (this.filteredDevices.length > 0 && this.filteredDevices.indexOf(newMessage.deviceId)>-1)){
           
           // in case the message is sent from the current opend chat
-            if(this.selectedChatId === newMessage.ChatId){
+            if(this.selectedChatId === newMessage.chatId){
               if(newMessage.direction){
                 newMessage.status=1
               }
-             
-              this.selectedChat.push(newMessage);
+              const existingIdx = this.selectedChat.findIndex((m) => m.id === newMessage.id);
+              if (existingIdx >= 0) {
+                this.selectedChat[existingIdx] = { ...this.selectedChat[existingIdx], ...newMessage };
+              } else {
+                this.selectedChat.push(newMessage);
+              }
               setTimeout(() => {
                 this.scrollToBottom();
               }, 0);        
@@ -1169,12 +1129,12 @@ else{
             // in case the message is sent from closedChat and same device
             let newChat={
               chat: {
-                id: newMessage.ChatId,
-                chatName: newMessage.ChatName,
+                id: newMessage.chatId,
+                chatName: newMessage.chatName,
                 targetPhoneNumber: newMessage.targetPhoneNumber,
                 createdAt: newMessage.createdAt,
               },
-              device:newMessage.Device,
+              device:newMessage.device,
               lastMessageDate: newMessage.createdAt,
               lastMessageContent: newMessage.msgBody,
               lastMessageFileName:newMessage.fileName,
@@ -1186,10 +1146,10 @@ else{
               targetPhoneNumber:newMessage.targetPhoneNumber
 
             }
-              let foundChat = this.listChats.find((chat)=>chat.chat.id == newMessage.ChatId);
+              let foundChat = this.listChats.find((chat)=>chat.chat.id == newMessage.chatId);
                 if (foundChat) {
                 this.updateChatDataWithNewMsg(foundChat,newMessage)
-                if((this.selectedChatId === newMessage.ChatId) ){
+                if((this.selectedChatId === newMessage.chatId) ){
                     if(!newMessage.direction){
                       this.markMessageAsRead(foundChat)
                     }
@@ -1208,7 +1168,7 @@ else{
       foundChat.lastMessageFileName='';
       foundChat.lastMessageFileUrl='';
       foundChat.fileType='';
-      if(this.selectedChatId !== newMessage.ChatId && newMessage.direction==false){
+      if(this.selectedChatId !== newMessage.chatId && newMessage.direction==false){
         foundChat.unseenMessagesCount+=1;
       }
       foundChat.lastMessageStatus=newMessage.direction?1:null;

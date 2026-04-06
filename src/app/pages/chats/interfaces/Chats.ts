@@ -76,30 +76,40 @@ interface devices {
     token?: string
 }
 
-export interface chatHub {
-    ChatName: string;
-    id: string,
-    Deviceid: string,
-    targetPhoneNumber: string,
-    direction: boolean,
-    msgBody: string,
-    createdAt: string,
-    updatedAt: string,
-    ChatId: string,
-    isDeleted: boolean,
-    isSeened: boolean,
-    status: number,
-    msgType: string,
-    fileName: string,
-    fileUrl: string,
-    CampaignId: string,
-    actionCount: any,
-    isReply: boolean,
-    isEnquiry: boolean,
-    EnquiryQuestion: number,
-    BotId: string,
-    isCampaignAction: boolean,
-    chatName?:string
-    Device?:devices,
+/** Matches backend SignalRDevice (safe subset, no secrets). */
+export interface SignalRDevice {
+    id: string;
+    deviceName: string;
+    deviceType: string;
+    deviceNumber?: string;
+    isConnected: boolean;
+    isDeleted: boolean;
+}
 
+/** Matches backend <see cref="MessageForSignalR" /> JSON (camelCase from Newtonsoft). */
+export interface chatHub {
+    chatName: string;
+    id: string;
+    deviceId: string;
+    targetPhoneNumber: string;
+    direction: boolean;
+    msgBody: string;
+    createdAt: string;
+    updatedAt: string;
+    chatId: string;
+    isDeleted: boolean;
+    isSeened: boolean;
+    status: number;
+    msgType: string;
+    fileName: string;
+    fileUrl: string;
+    campaignId: string;
+    actionCount: any;
+    isReply: boolean;
+    isEnquiry: boolean;
+    enquiryQuestion: number;
+    botId: string;
+    isCampaignAction: boolean;
+    groupName?: string;
+    device?: SignalRDevice;
 }

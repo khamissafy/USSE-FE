@@ -135,7 +135,7 @@ checkIfFieldFound(name){
 
 }
   getLists(){
-  this.listService.getList(this.email,100,0,"","").subscribe(
+  this.listService.getList(100,0,"","").subscribe(
      (res)=>{
       if(this.data){
         let dataLists;
@@ -244,13 +244,12 @@ checkIfFieldFound(name){
   }
   submitAdd(){
     this.isLoading = true
-    let email=this.email;
     let name =this.form.value.name;
    
     let mobile=this.form.value.mobile.e164Number;
     let listsIds = this.form.value.selectedLists.map((e)=>e.value);
 
-    this.listService.addContact(name,mobile,email,listsIds,this.additionalParameters).subscribe(
+    this.listService.addContact(name,mobile,listsIds,this.additionalParameters).subscribe(
       (res)=>{
         this.isLoading = false
         this.onClose(true);
@@ -273,7 +272,6 @@ checkIfFieldFound(name){
       id:this.data.contacts.id,
       name :this.form.value.name,
       mobileNumber:this.form.value.mobile.e164Number,
-      email: this.email,
       additionalContactParameters: this.additionalParameters
 
     }
@@ -299,8 +297,6 @@ checkIfFieldFound(name){
         id:this.data.contacts.id,
         name :this.form.value.name,
         mobileNumber:this.form.value.mobile.e164Number,
-     
-        email: this.email,
         newListId:listsIds,
         additionalContactParameters: this.additionalParameters
       }

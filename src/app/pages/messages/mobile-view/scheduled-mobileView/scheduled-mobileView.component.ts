@@ -212,7 +212,7 @@ export class ScheduledMobileViewComponent implements OnInit ,OnDestroy{
       }
    // get devices data
    getDevices(){
-    this.authService.getDevices(this.authService.getUserInfo()?.email,10,0,"","").subscribe(
+    this.authService.getDevices(10,0,"","").subscribe(
       (res)=>{
         this.handleResponce(res)
       },
@@ -242,9 +242,8 @@ export class ScheduledMobileViewComponent implements OnInit ,OnDestroy{
   }
       getMessages(deviceId?:string[]){
         let shows=this.messageService.display;
-        let email=this.messageService.email;
         this.loading=true;
-        let messagesSub=this.messageService.getScheduledMessages(email,shows,this.pageIndex,deviceId).subscribe(
+        let messagesSub=this.messageService.getScheduledMessages(shows,this.pageIndex,deviceId).subscribe(
           (res)=>{
             this.numRows=res.data.length;
             this.messagesTableData=res.data
