@@ -66,15 +66,15 @@
       >
       </us-button>
     </button>
-    <button class="rest-style" matStepperNext [disabled]="!form.valid && !files">
+    <button type="button" class="rest-style">
       <us-button
         class="m-2"
         [fullWidth]="true"
         label="{{ 'NEXT' | translate }}"
         [fill]="true"
         [size]="'md'"
-        [loading]="false"
-        [disabled]="!form.valid && !files"
+        [loading]="uploading"
+        [disabled]="(!form.valid && !files) || uploading"
         [appearance]="'primary'"
         (clicked)="filesAndMessageToParent()"
       >

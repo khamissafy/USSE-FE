@@ -98,27 +98,24 @@ export class StepFourComponent implements OnInit, OnDestroy ,AfterViewInit{
   }
 
   ngOnInit() {
-    this.setDefaultTime();
-    let formSubscription = this.form.valueChanges.subscribe(() => {
-      
-      this.checkValidIntervalRange(this.form.get("intervalFrom").value,this.form.get("intervalTo").value)
-     
+    const formSubscription = this.form.valueChanges.subscribe(() => {
+      this.checkValidIntervalRange(this.form.get("intervalFrom").value, this.form.get("intervalTo").value);
       this.formValidityChange.emit(this.form.valid);
     });
+    const time1Sub$ = this.time1.valueChanges.subscribe(() => {
+      this.utcTime1 = this.convertToUTC(this.time1);
+      this.checkValidTimeDifference(this.time1, this.time2);
+    });
+    const time2Sub$ = this.time2.valueChanges.subscribe(() => {
+      this.utcTime2 = this.convertToUTC(this.time2);
+      this.checkValidTimeDifference(this.time1, this.time2);
+    });
+    this.subscriptions.push(time1Sub$, time2Sub$, formSubscription);
+
+    this.setDefaultTime();
     this.utcTime1 = this.convertToUTC(this.time1);
     this.utcTime2 = this.convertToUTC(this.time2);
-
-let time1Sub$ = this.time1.valueChanges.subscribe(res => {
-  this.utcTime1 = this.convertToUTC(this.time1);
-  this.checkValidTimeDifference(this.time1,this.time2)
-});
-let time2Sub$ = this.time2.valueChanges.subscribe(res => {
-  this.utcTime2 = this.convertToUTC(this.time2);
-  this.checkValidTimeDifference(this.time1,this.time2)
-
-});
-this.subscriptions.push(time1Sub$,time2Sub$,formSubscription)
-
+    this.formValidityChange.emit(this.form.valid);
   }
 // set default campain settings
 setDefaultTime() {
@@ -150,6 +147,13 @@ setDefaultTime() {
       }
           // warning modal will open with message invalid interval range warning
       this.checkValidIntervalRange(this.form.get("intervalFrom").value,this.form.get("intervalTo").value , true)
+
+      const t1 = this.time1.value;
+      const t2 = this.time2.value;
+      const validDate = (v: unknown) => v instanceof Date && !Number.isNaN(v.getTime());
+      if (!validDate(t1) || !validDate(t2)) {
+        this.setTimeToDefault();
+      }
     
       this.isIntervalChecked=this.lastCampaignData.isInterval;
       if(this.timesAreSame(this.time1,this.time2)){
@@ -280,9 +284,15 @@ setDefaultTime() {
   }
 
   timesAreSame(time1: FormControl, time2: FormControl): boolean {
-    const date1: Date = time1.value;
-    const date2: Date = time2.value;
-  
+    const date1 = time1?.value;
+    const date2 = time2?.value;
+    if (!(date1 instanceof Date) || !(date2 instanceof Date)) {
+      return true;
+    }
+    if (Number.isNaN(date1.getTime()) || Number.isNaN(date2.getTime())) {
+      return true;
+    }
+
     return (
       date1.getHours() === date2.getHours() &&
       date1.getMinutes() === date2.getMinutes() &&
@@ -291,9 +301,9 @@ setDefaultTime() {
   }
   checkValidTimeDifference(time1: FormControl, time2: FormControl , fromLastCamp?) {
   
-    const date1: Date = time1.value;
-    const date2: Date = time2.value;
-    if(date1 && date2){
+    const date1 = time1.value;
+    const date2 = time2.value;
+    if(date1 instanceof Date && date2 instanceof Date && !Number.isNaN(date1.getTime()) && !Number.isNaN(date2.getTime())){
       const timeDifference = Math.abs(date1.getTime() - date2.getTime()) / 1000; // Difference in seconds
   
       if (timeDifference < 80 && !this.showTimeDifferenceWarning && !this.timesAreSame(time1, time2)) {
@@ -309,11 +319,14 @@ setDefaultTime() {
     }
    
   }
-  convertToUTC(timecontrol: any): any {
-    const selectedTime = timecontrol.value;
+  convertToUTC(timecontrol: FormControl | { value?: unknown } | null | undefined): string | undefined {
+    if (!timecontrol || !('value' in timecontrol)) {
+      return undefined;
+    }
+    const selectedTime = timecontrol.value as Date | undefined;
     let timezone = this.timeZoneService.getTimezone();
    
-    if (selectedTime) {
+    if (selectedTime instanceof Date && !Number.isNaN(selectedTime.getTime())) {
        if(timezone !== null){
        const utcTime = new Date(selectedTime.getTime() - timezone * 60 * 60 * 1000);
   
@@ -331,17 +344,20 @@ setDefaultTime() {
       return utcTime;
      }
     }
+    return undefined;
   }
 
   
-  convertUTCToLocal(utcTime: string): Date {
-    const [hoursStr, minutesStr] = utcTime.split(':');
-    const hours = parseInt(hoursStr, 10);
-    const minutes = parseInt(minutesStr, 10);
-  
+  convertUTCToLocal(utcTime: string): Date | null {
+    if (utcTime == null || utcTime === '') return null;
+    const parts = String(utcTime).trim().split(':');
+    if (parts.length < 2) return null;
+    const hours = parseInt(parts[0], 10);
+    const minutes = parseInt(parts[1], 10);
+    if (Number.isNaN(hours) || Number.isNaN(minutes)) return null;
+
     const utcDate = new Date();
     utcDate.setUTCHours(hours, minutes);
-    // Convert UTC time to local time
     return utcDate;
   }
   onSwitcherChange(e, data) {

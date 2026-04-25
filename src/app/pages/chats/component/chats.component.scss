@@ -193,6 +193,11 @@ textarea {
     display: flex;
     flex-direction: column;
 
+    .chat-message-text {
+        white-space: pre-wrap;
+        word-break: break-word;
+    }
+
     .received-chats,
     .outgoing-chats {
         display: flex;

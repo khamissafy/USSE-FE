@@ -7,7 +7,7 @@ import { ChatContactsComponent } from '../components/chat-contacts/chat-contacts
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { SelectOption } from 'src/app/shared/components/select/select-option.model';
 import { AuthService } from 'src/app/shared/services/auth.service';
-import { Observable, Subscription, concatMap,pipe, interval, throttleTime, combineLatest, find, debounceTime, distinctUntilChanged, switchMap } from 'rxjs';
+import { Observable, Subscription, concatMap,pipe, interval, throttleTime, combineLatest, find, debounceTime, distinctUntilChanged, switchMap, firstValueFrom } from 'rxjs';
 import { ChatById, Chats, chatHub, chatsData } from '../interfaces/Chats';
 import { ChatsService } from '../chats.service';
 import { DeleteModalComponent } from 'src/app/shared/components/delete-modal/delete-modal.component';
@@ -30,6 +30,9 @@ interface files{
   styleUrls: ['./chats.component.scss'] ,
 })
 export class ChatsComponent implements OnInit, AfterViewInit,OnDestroy{
+  /** Avoid concurrent refresh for the same message bubble. */
+  private readonly _chatMediaRefreshing = new Set<string>();
+
   devices:any=[];
   deviceLoadingText:string='Loading';
   devicesData :any= new FormControl([]);
@@ -176,6 +179,12 @@ export class ChatsComponent implements OnInit, AfterViewInit,OnDestroy{
     this.chatService.startConnection()
     this.onRecieveMessages();
     this.onStatusChange();
+    const hubReconSub = this.chatService.hubReconnected$.subscribe(() => {
+      if (this.openChat && this.selectedChatId) {
+        this.getChatById(this.selectedChatId);
+      }
+    });
+    this.subscriptions.push(hubReconSub);
   }
    setTimeZone(){
     let sub = this.timeZoneService.timezone$.subscribe(
@@ -655,7 +664,25 @@ chatRec(search){
     this.targetPhoneNumber='';
     this.hideSearch=true;
   }
+  private revokePendingAttachmentUrls(): void {
+    for (const f of this.filesList) {
+      const u = f?.url;
+      if (typeof u === 'string' && u.startsWith('blob:')) {
+        URL.revokeObjectURL(u);
+      }
+    }
+  }
+
+  onAttachmentRemoved(removed: { url?: string }): void {
+    const u = removed?.url;
+    if (typeof u === 'string' && u.startsWith('blob:')) {
+      URL.revokeObjectURL(u);
+    }
+    this.disableButtonOrnot();
+  }
+
 resetForm(){
+  this.revokePendingAttachmentUrls();
   this.messageForm.patchValue(
     {
       message:''
@@ -833,7 +860,7 @@ resetChatsOrder(chatContact){
       }
     }
   
-    sendMsg(event?){
+    async sendMsg(event?){
       let message = this.messageForm.value.message;
       let newMessage:any=[];
 
@@ -845,13 +872,39 @@ resetChatsOrder(chatContact){
             event.preventDefault(); 
           }  
         }
-        let attachements = this.filesList.map((file)=>{return file.url})
         let chatMsg=this.activeChat?.chat.channelType>1? {
           channelType:this.activeChat.chat.channelType,
           groupName:this.activeChat.chat.chatName
         }:null
-          this.messageService.sendWhatsappBusinessMessage(this.deviceId,[this.targetPhoneNumber],message,null,attachements,chatMsg).subscribe(
-            (res)=>{
+
+        try {
+          let attachements: string[] = [];
+          if (this.filesList.length > 0) {
+            const uploads = await Promise.all(
+              this.filesList.map((file, index) =>
+                firstValueFrom(
+                  this.messageService.uploadFile(
+                    file.file,
+                    index === 0 ? message : undefined,
+                    'chat'
+                  )
+                ).then((r) => r.signedUrl)
+              )
+            );
+            attachements = uploads;
+          }
+
+          const res = await firstValueFrom(
+            this.messageService.sendWhatsappBusinessMessage(
+              this.deviceId,
+              [this.targetPhoneNumber],
+              message,
+              null,
+              attachements,
+              chatMsg
+            )
+          );
+
           const messageIds: string[] = Array.isArray(res) ? res : [];
           const messageId = messageIds[0] ?? `pending-${Date.now()}`;
           let mainData:any={
@@ -869,13 +922,12 @@ resetChatsOrder(chatContact){
             msgType: 'WBS',
           }
 
-            // in case of uplaoded files 
           if(this.filesList.length > 0){
             newMessage = this.filesList.map((file, index) => {
               let messageWithFile = {
-                  ...mainData, // Spread mainData to retain its properties
+                  ...mainData,
                   fileName: file.name,
-                  fileUrl: file.url
+                  fileUrl: attachements[index]
               };
               if(index !== 0){
                 messageWithFile.msgBody='';
@@ -886,8 +938,6 @@ resetChatsOrder(chatContact){
             }
             else{
               newMessage=[mainData];
-
-
             }
             let foundChat:chatsData=this.listChats.find((chat)=>chat.chat.id == this.selectedChatId );
             if(foundChat){
@@ -907,7 +957,7 @@ resetChatsOrder(chatContact){
                   foundChat.fileType='';
                 }
                 foundChat.lastMessageFileName=this.filesList[this.filesList.length -1].name;
-                foundChat.lastMessageFileUrl=this.filesList[this.filesList.length -1].url;
+                foundChat.lastMessageFileUrl=attachements[attachements.length - 1];
               }
               this.resetChatsOrder(foundChat)
 
@@ -930,41 +980,72 @@ resetChatsOrder(chatContact){
                 let fileType=this.filesList[this.filesList.length -1].type
                 chat.fileType=`.${fileType.slice(fileType.indexOf('/') +1)}`;
                 chat.lastMessageFileName=this.filesList[this.filesList.length -1].name;
-                chat.lastMessageFileUrl=this.filesList[this.filesList.length -1].url;
+                chat.lastMessageFileUrl=attachements[attachements.length - 1];
               }
               this.listChats.unshift(chat)
               this.resetChatsOrder(chat)
 
             }
 
-
           this.selectedChat=[...this.selectedChat,...newMessage];
-
-        
           this.groupMessagesByDay();
-
-          this.resetForm()
-          this.filesList=[];
+          this.resetForm();
           setTimeout(() => {
             this.scrollToBottom();
           }, 0);
-        },
-        (err)=>{
-          this.disable=false;
-
-        })
-        
-
-
+        } catch {
+          this.toaster.error(this.translate.instant('Error'));
+        } finally {
+          this.disableButtonOrnot();
+        }
       }
   
 else{
-  event.preventDefault();
+  event?.preventDefault?.();
 
 }
 }
     isImage(fileUrl:string){
-      return fileUrl.includes('image')
+      return !!fileUrl && fileUrl.includes('image')
+    }
+
+    isAttachmentUnavailable(chat: any): boolean {
+      return chat?.fileName === 'ATTACHMENT_UNAVAILABLE';
+    }
+
+    isImageMedia(chat: any): boolean {
+      const u = chat?.fileUrl;
+      return typeof u === 'string' && u.includes('image');
+    }
+
+    async refreshChatMediaIfNeeded(chat: any): Promise<void> {
+      if (!chat?.id || !chat?.fileUrl || this.isAttachmentUnavailable(chat)) return;
+      const raw = chat.fileUrlExpiresAtUtc;
+      if (!raw) return;
+      const exp = new Date(raw).getTime();
+      if (!Number.isFinite(exp)) return;
+      const renewIfBefore = Date.now() + 24 * 60 * 60 * 1000;
+      if (exp > renewIfBefore) return;
+      await this.refreshChatMediaUrl(chat);
+    }
+
+    async onChatMediaLoadError(chat: any): Promise<void> {
+      await this.refreshChatMediaUrl(chat);
+    }
+
+    private async refreshChatMediaUrl(chat: any): Promise<void> {
+      if (!chat?.id || !chat?.fileUrl || this.isAttachmentUnavailable(chat)) return;
+      if (this._chatMediaRefreshing.has(chat.id)) return;
+      this._chatMediaRefreshing.add(chat.id);
+      try {
+        const res = await firstValueFrom(this.messageService.refreshChatMediaSignedUrl(chat.id));
+        chat.fileUrl = res.signedUrl;
+        chat.fileUrlExpiresAtUtc = res.expiresAtUtc as any;
+      } catch {
+        /* keep existing URL */
+      } finally {
+        this._chatMediaRefreshing.delete(chat.id);
+      }
     }
     convertToUTC(timecontrol: any): any {
       const selectedTime = timecontrol;
@@ -983,45 +1064,39 @@ else{
 
     backToChats(){
       this.clearInputData();
+      this.revokePendingAttachmentUrls();
       this.filesList=[];
       this.openChat=false
-    }
-    toBase64(file){
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = reject;
-    });
     }
     clearInputData(){
       const fileInput =this.fileInputRef.nativeElement.value='';
       }
-  async onChangeFile(e) {
+  onChangeFile(e) {
     e.preventDefault();
-    let toBase64String: any = '';
     let reloadedFiles: string[] = [];
   
     for (let item of e?.dataTransfer?.files?.length ? e?.dataTransfer?.files : e?.target?.files?.length ? e?.target?.files : []) {
-        toBase64String = await this.toBase64(item);
-     
-        const isReloaded = this.filesList.some(file => file.url === toBase64String);
+        const isReloaded = this.filesList.some(
+          (f) =>
+            f.file.name === item.name &&
+            f.file.size === item.size &&
+            f.file.lastModified === item.lastModified
+        );
   
         if(isFileSizeNotAllowed(item.size,this.authService.getAllowedFileSize())){
           this.toaster.warning(`${this.translate.instant("File_Size_Warning")} ${this.authService.getAllowedFileSize()} MB`)
         }
-        // Check if the new file matches any existing file based on its base64 representation
-  
         else if (isReloaded) {
-          reloadedFiles.push(item.name); // Add the name of the reloaded file to the list
+          reloadedFiles.push(item.name);
         } 
         
         else {
             this.filesList.push(
                 {
+                    file: item,
                     name: item.name,
                     type: item.type,
-                    url: toBase64String,
+                    url: URL.createObjectURL(item),
                     size: item.size
                 }
             );

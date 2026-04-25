@@ -92,7 +92,7 @@ extractChats(deviceId: string): Observable<any> {
   });
 }
 addTelegramDev(data):Observable<any>{
-  return this.http.post<any>(`${this.api}Device/addNewTelgramDevice`,data)
+  return this.http.post<any>(`${this.api}Device/addNewTelegramDevice`,data)
 }
 reconnectTelegramDev(data):Observable<any>{
   return this.http.put<any>(`${this.api}Device/reconnectTelegramDevice`,data)

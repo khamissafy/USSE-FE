@@ -46,6 +46,8 @@ export interface ChatById {
     msgType?: string,
     fileName?: any,
     fileUrl?: any,
+    /** UTC expiry for GCS signed URLs (from API). */
+    fileUrlExpiresAtUtc?: string,
     campaignId?: any,
     actionCount?: any,
     isReply?: boolean,

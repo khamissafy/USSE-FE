@@ -15,6 +15,7 @@ import { ToasterServices } from './shared/components/us-toaster/us-toaster.compo
 import { TRANSLATE_SERVICE } from './shared/shared.module';
 import { TokenInterceptorService } from './interceptors/token-interceptor.service';
 import { ApiResultUnwrapInterceptor } from './interceptors/api-result-unwrap.interceptor';
+import { CampaignApiRouteInterceptor } from './interceptors/campaign-api-route.interceptor';
 import { NZ_I18N, en_US } from 'ng-zorro-antd/i18n';
 import { AuthSessionService } from './shared/services/auth-session.service';
 import { firstValueFrom, of, catchError } from 'rxjs';
@@ -55,6 +56,11 @@ export function initAuthSession(session: AuthSessionService) {
       provide: APP_INITIALIZER,
       useFactory: initAuthSession,
       deps: [AuthSessionService],
+      multi: true,
+    },
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: CampaignApiRouteInterceptor,
       multi: true,
     },
     {

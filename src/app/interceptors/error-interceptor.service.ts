@@ -82,12 +82,13 @@ export class ErrorInterceptorService implements HttpInterceptor {
               if (
                 !u.includes('reconnectWBSDevice') &&
                 !u.includes('addNewTelgramDevice') &&
+                !u.includes('addNewTelegramDevice') &&
                 !u.includes('reconnectTelegramDevice') &&
                 !u.includes('ipapi')
               ) {
                 this.toaster.error(display, true);
               }
-              if (u.includes('addNewTelgramDevice') && (errBody as any)?.msg) {
+              if ((u.includes('addNewTelgramDevice') || u.includes('addNewTelegramDevice')) && (errBody as any)?.msg) {
                 this.toaster.error((errBody as any).msg, true);
               }
               if (u.includes('reconnectTelegramDevice') && (errBody as any)?.msg) {

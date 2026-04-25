@@ -6,26 +6,33 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./bot.component.scss']
 })
 export class BotComponent implements OnInit {
-  isBots:boolean =true;
-  automationData:any
-  constructor() { }
+  isBots: boolean = true;
+  automationData: any;
+  selectedTabIndex: number = 0;
 
-  ngOnInit() {
+  constructor() {}
+
+  ngOnInit() {}
+
+  backToBots() {
+    this.isBots = true;
   }
-  backToBots(){
-    this.isBots=true;
-}
-openNewAutomation(event){
-  this.isBots=!event.openNewAutomation;
-  this.automationData=event.editAutomationData;
 
-}
-backToBotComponent(event){
-  this.isBots=event;
+  openNewAutomation(event: any) {
+    this.isBots = !event.openNewAutomation;
+    this.automationData = event.editAutomationData;
+  }
 
-}
-addAutomation(){
-  this.automationData = null
-  this.isBots=false;
-}
+  backToBotComponent(event: any) {
+    this.isBots = event;
+  }
+
+  addAutomation() {
+    this.automationData = null;
+    this.isBots = false;
+  }
+
+  changeModal(event: any) {
+    this.selectedTabIndex = event.index;
+  }
 }

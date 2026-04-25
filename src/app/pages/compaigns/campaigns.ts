@@ -43,7 +43,7 @@ export interface compaignDetails{
   sessionTimeOutResponseContent: any
 }
 export interface CompaignStat{
-  pindingCount: number,
+  pendingCount: number,
   sentCount: number,
   deliveredCount: number,
   readCount: number,

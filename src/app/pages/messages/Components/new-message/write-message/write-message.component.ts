@@ -1,8 +1,12 @@
-import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Host, OnInit, Optional, Output } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { MatStepper } from '@angular/material/stepper';
+import { firstValueFrom } from 'rxjs';
 import { Attatchment, Templates } from 'src/app/pages/templates/templates';
 import { TemplatesService } from 'src/app/pages/templates/templates.service';
 import { SelectOption } from 'src/app/shared/components/select/select-option.model';
+import { MessagesService } from 'src/app/pages/messages/messages.service';
+import { ToasterServices } from 'src/app/shared/components/us-toaster/us-toaster.component';
 
 export interface files{
   name:string,
@@ -34,7 +38,14 @@ export class WriteMessageComponent implements OnInit {
     templatesData:this.templatesData,
     message:this.message
   });
-  constructor(private templateService:TemplatesService) { }
+  uploading = false;
+
+  constructor(
+    private templateService: TemplatesService,
+    private messagesService: MessagesService,
+    private toaster: ToasterServices,
+    @Optional() @Host() private stepper: MatStepper | null
+  ) { }
 
   ngOnInit() {
     this.formValidityChange.emit(this.form.valid);
@@ -45,8 +56,46 @@ export class WriteMessageComponent implements OnInit {
     });
     this.getTemplates();
   }
-  filesAndMessageToParent(){
-    this.filesAndMessage.emit({files:this.fileData.map((file)=>file.url) , message: this.form.value.message})
+  private dataUrlToFile(dataUrl: string, filename: string): File {
+    const parts = dataUrl.split(',');
+    const mime = parts[0].match(/:(.*?);/)?.[1] ?? 'application/octet-stream';
+    const binary = atob(parts[1]);
+    const len = binary.length;
+    const bytes = new Uint8Array(len);
+    for (let i = 0; i < len; i++) {
+      bytes[i] = binary.charCodeAt(i);
+    }
+    return new File([bytes], filename, { type: mime });
+  }
+
+  async filesAndMessageToParent() {
+    const msg = this.form.value.message ?? '';
+    this.uploading = true;
+    try {
+      const urls: string[] = [];
+      for (let i = 0; i < this.fileData.length; i++) {
+        const entry = this.fileData[i];
+        const raw = entry.url?.trim() ?? '';
+        if (raw.startsWith('https://') || raw.startsWith('http://')) {
+          urls.push(raw);
+          continue;
+        }
+        if (!raw.startsWith('data:')) {
+          this.toaster.error('Unsupported attachment format');
+          return;
+        }
+        const file = this.dataUrlToFile(raw, entry.name);
+        const cap = i === 0 ? msg : undefined;
+        const res = await firstValueFrom(this.messagesService.uploadFile(file, cap, 'campaign'));
+        urls.push(res.signedUrl);
+      }
+      this.filesAndMessage.emit({ files: urls, message: msg });
+      this.stepper?.next();
+    } catch {
+      this.toaster.error('Upload failed');
+    } finally {
+      this.uploading = false;
+    }
   }
   getTemplates(){
 

@@ -253,7 +253,7 @@
                                     <span *ngIf="chat?.chat?.channelType > 1 || chat?.groupName" class="text-primary-800 font-w-700 txt-xs">
                                         {{chat?.targetPhoneNumber}}
                                         </span>
-                                    <p>{{ chat?.msgBody }}</p>
+                                    <p class="chat-message-text">{{ chat?.msgBody }}</p>
                                     <span class="time">{{ chat?.createdAt | timeOnly:selectedTimeZone }}</span>
                                 </div>
                             </div>
@@ -269,7 +269,7 @@
                                 <div class="message-out d-flex flex-column gap-1 align-items-end"
                                     (click)="toggleUpdatedAt(chat)">
                                     <div class="outgoing-chats-msg ">
-                                        <p>{{ chat?.msgBody }}</p>
+                                        <p class="chat-message-text">{{ chat?.msgBody }}</p>
                                         <span class="time">{{ chat?.createdAt | timeOnly:selectedTimeZone }}</span>
                                     </div>
 
@@ -302,7 +302,7 @@
                     <ng-template #withFiles>
                         <ng-container [ngSwitch]="chat?.direction">
                             <div *ngSwitchCase="false" class="received-chats"
-                                [ngClass]="{'align-items-start':(chat?.fileName && chat?.fileName !== '') && chat?.msgBody == ''  && (!chat?.fileUrl.includes('image') || (chat?.fileName | type ) !=='assets/images/image.svg')}">
+                                [ngClass]="{'align-items-start':(chat?.fileName && chat?.fileName !== '') && chat?.msgBody == ''  && (!(chat?.fileUrl && chat.fileUrl.includes('image')) || (chat?.fileName | type ) !=='assets/images/image.svg')}">
                                 <div class="chat-contact-img">
                                     <span>{{ (chat?.chat?.channelType > 1 || chat?.groupName) ? chatIcon(chat?.targetPhoneNumber) : chatIcon(chatName) }}</span>
                                 </div>
@@ -312,25 +312,32 @@
                                         {{chat?.targetPhoneNumber}}
                                         </span>
                                     <ng-container *ngIf="chat?.fileName">
-                                        <div *ngIf="(chat.fileUrl.includes('image') || (chat?.fileName | type ) === 'assets/images/image.svg'); else otherType"
+                                        <div *ngIf="isAttachmentUnavailable(chat)" class="attachment-unavailable txt-sm text-danger mb-1">
+                                            {{ 'Attachment unavailable' | translate }}
+                                        </div>
+                                        <ng-container *ngIf="!isAttachmentUnavailable(chat)">
+                                        <div *ngIf="(isImageMedia(chat) || (chat?.fileName | type ) === 'assets/images/image.svg'); else recvOtherType"
                                             class="d-flex justify-content-center ">
 
-                                            <img class="mx-1 mb-1 w-100 image" [src]="chat.fileUrl" alt="">
+                                            <img class="mx-1 mb-1 w-100 image" [src]="chat.fileUrl" alt=""
+                                                (load)="refreshChatMediaIfNeeded(chat)"
+                                                (error)="onChatMediaLoadError(chat)">
                                         </div>
-                                        <ng-template #otherType>
+                                        <ng-template #recvOtherType>
                                             <a class="pointer" [href]="chat.fileUrl" target="_blank"
                                                 [title]="'open' | translate"><img class="media mb-1"
                                                     [src]="chat.fileName | type" alt=""></a>
                                         </ng-template>
+                                        </ng-container>
                                     </ng-container>
                                     <div>
-                                        <p class="mt-1" *ngIf="chat?.msgBody !== '' ">{{ chat?.msgBody }}</p>
+                                        <p class="mt-1 chat-message-text" *ngIf="chat?.msgBody !== '' ">{{ chat?.msgBody }}</p>
                                         <span class="time">{{ chat?.createdAt | timeOnly:selectedTimeZone }}</span>
                                     </div>
                                 </div>
                             </div>
                             <div *ngSwitchCase="true" class="outgoing-chats"
-                                [ngClass]="{'align-items-start':(chat?.fileName && chat?.fileName !== '') && chat?.msgBody == ''  && (!chat?.fileUrl.includes('image') || (chat?.fileName | type ) !=='assets/images/image.svg')}">
+                                [ngClass]="{'align-items-start':(chat?.fileName && chat?.fileName !== '') && chat?.msgBody == ''  && (!(chat?.fileUrl && chat.fileUrl.includes('image')) || (chat?.fileName | type ) !=='assets/images/image.svg')}">
                                 <div [ngClass]="{'show':chat.updatedAtVisible}" class="updatedAt"
                                     *ngIf="chat?.status > 0 && chat?.status < 4 && chat?.updatedAt">
                                     <span>{{chat?.status == 1?('sentAt' |translate):
@@ -344,18 +351,25 @@
                                     <div class="outgoing-chats-msg"
                                         [ngClass]="{'outgoing-files-only': (chat?.fileName && chat?.fileName !== '') && chat?.msgBody == ''  }">
                                         <ng-container *ngIf="chat?.fileName">
-                                            <div *ngIf="(chat.fileUrl.includes('image') || (chat?.fileName | type ) === 'assets/images/image.svg') ; else otherType"
-                                                class="d-flex justify-content-center ">
-                                                <img class="mx-1 mb-1 w-100 image" [src]="chat.fileUrl" alt="">
+                                            <div *ngIf="isAttachmentUnavailable(chat)" class="attachment-unavailable txt-sm text-danger mb-1">
+                                                {{ 'Attachment unavailable' | translate }}
                                             </div>
-                                            <ng-template #otherType>
+                                            <ng-container *ngIf="!isAttachmentUnavailable(chat)">
+                                            <div *ngIf="(isImageMedia(chat) || (chat?.fileName | type ) === 'assets/images/image.svg') ; else outOtherType"
+                                                class="d-flex justify-content-center ">
+                                                <img class="mx-1 mb-1 w-100 image" [src]="chat.fileUrl" alt=""
+                                                    (load)="refreshChatMediaIfNeeded(chat)"
+                                                    (error)="onChatMediaLoadError(chat)">
+                                            </div>
+                                            <ng-template #outOtherType>
                                                 <a class="pointer" [href]="chat.fileUrl" target="_blank"
                                                     [title]="'open' | translate"><img class="media mb-1"
                                                         [src]="chat.fileName | type" alt=""></a>
                                             </ng-template>
+                                            </ng-container>
                                         </ng-container>
                                         <div>
-                                            <p class="mt-1" *ngIf="chat?.msgBody !== '' ">{{ chat?.msgBody }}</p>
+                                            <p class="mt-1 chat-message-text" *ngIf="chat?.msgBody !== '' ">{{ chat?.msgBody }}</p>
                                             <span class="time">{{ chat?.createdAt | timeOnly:selectedTimeZone }}</span>
                                         </div>
                                     </div>
@@ -395,7 +409,7 @@
         </div>
         <!-- footer -->
         <div class="attachments-review">
-            <app-attachments (onRemoveFile)="disableButtonOrnot()" [files]="filesList"></app-attachments>
+            <app-attachments (onRemoveFile)="onAttachmentRemoved($event)" [files]="filesList"></app-attachments>
         </div>
         <div *ngIf="listChats?.length>0" class="chats-footer w-100 p-3 bg-primary-500">
             <div class="d-flex gap-3  chat-message-container" style="width: 95%;">

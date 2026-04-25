@@ -154,7 +154,7 @@
             </us-button>
           </button>
 
-          <button class="rest-style" matStepperNext [disabled]="isLoading">
+          <button class="rest-style" [disabled]="isLoading">
             <us-button
               class="m-2"
               [label]="(actions.length==0) ? ('addLabel' | translate) :('nextLabel' | translate )"
@@ -164,7 +164,7 @@
               [loading]="isLoading"
               [disabled]="isLoading "
               [appearance]="'primary'"
-              (clicked)="(actions.length==0) ? addCampaign() : ''"
+              (clicked)="onStepFiveNext()"
             >
             </us-button>
           </button>

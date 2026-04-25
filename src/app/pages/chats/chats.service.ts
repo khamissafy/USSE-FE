@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 
 import { environment } from 'src/environments/environment';
-import { BehaviorSubject, Observable, shareReplay } from 'rxjs';
+import { BehaviorSubject, Observable, Subject, shareReplay } from 'rxjs';
 import { ChatById, Chats } from './interfaces/Chats';
 import * as signalR from "@microsoft/signalr";
 import { AuthService } from 'src/app/shared/services/auth.service';
@@ -25,6 +25,9 @@ export class ChatsService {
   /** Emits SignalR hub connection state for UI (e.g. disconnected banner). */
   connectionState$: Observable<signalR.HubConnectionState> = this.connectionState.asObservable();
 
+  /** Fires after each successful hub reconnect (automatic or manual); use to reconcile chat state (e.g. REST reload). */
+  private readonly hubReconnected = new Subject<void>();
+  readonly hubReconnected$ = this.hubReconnected.asObservable();
 
 constructor(private http:HttpClient, private auth: AuthService) { 
 
@@ -57,6 +60,7 @@ private createConnection() {
   this.hubConnection.onreconnected((connectionId) => {
     console.log('SignalR reconnected', connectionId);
     this.connectionState.next(this.hubConnection.state);
+    this.hubReconnected.next();
   });
   this.hubConnection.onclose((err) => {
     console.error('SignalR connection closed', err);

@@ -163,6 +163,30 @@ sendWhatsappBusinessMessage( deviceid: string,
   return this.http.post<any>(`${this.api}Message/sendWhatsappBusinessMessage`,data)
 
 }
+uploadFile(file: File, caption?: string, source?: string): Observable<FileManagementUploadResponse> {
+  const form = new FormData();
+  form.append('file', file);
+  if (caption) {
+    form.append('caption', caption);
+  }
+  if (source) {
+    form.append('source', source);
+  }
+  return this.http.post<FileManagementUploadResponse>(`${this.api}file-management/upload`, form);
+}
+
+refreshSignedUrl(attachmentId: string): Observable<FileManagementSignedUrlResponse> {
+  return this.http.get<FileManagementSignedUrlResponse>(
+    `${this.api}file-management/attachments/${encodeURIComponent(attachmentId)}/signed-url`);
+}
+
+/** Refresh signed URL for chat/connector media (GCS object in configured bucket). */
+refreshChatMediaSignedUrl(messageId: string): Observable<FileManagementSignedUrlResponse> {
+  const params = new HttpParams().set('messageId', messageId);
+  return this.http.get<FileManagementSignedUrlResponse>(
+    `${this.api}Message/chat-media-signed-url`,
+    { params });
+}
 updateDisplayNumber(displayNum){
   displayNum=this.display;
  }
@@ -172,4 +196,20 @@ getUpdatedDisplayNumber(){
 ressendFailedMessages(data):Observable<any>{
   return this.http.post<any>(`${this.api}Message/resendFailedMessages`,data);
 }
+}
+
+export interface FileManagementUploadResponse {
+  attachmentId: string;
+  fileName: string;
+  mimeType: string;
+  sizeBytes: number;
+  signedUrl: string;
+  expiresAtUtc: string;
+  status: string;
+}
+
+export interface FileManagementSignedUrlResponse {
+  attachmentId: string;
+  signedUrl: string;
+  expiresAtUtc: string;
 }

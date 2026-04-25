@@ -20,7 +20,7 @@ export class CompaignsDetailsService {
 
   }
   getCampaignStat(id:string):Observable<CompaignStat>{
-    return this.http.get<CompaignStat>(`${this.api}Message/getCampaignStat?id=${id}`);
+    return this.http.get<CompaignStat>(`${this.api}Campaign/getCampaignStat?id=${id}`);
   }
 
   listCampaignMessages(id: string, showsNum: number, pageNum: number, StatusFilters?: number[]): Observable<CompainMessages[]> {
@@ -36,7 +36,7 @@ export class CompaignsDetailsService {
       });
     }
   
-    const apiUrl = `${this.api}Message/listCampaignMessages`;
+    const apiUrl = `${this.api}Campaign/listCampaignMessages`;
   
     return this.http.get<CompainMessages[]>(apiUrl, { params: params });
   }
@@ -50,12 +50,12 @@ export class CompaignsDetailsService {
       });
     }
   
-    const apiUrl = `${this.api}Message/listCampaignMessagesCount`;
+    const apiUrl = `${this.api}Campaign/listCampaignMessagesCount`;
   
     return this.http.get<number>(apiUrl, { params: params });
   }
   resendCampaignFailedMessages(data):Observable<any>{
-    return this.http.post<any>(`${this.api}Message/resendCampaignFailedMessages`,data);
+    return this.http.post<any>(`${this.api}Campaign/resendCampaignFailedMessages`,data);
   }
   convertUTCToLocal(utcTime: string,timezone): string {
     const [hoursStr, minutesStr] = utcTime.split(':');

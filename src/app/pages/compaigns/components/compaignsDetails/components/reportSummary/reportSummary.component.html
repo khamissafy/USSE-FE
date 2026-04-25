@@ -3,7 +3,7 @@
     <div class=" summary-state d-flex justify-content-between pending align-items-center px-4 py-2" >
       <div class="d-flex gap-4 flex-column summary-state-content">
         <h4 class="txt-md" style="font-weight: 500;">{{ 'PENDING' | translate }}</h4>
-        <p style="font-weight: 500; font-size: 32px;" class="fw-bold">{{ statics?.pindingCount }}</p>
+        <p style="font-weight: 500; font-size: 32px;" class="fw-bold">{{ statics?.pendingCount }}</p>
       </div>
 
       <div class="d-flex justify-content-center align-items-center  summary-icon" >
@@ -62,7 +62,7 @@
   </div>
   <div >
     <h4 class="total-delevired" style="font-size: 32px; font-weight: 600; margin-bottom: 0 !important;" >
-      {{ 'TOTAL' | translate }}: <span>{{ statics?.pindingCount + statics?.sentCount }}</span>
+      {{ 'TOTAL' | translate }}: <span>{{ statics?.pendingCount + statics?.sentCount }}</span>
     </h4>
   </div>
 

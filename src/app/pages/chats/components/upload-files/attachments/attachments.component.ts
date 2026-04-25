@@ -20,9 +20,12 @@ calcSize(file){
     return val;
   }
   remove(file){
-    this.files.splice(this.files.indexOf(file),1);
-    this.onRemoveFile.emit(this.files)
-    
+    const idx = this.files.indexOf(file);
+    if (idx < 0) {
+      return;
+    }
+    this.files.splice(idx, 1);
+    this.onRemoveFile.emit(file);
   }
 }
 

@@ -46,7 +46,7 @@ export class AddCompaignsComponent implements OnInit {
   numErr:number=0;
   stepTwoValidate: boolean = true;
   stepThreeValidate: boolean = true;
-  stepFourValidate: boolean = true;
+  stepFourValidate: boolean = false;
   deviceSelected:boolean=false;
   step1:boolean=true;
 step2:boolean=false;
@@ -95,6 +95,7 @@ actions:any=[];
 this.getLastCampaignData();
   }
   getLists(listsData){
+    this.totalContacts = 0;
     this.lists=listsData.map((list:ListData)=>{
       this.totalContacts += list.totalContacts
       return list.id
@@ -138,11 +139,15 @@ getLastCampaignData(){
     (res)=>{
       if(res){
        this.lastCampaignData=res;
-       this.lastCampaignData.sendingoutFrom=this.convertUTCToLocal(this.lastCampaignData.sendingoutFrom)
-       this.lastCampaignData.sendingoutTo=this.convertUTCToLocal(this.lastCampaignData.sendingoutTo)
+       if (this.lastCampaignData.sendingoutFrom != null && String(this.lastCampaignData.sendingoutFrom).trim() !== '') {
+         const local = this.convertUTCToLocal(this.lastCampaignData.sendingoutFrom);
+         if (local) this.lastCampaignData.sendingoutFrom = local;
+       }
+       if (this.lastCampaignData.sendingoutTo != null && String(this.lastCampaignData.sendingoutTo).trim() !== '') {
+         const local = this.convertUTCToLocal(this.lastCampaignData.sendingoutTo);
+         if (local) this.lastCampaignData.sendingoutTo = local;
+       }
       }
- 
-      
     }
   )
 }
@@ -160,10 +165,10 @@ toStepFive(){
   this.repeatedDays=this.stepFourComponent.form.get("repeatedDays").value;
   this.intervalFrom = this.stepFourComponent.form.get("intervalFrom").value;
   this.intervalTo=this.stepFourComponent.form.get("intervalTo").value;
-  this.blackoutFrom=this.stepFourComponent.utcTime1;
-  this.blackoutTo=this.stepFourComponent.utcTime2;
-  // this.maxPerDay=this.stepFourComponent.form.get("maxPerDay").value;
-  this.stepFourComponent.convertToUTC(this.blackoutFrom);
+  this.blackoutFrom = this.stepFourComponent.convertToUTC(this.stepFourComponent.time1);
+  this.blackoutTo = this.stepFourComponent.convertToUTC(this.stepFourComponent.time2);
+  this.stepFourComponent.utcTime1 = this.blackoutFrom;
+  this.stepFourComponent.utcTime2 = this.blackoutTo;
 
   this.calulateCampExpectedTime()
 
@@ -174,9 +179,14 @@ toStepFive(){
 calulateCampExpectedTime(){
   let startDate = this.stepFourComponent.time1;
   let endDate = this.stepFourComponent.time2;
+  const sv = startDate?.value;
+  const ev = endDate?.value;
+  const timesOk = sv instanceof Date && ev instanceof Date && !Number.isNaN(sv.getTime()) && !Number.isNaN(ev.getTime());
 
-  // Calculate the total time window in seconds
-  const timeDiffInHours = !this.stepFourComponent.timesAreSame(startDate,endDate) ? this.calculateTimeDifference(startDate.value , endDate.value) : 24;
+  // Calculate the total time window in seconds (fallback 24h if times are missing)
+  const timeDiffInHours = timesOk
+    ? (!this.stepFourComponent.timesAreSame(startDate,endDate) ? this.calculateTimeDifference(sv , ev) : 24)
+    : 24;
   
   // Calculate the interval average
   let intervalAvg = this.isInterval ? (parseInt(this.intervalFrom, 10) + parseInt(this.intervalTo, 10)) / 2 : 1;
@@ -350,15 +360,28 @@ this.compaignsService.addMewCampain(this.compaignsService.filteredObject(data)).
 )
 
 }
-convertUTCToLocal(utcTime: string): Date {
-  const [hoursStr, minutesStr] = utcTime.split(':');
-  const hours = parseInt(hoursStr, 10);
-  const minutes = parseInt(minutesStr, 10);
+convertUTCToLocal(utcTime: string): Date | null {
+  if (utcTime == null || utcTime === '') return null;
+  const s = typeof utcTime === 'string' ? utcTime.trim() : String(utcTime);
+  const parts = s.split(':');
+  if (parts.length < 2) return null;
+  const hours = parseInt(parts[0], 10);
+  const minutes = parseInt(parts[1], 10);
+  if (Number.isNaN(hours) || Number.isNaN(minutes)) return null;
 
   const utcDate = new Date();
   utcDate.setUTCHours(hours, minutes);
-  // Convert UTC time to local time
   return utcDate;
 }
+
+  /** Step 5: no actions → submit; with actions → go to timeout step. */
+  onStepFiveNext(): void {
+    if (this.actions.length === 0) {
+      this.addCampaign();
+    } else {
+      this.stepper?.next();
+    }
   }
+
+}
 
