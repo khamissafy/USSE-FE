@@ -19,6 +19,7 @@ import { SelectOption } from 'src/app/shared/components/select/select-option.mod
 import { Subject, Subscription, debounceTime, distinctUntilChanged, switchMap, takeUntil } from 'rxjs';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { TimeZoneServiceService } from 'src/app/shared/services/timeZoneService.service';
+import { SubscriptionStateService } from 'src/app/shared/services/subscription-state.service';
 
 @Component({
 
@@ -83,7 +84,8 @@ export class UsersComponent implements OnInit, OnDestroy {
     private snackBar: MatSnackBar,
     private breakpointObserver: BreakpointObserver,
     private userService: UsersService,
-    private timeZoneService:TimeZoneServiceService
+    private timeZoneService:TimeZoneServiceService,
+    private subscriptionState: SubscriptionStateService
 
   ) { };
 
@@ -283,6 +285,11 @@ setupSearchSubscription(){
 
 
   openAddUserModal(data?) {
+    if (this.subscriptionState.isAtSeatLimit()) {
+      const msg = `You have reached the Seats limit for your current plan. <a href="/plans" style="text-decoration:underline;font-weight:600">Upgrade Plan</a>`;
+      this.toaster.warning(msg, true);
+      return;
+    }
     const dialogConfig = new MatDialogConfig();
     dialogConfig.height = '81vh';
     dialogConfig.width = '45vw';
@@ -297,6 +304,7 @@ setupSearchSubscription(){
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
         this.getUsers();
+        this.subscriptionState.refreshSnapshot().subscribe();
       }
     });
 

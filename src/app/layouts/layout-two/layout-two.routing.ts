@@ -43,6 +43,12 @@ const routes: Routes = [
           import("./../../pages/users/users.module").then((m) => m.UsersModule)
       },
       {
+        path: "devices/evolution",
+        canActivate:[AuthGuard],data:{name:"Devices"},
+        loadChildren: () =>
+          import("./../../pages/devices/evolution/evolution-device.module").then((m) => m.EvolutionDeviceModule),
+      },
+      {
         path: "devices",
         canActivate:[AuthGuard],data:{name:"Devices"},
 
@@ -83,6 +89,12 @@ const routes: Routes = [
         canActivate:[AuthGuard],data:{name:"info"},
         loadChildren:()=>
         import('./../../pages/info/info.module').then((m)=>m.InfoModule)
+      },
+      {
+        path: "plans",
+        data: { name: "plans" },
+        loadChildren: () =>
+          import('./../../pages/plans/plans.module').then((m) => m.PlansModule)
       }
 
 

@@ -1,4 +1,5 @@
 import { Component, Input, OnInit, ViewContainerRef   } from '@angular/core';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
 let toasterCustomComponent:any;
 
@@ -25,7 +26,10 @@ export class ToasterServices implements OnInit {
 @Input() duration: number = 3000;
 progress = 100;
 @Input() translate: boolean =false ;
-  constructor(private viewContainerRef : ViewContainerRef) { }
+/** When true, `message` is rendered via [innerHTML] (sanitized). */
+@Input() isHtml: boolean = false;
+safeHtml: SafeHtml | null = null;
+  constructor(private viewContainerRef : ViewContainerRef, private sanitizer: DomSanitizer) { }
 
 
   ngOnInit(): void {
@@ -36,6 +40,10 @@ progress = 100;
     toasterCustomComponent.instance.state = this.state;
     toasterCustomComponent.instance.translate = this.translate;
     toasterCustomComponent.instance.iconClass = this.iconClass;
+    toasterCustomComponent.instance.isHtml = this.isHtml;
+    toasterCustomComponent.instance.safeHtml = this.isHtml
+      ? this.sanitizer.bypassSecurityTrustHtml(this.message ?? '')
+      : null;
     toasterCustomComponent.instance.showToaster = true;
     this.showToaster = toasterCustomComponent.instance.showToaster;
 
@@ -78,11 +86,12 @@ progress = 100;
     this.getToasterData();
   }
 
-  warning( message:any){
+  warning( message:any, isHtml: boolean = false){
     if(toasterCustomComponent){
       toasterCustomComponent.destroy();
     }
     this.translate=false;
+    this.isHtml = isHtml;
 
     this.message=  message;
     this.state = "warning",

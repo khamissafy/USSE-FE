@@ -122,18 +122,24 @@
           </button>
           </div>
           <mat-menu #menu2="matMenu">
-            <button mat-menu-item (click)="isChecked ? exportSelectedContactsAs('excel') :exportAllAs('excel')" [style.width]="getWidth(exportMenu)" >
-            <div class="d-flex align-items-center gap-2">
-              <img src="assets/icons/Excel.svg" alt="" /> 
-              <span>Excel Sheet</span>
-            </div>
-            </button>
-            <button mat-menu-item (click)="isChecked ? exportSelectedContactsAs('vcf') :exportAllAs('vcf')" [style.width]="getWidth(exportMenu)">
-              <div class="d-flex align-items-center gap-2">
-                <img src="assets/icons/vcf.svg" alt="" />
-                <span>vcf file</span>
-              </div>
-            </button>
+            <!-- Excel export — requires dataExportExcel (Pro+) -->
+            <ng-container *appHasFeature="'dataExportExcel'">
+              <button mat-menu-item (click)="isChecked ? exportSelectedContactsAs('excel') :exportAllAs('excel')" [style.width]="getWidth(exportMenu)" >
+                <div class="d-flex align-items-center gap-2">
+                  <img src="assets/icons/Excel.svg" alt="" />
+                  <span>Excel Sheet</span>
+                </div>
+              </button>
+            </ng-container>
+            <!-- CSV / VCF export — requires dataExportCsv (Growth+) -->
+            <ng-container *appHasFeature="'dataExportCsv'">
+              <button mat-menu-item (click)="isChecked ? exportSelectedContactsAs('vcf') :exportAllAs('vcf')" [style.width]="getWidth(exportMenu)">
+                <div class="d-flex align-items-center gap-2">
+                  <img src="assets/icons/vcf.svg" alt="" />
+                  <span>vcf file</span>
+                </div>
+              </button>
+            </ng-container>
           </mat-menu>
       </div>
    

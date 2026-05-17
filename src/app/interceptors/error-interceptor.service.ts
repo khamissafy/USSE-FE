@@ -14,6 +14,21 @@ import { AuthSessionService } from '../shared/services/auth-session.service';
 import { AuthService } from '../shared/services/auth.service';
 import { ApiResult } from '../models/api-result.model';
 
+/** Error codes emitted by SubscriptionGuardService that need an upgrade CTA. */
+const SUBSCRIPTION_ERROR_CODES = new Set([
+  'SUBSCRIPTION_LIMIT_EXCEEDED',
+  'FAIR_USE_THROTTLED',
+]);
+
+/** Shape of the limit-exceeded body returned by the backend. */
+interface SubscriptionLimitBody {
+  errorCode?: string;
+  vector?: string;
+  feature?: string;
+  message?: string;
+  upgradeUrl?: string;
+}
+
 @Injectable()
 export class ErrorInterceptorService implements HttpInterceptor {
   constructor(
@@ -70,6 +85,26 @@ export class ErrorInterceptorService implements HttpInterceptor {
             typeof error.error !== 'boolean'
           ) {
             const errBody = error.error;
+            const u = error.url || '';
+
+            // ── Subscription limit / Fair-Use errors (402, 403, 429) ──────────
+            if (
+              (error.status === 402 || error.status === 403 || error.status === 429) &&
+              errBody && typeof errBody === 'object' &&
+              'errorCode' in errBody &&
+              SUBSCRIPTION_ERROR_CODES.has((errBody as SubscriptionLimitBody).errorCode ?? '')
+            ) {
+              const body = errBody as SubscriptionLimitBody;
+              const upgradeUrl = body.upgradeUrl ?? '/plans';
+              const baseText = body.message ? body.message : 'Subscription limit reached.';
+              const toastMessage =
+                `${baseText} <a href="${upgradeUrl}" style="text-decoration:underline;font-weight:600">Upgrade Plan</a>`;
+              // isHtml=true so the toaster renders the anchor instead of escaping it.
+              this.toaster.warning(toastMessage, true);
+              return throwError(() => error);
+            }
+
+            // ── Generic error display ─────────────────────────────────────────
             let display: string | undefined;
             if (errBody && typeof errBody === 'object' && 'messageCode' in errBody) {
               display = (errBody as ApiResult<unknown>).messageCode;
@@ -78,7 +113,6 @@ export class ErrorInterceptorService implements HttpInterceptor {
             }
 
             if (display) {
-              const u = error.url || '';
               if (
                 !u.includes('reconnectWBSDevice') &&
                 !u.includes('addNewTelgramDevice') &&

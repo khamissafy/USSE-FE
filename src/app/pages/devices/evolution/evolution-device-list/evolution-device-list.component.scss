@@ -1,0 +1,52 @@
+.evo-list {
+  padding: 1rem;
+}
+
+.evo-list__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.evo-list__loading {
+  display: flex;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.evo-list__table-wrap {
+  overflow: auto;
+}
+
+.evo-table {
+  width: 100%;
+}
+
+.evo-list__empty {
+  padding: 1rem;
+  text-align: center;
+}
+
+.evo-badge {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+}
+
+.evo-badge--open {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.evo-badge--close {
+  background: #ffebee;
+  color: #c62828;
+}
+
+.evo-badge--pending {
+  background: #fff8e1;
+  color: #f57f17;
+}

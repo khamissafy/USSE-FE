@@ -7,6 +7,9 @@ import { CompaignsService, DevicesPermissions } from '../../../compaigns.service
 import { AuthService } from 'src/app/shared/services/auth.service';
 import { TranslateService } from '@ngx-translate/core';
 import { TimeZoneServiceService } from 'src/app/shared/services/timeZoneService.service';
+import { map } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { SubscriptionStateService } from 'src/app/shared/services/subscription-state.service';
 
 @Component({
   selector: 'app-stepThree',
@@ -39,15 +42,21 @@ export class StepThreeComponent implements OnInit ,OnDestroy{
   @Output() isSelectedDevices = new EventEmitter<boolean>(true);
   sub: any;
 
+  /** Emits true when the user's plan includes campaign scheduling. */
+  hasCampaignScheduling$: Observable<boolean>;
+
   constructor( private translate:TranslateService,
     private devicesService:DevicesService,
     private datePipe: DatePipe,
     private compaignsService:CompaignsService,
     private authService:AuthService,
-    private timeZoneService:TimeZoneServiceService
-
-  
-  ) { }
+    private timeZoneService:TimeZoneServiceService,
+    private subscriptionState: SubscriptionStateService
+  ) {
+    this.hasCampaignScheduling$ = this.subscriptionState.plan$.pipe(
+      map(plan => !!plan && plan.features.includes('campaignScheduling'))
+    );
+  }
   ngOnDestroy(): void {
 
     this.formSub$.unsubscribe()

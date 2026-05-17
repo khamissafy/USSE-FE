@@ -1,4 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+import { SubscriptionStateService } from 'src/app/shared/services/subscription-state.service';
+import { ToasterServices } from 'src/app/shared/components/us-toaster/us-toaster.component';
 
 @Component({
   selector: 'app-bot',
@@ -10,12 +12,16 @@ export class BotComponent implements OnInit {
   automationData: any;
   selectedTabIndex: number = 0;
 
-  constructor() {}
+  constructor(
+    private subscriptionState: SubscriptionStateService,
+    private toaster: ToasterServices
+  ) {}
 
   ngOnInit() {}
 
   backToBots() {
     this.isBots = true;
+    this.subscriptionState.refreshSnapshot().subscribe();
   }
 
   openNewAutomation(event: any) {
@@ -25,9 +31,15 @@ export class BotComponent implements OnInit {
 
   backToBotComponent(event: any) {
     this.isBots = event;
+    this.subscriptionState.refreshSnapshot().subscribe();
   }
 
   addAutomation() {
+    if (this.subscriptionState.isAtBotLimit()) {
+      const msg = `You have reached the Bots limit for your current plan. <a href="/plans" style="text-decoration:underline;font-weight:600">Upgrade Plan</a>`;
+      this.toaster.warning(msg, true);
+      return;
+    }
     this.automationData = null;
     this.isBots = false;
   }

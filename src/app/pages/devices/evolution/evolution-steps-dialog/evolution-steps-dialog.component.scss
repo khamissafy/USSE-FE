@@ -1,0 +1,116 @@
+::ng-deep .mat-mdc-dialog-container .mdc-dialog__surface {
+  border-radius: 25px;
+}
+
+ol li {
+  color: #292D32;
+}
+
+ol.circles {
+  list-style-type: none;
+  padding: 0;
+  counter-reset: item 0;
+}
+
+ol.circles > li {
+  position: relative;
+  margin: 16px 0 10px 2rem;
+  padding: 0 0 0 0.5rem;
+  max-width: 81%;
+  counter-increment: item 1;
+}
+
+ol.circles > li::before {
+  content: counter(item);
+  position: absolute;
+  top: 0.2rem;
+  left: -1.2rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  background-color: #00A783;
+  color: white;
+  text-align: center;
+  padding: 4px;
+  line-height: 1rem;
+}
+
+.steps-container {
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  display: flex;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+  width: 113%;
+}
+
+.steps_ {
+  position: relative;
+  bottom: -42%;
+  width: 100%;
+  margin-inline: 15%;
+  max-width: 323px;
+}
+
+.evo-form {
+  mat-form-field {
+    width: 100%;
+  }
+}
+
+.pair-code {
+  font-size: 18px;
+  color: rgba(0, 0, 0, 0.7);
+}
+
+@media (max-width: 1600px) {
+  .qr-code-container {
+    .qr-code.p-5 {
+      padding: 25px !important;
+    }
+
+    p {
+      font-size: 26px;
+    }
+  }
+
+  .close-icon {
+    img {
+      width: 27px !important;
+    }
+  }
+}
+
+@media (max-width: 1400px) {
+  .steps-container {
+    h3 {
+      font-size: 13px !important;
+    }
+
+    padding: 13px 0 0 0 !important;
+  }
+
+  .circles {
+    li {
+      margin: 3px 0 1px 2rem !important;
+      font-size: 10px !important;
+
+      &::before {
+        width: 20px !important;
+        height: 20px !important;
+        padding: 2px !important;
+      }
+    }
+  }
+
+  ol.circles > li::before {
+    width: 18px !important;
+    height: 18px !important;
+    padding: 1px !important;
+  }
+
+  .modal-footer {
+    bottom: 3% !important;
+  }
+}

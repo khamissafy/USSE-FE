@@ -3,6 +3,7 @@ import { DevicesService } from '../devices.service';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { ToasterServices } from 'src/app/shared/components/us-toaster/us-toaster.component';
 import { StepsComponent } from '../components/steps/steps.component';
+import { EvolutionStepsDialogComponent } from '../evolution/evolution-steps-dialog/evolution-steps-dialog.component';
 import { DeviceData } from '../device';
 import { SelectionModel } from '@angular/cdk/collections';
 import { FormControl, FormGroup } from '@angular/forms';
@@ -20,6 +21,7 @@ import { Subject, debounceTime, distinctUntilChanged, switchMap, takeUntil } fro
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { AddTLDeviceComponent } from '../components/telegramDevice/addTLDevice/addTLDevice.component';
 import { TimeZoneServiceService } from 'src/app/shared/services/timeZoneService.service';
+import { SubscriptionStateService } from 'src/app/shared/services/subscription-state.service';
 
 @Component({
   selector: 'app-devices',
@@ -89,7 +91,8 @@ export class DevicesComponent implements OnInit,OnDestroy{
     private  toaster: ToasterServices,
     private authService:AuthService,
     private devicesService:DevicesService,
-    private timeZoneService:TimeZoneServiceService
+    private timeZoneService:TimeZoneServiceService,
+    private subscriptionState: SubscriptionStateService
   ){
   }
   ngOnInit() {
@@ -335,6 +338,12 @@ onPageChange(event){
   }
 
   openStepsModal(data?){
+    // Only block on new device add (no data = no reconnect)
+    if (!data && this.subscriptionState.isAtDeviceLimit()) {
+      const msg = `You have reached the Devices limit for your current plan. <a href="/plans" style="text-decoration:underline;font-weight:600">Upgrade Plan</a>`;
+      this.toaster.warning(msg, true);
+      return;
+    }
     const dialogConfig=new MatDialogConfig();
     dialogConfig.height='95vh';
     dialogConfig.width='70vw';
@@ -354,13 +363,41 @@ onPageChange(event){
            this.reconnect(data.device)
         }
                 this.toaster.success( this.translate.instant("COMMON.SUCC_MSG"));
-
+        if (!data) { this.subscriptionState.refreshSnapshot().subscribe(); }
       }
       this.getDevices();
 
     });
 
 
+  }
+
+  openEvoStepsModal(data?: { deviceId: string }): void {
+    if (!data && this.subscriptionState.isAtDeviceLimit()) {
+      const msg = `You have reached the Devices limit for your current plan. <a href="/plans" style="text-decoration:underline;font-weight:600">Upgrade Plan</a>`;
+      this.toaster.warning(msg, true);
+      return;
+    }
+    const dialogConfig = new MatDialogConfig()
+    dialogConfig.height = '95vh'
+    dialogConfig.width = '70vw'
+    dialogConfig.maxWidth = '100%'
+    dialogConfig.minWidth = '987px'
+    dialogConfig.maxHeight = '705px'
+    dialogConfig.disableClose = true
+    dialogConfig.data = data ?? null
+    const dialogRef = this.dialog.open(EvolutionStepsDialogComponent, dialogConfig)
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        this.toaster.success(this.translate.instant('COMMON.SUCC_MSG'))
+        if (!data) { this.subscriptionState.refreshSnapshot().subscribe(); }
+      }
+      this.getDevices()
+    })
+  }
+
+  reconnectEvo(device: DeviceData): void {
+    this.openEvoStepsModal({ deviceId: device.id })
   }
 
   updateDeviceDelay(id: string) {
@@ -413,6 +450,12 @@ onPageChange(event){
     
   }
   addTLDevice(element?){
+    // element is passed only on reconnect — new device has no element
+    if (!element && this.subscriptionState.isAtDeviceLimit()) {
+      const msg = `You have reached the Devices limit for your current plan. <a href="/plans" style="text-decoration:underline;font-weight:600">Upgrade Plan</a>`;
+      this.toaster.warning(msg, true);
+      return;
+    }
     const dialogConfig = new MatDialogConfig();
     dialogConfig.height='fit-content';
     dialogConfig.width='fit-content';
@@ -431,7 +474,7 @@ onPageChange(event){
       if(result){
         this.getDevices();
         this.loading=false;
-
+        if (!element) { this.subscriptionState.refreshSnapshot().subscribe(); }
       }
       else{
         this.loading=false;

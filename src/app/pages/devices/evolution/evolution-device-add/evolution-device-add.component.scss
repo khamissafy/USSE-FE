@@ -1,0 +1,33 @@
+.evo-add {
+  padding: 1rem;
+  max-width: 720px;
+}
+
+.evo-add__form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.evo-add__pairing {
+  margin-top: 1rem;
+}
+
+.evo-add__pair-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.evo-add__qr {
+  max-width: 260px;
+  border: 1px solid #e0e0e0;
+}
+
+.evo-add__code {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}

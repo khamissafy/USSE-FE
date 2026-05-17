@@ -22,6 +22,7 @@ import {MatSelectModule} from '@angular/material/select';
 import {MatMenuModule} from '@angular/material/menu';
 import {MatProgressBarModule} from '@angular/material/progress-bar';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
+import {MatTooltipModule} from '@angular/material/tooltip';
 import { MatSortModule } from '@angular/material/sort';
 
 import { ToasterServices } from './components/us-toaster/us-toaster.component';
@@ -43,6 +44,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { ErrorInterceptorService } from '../interceptors/error-interceptor.service';
 import { ClickOutsideDirective } from './directives/clickOutside.directive';
+import { HasFeatureDirective } from './directives/has-feature.directive';
 import { ConfirmLogOutComponent } from './components/side-bar/components/confirmLogOut/confirmLogOut.component';
 export const TRANSLATE_SERVICE = new InjectionToken<TranslateService>('TRANSLATE_SERVICE');
 import { PickerModule } from '@ctrl/ngx-emoji-mart';
@@ -78,6 +80,7 @@ import { TextMaskingPipe } from './pipes/textMasking.pipe';
     MatMenuModule,
     MatProgressBarModule,
     MatSnackBarModule,
+    MatTooltipModule,
     MatSortModule,
     MatStepperModule,
     FormsModule,
@@ -103,6 +106,7 @@ import { TextMaskingPipe } from './pipes/textMasking.pipe';
     ToasterServices,
     DeleteModalComponent,
     ClickOutsideDirective,
+    HasFeatureDirective,
     ConfirmLogOutComponent,
     TypePipe,
     HintMessageComponent,
@@ -135,6 +139,7 @@ import { TextMaskingPipe } from './pipes/textMasking.pipe';
     MatMenuModule,
     MatProgressBarModule,
     MatSnackBarModule,
+    MatTooltipModule,
     MatSortModule,
     MatIconModule,
     FormsModule,
@@ -157,6 +162,7 @@ import { TextMaskingPipe } from './pipes/textMasking.pipe';
     RouterModule,
     NavActionsComponent,
     ClickOutsideDirective,
+    HasFeatureDirective,
     TextMaskingPipe
 
   ],

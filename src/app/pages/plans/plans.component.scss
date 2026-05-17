@@ -1,0 +1,181 @@
+.plans-page {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.plans-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--clr-primary-800, #1a56db);
+}
+
+.plans-subtitle {
+  font-size: 1.05rem;
+}
+
+/* ── Billing toggle ──────────────────────────────────────────────────── */
+.billing-toggle {
+  font-size: 15px;
+}
+
+.savings-chip {
+  background: #dcfce7;
+  color: #166534;
+  border-radius: 12px;
+  font-size: 12px;
+  padding: 2px 8px;
+  margin-left: 4px;
+}
+
+/* ── Plan cards ──────────────────────────────────────────────────────── */
+.plan-card {
+  background: #fff;
+  border: 2px solid #e5e7eb;
+  border-radius: 20px;
+  padding: 32px 28px;
+  min-width: 230px;
+  max-width: 270px;
+  flex: 1;
+  position: relative;
+  transition: box-shadow 0.2s;
+
+  &:hover {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  }
+
+  &--highlighted {
+    border-color: var(--clr-primary-800, #1a56db);
+    box-shadow: 0 8px 24px rgba(26, 86, 219, 0.15);
+  }
+}
+
+.popular-badge {
+  position: absolute;
+  top: -14px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--clr-primary-800, #1a56db);
+  color: #fff;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 3px 14px;
+  white-space: nowrap;
+}
+
+.plan-name {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 0;
+}
+
+.plan-price {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--clr-primary-800, #1a56db);
+}
+
+.plan-period {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.egp-note {
+  font-size: 13px;
+}
+
+.trial-note {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 4px 12px;
+  display: inline-block;
+}
+
+/* ── Limits list ─────────────────────────────────────────────────────── */
+.plan-limits li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  padding: 5px 0;
+  color: #374151;
+}
+
+.limit-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  color: var(--clr-primary-800, #1a56db);
+}
+
+/* ── CTA buttons ─────────────────────────────────────────────────────── */
+.cta-button {
+  display: block;
+  text-align: center;
+  border-radius: 10px;
+  padding: 12px;
+  font-size: 15px;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+
+  &--primary {
+    background: var(--clr-primary-800, #1a56db);
+    color: #fff;
+    &:hover { background: #1a3faa; }
+  }
+
+  &--outline {
+    border: 2px solid var(--clr-primary-800, #1a56db);
+    color: var(--clr-primary-800, #1a56db);
+    &:hover { background: #eff6ff; }
+  }
+}
+
+/* ── Comparison table ────────────────────────────────────────────────── */
+.comparison-table-wrap {
+  background: #fff;
+  border-radius: 20px;
+  padding: 32px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.07);
+}
+
+.comparison-table {
+  border-collapse: collapse;
+
+  th, td {
+    padding: 12px 16px;
+    border-bottom: 1px solid #f3f4f6;
+    font-size: 14px;
+  }
+
+  thead th {
+    font-weight: 700;
+    color: #111827;
+    background: #f9fafb;
+    &:first-child { border-radius: 8px 0 0 0; }
+    &:last-child  { border-radius: 0 8px 0 0; }
+  }
+
+  .feature-col { width: 260px; }
+  .plan-col { min-width: 120px; }
+
+  .feature-name { color: #374151; }
+}
+
+.check-icon { color: #16a34a; font-size: 20px; width: 20px; height: 20px; }
+.dash-icon  { color: #d1d5db; font-size: 20px; width: 20px; height: 20px; }
+
+@media (max-width: 768px) {
+  .plan-card {
+    min-width: 90%;
+    max-width: 100%;
+  }
+
+  .comparison-table-wrap { padding: 16px; }
+}

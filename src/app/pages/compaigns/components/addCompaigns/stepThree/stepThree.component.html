@@ -11,38 +11,42 @@
       </label>
       </div>
       <div class="w-100">
-        <!-- <input #dateTime
+        <!-- Campaign Scheduling — gated by 'campaignScheduling' feature (Growth+) -->
+        <ng-container *ngIf="hasCampaignScheduling$ | async; else schedulingLocked">
+          <nz-date-picker
+          #datePicker
           class="rounded-pill border border-1py-2 txt-input w-100 date"
           style="padding: 0 12px;"
-          nbInput
-          placeholder="{{ 'pickDatePlaceholder' | translate }}"
-          [nbDatepicker]="dateTimePicker"
-          [formControl]="dateFormControl"
-        />
-        <nb-date-timepicker withSeconds #dateTimePicker></nb-date-timepicker> -->
- 
-        <nz-date-picker
-        #datePicker
-        class="rounded-pill border border-1py-2 txt-input w-100 date"
-        style="padding: 0 12px;"
-          nzShowTime
-          nzFormat="yyyy-MM-dd HH:mm a"
-          [formControl]="dateFormControl"
-          nzUse12Hours
-          [nzShowTime]="{ nzFormat: 'hh:mm a',nzUse12Hours: true }"
-          (nzOnOpenChange)="convertToUTC(dateFormControl)"
-          [nzRenderExtraFooter]="footerTemplate"
-          [nzShowNow]="false"
-      >
-      <ng-template #footerTemplate>
-        <div class="custom-footer d-flex align-items-center justify-content-between" >
-          <span class="text-primary-800 pointer" (click)="setDefaultTime()">Now</span>
-          <div class="d-flex align-items-center">
-            <button class="bg-primary-800 custom-btn-ok text-white pointer" (click)="datePicker?.close();"><span>ok</span></button>
+            nzShowTime
+            nzFormat="yyyy-MM-dd HH:mm a"
+            [formControl]="dateFormControl"
+            nzUse12Hours
+            [nzShowTime]="{ nzFormat: 'hh:mm a',nzUse12Hours: true }"
+            (nzOnOpenChange)="convertToUTC(dateFormControl)"
+            [nzRenderExtraFooter]="footerTemplate"
+            [nzShowNow]="false"
+        >
+        <ng-template #footerTemplate>
+          <div class="custom-footer d-flex align-items-center justify-content-between" >
+            <span class="text-primary-800 pointer" (click)="setDefaultTime()">Now</span>
+            <div class="d-flex align-items-center">
+              <button class="bg-primary-800 custom-btn-ok text-white pointer" (click)="datePicker?.close();"><span>ok</span></button>
+            </div>
           </div>
-        </div>
+          </ng-template>
+        </nz-date-picker>
+        </ng-container>
+
+        <!-- Locked scheduling placeholder (shown when plan lacks campaignScheduling) -->
+        <ng-template #schedulingLocked>
+          <div class="scheduling-locked d-flex align-items-center gap-2 rounded-pill px-3 py-2"
+               [matTooltip]="'scheduling_requires_growth' | translate"
+               matTooltipPosition="above">
+            <mat-icon class="lock-icon">lock</mat-icon>
+            <span class="text-muted">{{ 'campaign_scheduling_locked' | translate }}</span>
+            <a routerLink="/plans" class="ms-auto upgrade-link-sm">{{ 'upgrade_plan' | translate }}</a>
+          </div>
         </ng-template>
-    </nz-date-picker>
       </div>
     </div>
 

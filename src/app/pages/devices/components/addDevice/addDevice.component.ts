@@ -5,6 +5,7 @@ import { ToasterServices } from 'src/app/shared/components/us-toaster/us-toaster
 import { AuthService } from 'src/app/shared/services/auth.service';
 import { SearchCountryField, CountryISO, PhoneNumberFormat } from 'ngx-intl-tel-input-gg';
 import { CountryService } from 'src/app/shared/services/country.service';
+import { SubscriptionStateService } from 'src/app/shared/services/subscription-state.service';
 
 @Component({
   selector: 'app-addDevice',
@@ -36,7 +37,8 @@ export class AddDeviceComponent implements OnInit {
   constructor(    private toaster: ToasterServices,
     private devicesService:DevicesService,
     private authService:AuthService,
-    private countryService:CountryService
+    private countryService:CountryService,
+    private subscriptionState: SubscriptionStateService
   ) { }
 
   ngOnInit() {
@@ -50,6 +52,12 @@ export class AddDeviceComponent implements OnInit {
     )
   }
   submitAdd(){
+
+    if (this.subscriptionState.isAtDeviceLimit()) {
+      const msg = `You have reached the Devices limit for your current plan. <a href="/plans" style="text-decoration:underline;font-weight:600">Upgrade Plan</a>`;
+      this.toaster.warning(msg, true);
+      return;
+    }
 
     this.isLoading=true;
     let deviceN=this.form.value.deviceName;

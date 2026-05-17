@@ -1,0 +1,44 @@
+<div class="evo-add">
+  <h2>{{ 'devices.evolution.addDevice' | translate }}</h2>
+
+  <form [formGroup]="form" (ngSubmit)="submit()" class="evo-add__form" *ngIf="!connected">
+    <mat-form-field appearance="outline">
+      <mat-label>{{ 'devices.evolution.label' | translate }}</mat-label>
+      <input matInput formControlName="label" maxlength="64" />
+      <mat-error *ngIf="form.controls.label.hasError('required')">{{ 'REQUIRED_FIELD_ERROR' | translate }}</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>{{ 'DELAY_INTERVAL' | translate }}</mat-label>
+      <input matInput type="number" formControlName="delayIntervalInSeconds" min="0" />
+    </mat-form-field>
+
+    <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid">
+      {{ 'submit' | translate }}
+    </button>
+  </form>
+
+  <div *ngIf="created" class="evo-add__pairing">
+    <p>{{ 'devices.evolution.scanQr' | translate }}</p>
+    <div class="evo-add__pair-row">
+      <img *ngIf="qrSrc" [src]="qrSrc" alt="QR" class="evo-add__qr" />
+      <div class="evo-add__code">
+        <div>
+          <strong>{{ 'devices.evolution.pairCode' | translate }}:</strong>
+          {{ pairCode || '—' }}
+        </div>
+        <div *ngIf="secondsLeft !== null">
+          {{ 'devices.evolution.expiresIn' | translate: { seconds: secondsLeft } }}
+        </div>
+        <button
+          mat-stroked-button
+          type="button"
+          *ngIf="pairingExpired || (secondsLeft !== null && secondsLeft <= 0)"
+          (click)="regenerate()"
+        >
+          {{ 'devices.evolution.regenerate' | translate }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

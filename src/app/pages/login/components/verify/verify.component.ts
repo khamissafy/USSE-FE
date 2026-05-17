@@ -7,6 +7,7 @@ import { AuthService } from 'src/app/shared/services/auth.service';
 import { UsersService } from 'src/app/pages/users/users.service';
 import { TranslationService } from 'src/app/shared/services/translation.service';
 import { AuthSessionService } from 'src/app/shared/services/auth-session.service';
+import { SubscriptionStateService } from 'src/app/shared/services/subscription-state.service';
 
 @Component({
   selector: 'app-verify',
@@ -26,7 +27,8 @@ export class VerifyComponent implements OnInit ,AfterViewInit,OnDestroy{
     private userServiece:UsersService,
     private verificatioinService:VerifyService,
     private languageService:TranslationService,
-    private authSession: AuthSessionService) {
+    private authSession: AuthSessionService,
+    private subscriptionState: SubscriptionStateService) {
     this.verificationForm = this.formBuilder.group({
       digit0: ['', Validators.required],
       digit1: ['', Validators.required],
@@ -147,6 +149,7 @@ export class VerifyComponent implements OnInit ,AfterViewInit,OnDestroy{
             if (t) {
               this.authSession.scheduleRefreshBeforeExpiry(t);
             }
+            this.subscriptionState.loadSnapshot().subscribe();
             this.languageService.setAppDirection();
 
             this.router.navigateByUrl('devices')

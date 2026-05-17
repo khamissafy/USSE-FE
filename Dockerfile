@@ -3,8 +3,9 @@
 # ----------------------------
 FROM node:18-alpine as node
 WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci
 COPY . .
-RUN npm install
 RUN npm run build --prod
 
 # ----------------------------

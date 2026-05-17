@@ -16,6 +16,8 @@ import { Subject, Subscription, debounceTime, distinctUntilChanged, switchMap, t
 import { CampaignsMobileViewComponent } from '../mobile view/campaigns-mobileView/campaigns-mobileView.component';
 import { arraysContainSameObjects } from 'src/app/shared/methods/arraysContainSameObjects';
 import { TimeZoneServiceService } from 'src/app/shared/services/timeZoneService.service';
+import { SubscriptionStateService } from 'src/app/shared/services/subscription-state.service';
+import { ToasterServices } from 'src/app/shared/components/us-toaster/us-toaster.component';
 
 @Component({
   selector: 'app-compaigns',
@@ -61,11 +63,13 @@ export class CompaignsComponent implements AfterViewInit ,OnInit,OnDestroy {
   selectedTimeZone:number=0;
 
   constructor(private compaignsService:CompaignsService,
-    public dialog: MatDialog, 
+    public dialog: MatDialog,
     private router:Router,
     private authService:AuthService,
     private timeZoneService:TimeZoneServiceService,
-    private breakpointObserver: BreakpointObserver
+    private breakpointObserver: BreakpointObserver,
+    private subscriptionState: SubscriptionStateService,
+    private toaster: ToasterServices
     ){
     this.display=compaignsService.getUpdatedDisplayNumber();
     this.pageNum=this.compaignsService.pageNum;
@@ -295,6 +299,7 @@ onSelect(device){
 
 backToCompaigns(event){
 this.isCompagins=event;
+this.subscriptionState.refreshSnapshot().subscribe();
 this.getCompaigns(this.deviceId);
 }
 
@@ -395,6 +400,7 @@ compaignsCount(deviceId){
 }
 backToCampaign(){
   this.isCompagins=true;
+  this.subscriptionState.refreshSnapshot().subscribe();
   this.getCompaigns(this.deviceId)
 
 }
@@ -404,6 +410,11 @@ backToCampaign(){
     }
 
   addCampaigns(){
+    if (this.subscriptionState.isAtCampaignLimit()) {
+      const msg = `You have reached the Active Campaigns limit for your current plan. <a href="/plans" style="text-decoration:underline;font-weight:600">Upgrade Plan</a>`;
+      this.toaster.warning(msg, true);
+      return;
+    }
     this.compaignsService.search='';
     this.isCompagins=false;
   }

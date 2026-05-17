@@ -9,6 +9,7 @@ import { PluginsService } from 'src/app/services/plugins.service';
 import { UsersService } from '../../users.service';
 import { ToasterServices } from 'src/app/shared/components/us-toaster/us-toaster.component';
 import { TranslateService } from '@ngx-translate/core';
+import { SubscriptionStateService } from 'src/app/shared/services/subscription-state.service';
 
 export interface TestData{
   deviceId:string,
@@ -46,7 +47,8 @@ export class AddUserComponent implements OnInit {
       private translate: TranslateService,
 
       private plugin:PluginsService,private toaster: ToasterServices,
-    private signupService:SignupService,private userService:UsersService) {
+    private signupService:SignupService,private userService:UsersService,
+    private subscriptionState: SubscriptionStateService) {
     }
   ngOnInit() {
      // controls
@@ -70,6 +72,11 @@ export class AddUserComponent implements OnInit {
   }
 
     submitAdd() {
+      if (this.subscriptionState.isAtSeatLimit()) {
+        const msg = `You have reached the Seats limit for your current plan. <a href="/plans" style="text-decoration:underline;font-weight:600">Upgrade Plan</a>`;
+        this.toaster.warning(msg, true);
+        return;
+      }
       let allPermisions=this.preparePermisions();
       const data={
         contactName: this.contactName.value ,

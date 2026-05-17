@@ -1,0 +1,57 @@
+<div class="evo-list">
+  <div class="evo-list__header">
+    <h2>{{ 'devices.evolution.title' | translate }}</h2>
+    <button mat-flat-button color="primary" type="button" (click)="openAddDialog()">
+      {{ 'devices.evolution.addDevice' | translate }}
+    </button>
+  </div>
+
+  <div *ngIf="loading" class="evo-list__loading">
+    <mat-spinner diameter="40"></mat-spinner>
+  </div>
+
+  <div *ngIf="!loading" class="evo-list__table-wrap mat-elevation-z1">
+    <table mat-table [dataSource]="items" class="evo-table">
+      <ng-container matColumnDef="label">
+        <th mat-header-cell *matHeaderCellDef>{{ 'devices.evolution.label' | translate }}</th>
+        <td mat-cell *matCellDef="let row">{{ row.label }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="instanceId">
+        <th mat-header-cell *matHeaderCellDef>{{ 'devices.evolution.instanceId' | translate }}</th>
+        <td mat-cell *matCellDef="let row">{{ row.instanceId }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="connection">
+        <th mat-header-cell *matHeaderCellDef>{{ 'devices.evolution.status' | translate }}</th>
+        <td mat-cell *matCellDef="let row">
+          <span [ngClass]="badgeClass(row)">{{ badgeLabel(row) | translate }}</span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="lastUpdate">
+        <th mat-header-cell *matHeaderCellDef>{{ 'devices.evolution.lastUpdate' | translate }}</th>
+        <td mat-cell *matCellDef="let row">{{ row.lastUpdate }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let row">
+          <a mat-button color="primary" [routerLink]="['/devices/evolution', row.deviceId]">{{ 'details' | translate }}</a>
+          <button
+            mat-icon-button
+            *ngIf="!row.isConnected"
+            [title]="'devices.evolution.reconnect' | translate"
+            (click)="openReconnectDialog(row)"
+          >
+            <img src="assets/icons/reload.svg" alt="reconnect" style="width: 20px;" />
+          </button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+    </table>
+    <p *ngIf="items.length === 0" class="evo-list__empty">{{ 'NO_DATA' | translate }}</p>
+  </div>
+</div>

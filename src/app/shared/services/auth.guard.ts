@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { ActivatedRouteSnapshot, CanActivate, Router, RouterStateSnapshot, UrlTree } from '@angular/router';
 import { AuthService } from './auth.service';
 import { PermissionsService } from './permissions.service';
+import { SubscriptionStateService } from './subscription-state.service';
 
 @Injectable({
   providedIn: 'root'
@@ -10,7 +11,8 @@ export class AuthGuard implements CanActivate {
   constructor(
     private authService: AuthService,
     private router: Router,
-    private permissionService: PermissionsService
+    private permissionService: PermissionsService,
+    private subscriptionState: SubscriptionStateService
   ) {}
 
   async canActivate(
@@ -71,6 +73,9 @@ export class AuthGuard implements CanActivate {
 
     if (allowed) {
       this.authService.setRedirectURL(state.url.slice(state.url.lastIndexOf('/')));
+      if (!this.subscriptionState.getCurrent()) {
+        this.subscriptionState.loadSnapshot().subscribe();
+      }
       return true;
     }
 

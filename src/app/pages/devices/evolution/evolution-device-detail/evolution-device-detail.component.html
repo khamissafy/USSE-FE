@@ -1,0 +1,46 @@
+<div class="evo-detail" *ngIf="!loading && detail">
+  <div class="evo-detail__header">
+    <h2>{{ detail.label }}</h2>
+    <a mat-button routerLink="/devices/evolution">{{ 'devices.evolution.title' | translate }}</a>
+  </div>
+
+  <div class="evo-detail__grid mat-elevation-z1">
+    <div><strong>{{ 'devices.evolution.label' | translate }}:</strong> {{ detail.label }}</div>
+    <div><strong>{{ 'devices.evolution.instanceId' | translate }}:</strong> {{ detail.instanceId }}</div>
+    <div><strong>{{ 'devices.evolution.lastUpdate' | translate }}:</strong> {{ detail.lastUpdate }}</div>
+    <div><strong>{{ 'DELAY_INTERVAL' | translate }}:</strong> {{ detail.delayIntervalInSeconds }}</div>
+    <div>
+      <strong>{{ 'devices.evolution.status' | translate }}:</strong>
+      {{ (detail.isConnected ? 'devices.evolution.connected' : 'devices.evolution.disconnected') | translate }}
+    </div>
+  </div>
+
+  <div class="evo-detail__actions">
+    <button mat-stroked-button type="button" *ngIf="!detail.isConnected" (click)="reconnect()">{{ 'devices.evolution.reconnect' | translate }}</button>
+    <button mat-stroked-button color="primary" type="button" (click)="restart()">{{ 'devices.evolution.restart' | translate }}</button>
+    <button mat-stroked-button type="button" (click)="logout()">{{ 'devices.evolution.logout' | translate }}</button>
+    <button mat-stroked-button color="warn" type="button" (click)="softDelete()">{{ 'devices.evolution.delete' | translate }}</button>
+  </div>
+
+  <div class="evo-detail__panel mat-elevation-z1">
+    <h3>{{ 'devices.evolution.status' | translate }}</h3>
+    <h4>Connection</h4>
+    <ul>
+      <li *ngFor="let ev of recentConnection">
+        {{ ev.timestamp }} — {{ ev.state }} ({{ ev.instanceId }})
+      </li>
+      <li *ngIf="recentConnection.length === 0">{{ 'NO_DATA' | translate }}</li>
+    </ul>
+    <h4>Messages</h4>
+    <ul>
+      <li *ngFor="let st of recentStatus">
+        {{ st.timestamp }} — {{ st.eventType }} — {{ st.canonicalMessageId }}
+      </li>
+      <li *ngIf="recentStatus.length === 0">{{ 'NO_DATA' | translate }}</li>
+    </ul>
+  </div>
+</div>
+
+<div *ngIf="loading" class="evo-detail__loading">
+  <mat-spinner diameter="40"></mat-spinner>
+</div>

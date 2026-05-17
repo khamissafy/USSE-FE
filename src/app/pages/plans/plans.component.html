@@ -1,0 +1,137 @@
+<section class="plans-page py-5 px-3">
+
+  <!-- Page header -->
+  <div class="text-center mb-5">
+    <h1 class="plans-title">{{ 'plans_heading' | translate }}</h1>
+    <p class="plans-subtitle text-muted">{{ 'plans_subheading' | translate }}</p>
+
+    <!-- Billing toggle -->
+    <div class="billing-toggle d-inline-flex align-items-center gap-3 mt-3">
+      <span [class.fw-semibold]="billingPeriod === 'Monthly'">{{ 'monthly' | translate }}</span>
+      <nb-toggle
+        [checked]="billingPeriod === 'Annual'"
+        (checkedChange)="toggleBilling()"
+        status="primary">
+      </nb-toggle>
+      <span [class.fw-semibold]="billingPeriod === 'Annual'">
+        {{ 'annual' | translate }}
+        <span class="savings-chip">{{ 'save_20_pct' | translate }}</span>
+      </span>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="text-center py-5">
+    <mat-spinner diameter="48" class="mx-auto"></mat-spinner>
+  </div>
+
+  <!-- Plan cards -->
+  <div *ngIf="!loading" class="plan-cards d-flex flex-wrap justify-content-center gap-4 mb-5">
+    <div
+      *ngFor="let plan of plans"
+      class="plan-card"
+      [class.plan-card--highlighted]="plan.tier === 'Growth'">
+
+      <!-- Popular badge -->
+      <div *ngIf="plan.tier === 'Growth'" class="popular-badge">{{ 'most_popular' | translate }}</div>
+
+      <!-- Tier name -->
+      <h2 class="plan-name">{{ plan.displayName }}</h2>
+
+      <!-- Price -->
+      <div class="plan-price-block my-3">
+        <span class="plan-price">{{ displayPrice(plan) }}</span>
+        <span *ngIf="plan.tier !== 'Starter' && plan.tier !== 'Enterprise'" class="plan-period">
+          &nbsp;/ {{ 'month' | translate }}
+        </span>
+      </div>
+
+      <!-- Annual EGP note -->
+      <div *ngIf="billingPeriod === 'Annual' && plan.priceEgpAnnualMonthly"
+           class="egp-note text-muted mb-2">
+        {{ plan.priceEgpAnnualMonthly }} EGP / {{ 'month' | translate }}
+      </div>
+      <div *ngIf="billingPeriod === 'Monthly' && plan.priceEgpMonthly"
+           class="egp-note text-muted mb-2">
+        {{ plan.priceEgpMonthly }} EGP / {{ 'month' | translate }}
+      </div>
+
+      <!-- Trial badge -->
+      <div *ngIf="plan.trialDays > 0" class="trial-note mb-3">
+        {{ plan.trialDays }}-{{ 'day_free_trial' | translate }}
+      </div>
+
+      <!-- Key limits summary -->
+      <ul class="plan-limits list-unstyled mb-4">
+        <li>
+          <mat-icon class="limit-icon">devices</mat-icon>
+          {{ plan.maxDevices !== null ? plan.maxDevices : ('unlimited' | translate) }}
+          {{ 'devices' | translate }}
+        </li>
+        <li>
+          <mat-icon class="limit-icon">smart_toy</mat-icon>
+          {{ plan.maxBots !== null ? plan.maxBots : ('unlimited' | translate) }}
+          {{ 'bots' | translate }}
+        </li>
+        <li>
+          <mat-icon class="limit-icon">email</mat-icon>
+          <ng-container *ngIf="plan.maxOutgoingMessagesPerCycle !== null">
+            {{ plan.maxOutgoingMessagesPerCycle | number }} {{ 'msgs_per_cycle' | translate }}
+          </ng-container>
+          <ng-container *ngIf="plan.maxOutgoingMessagesPerCycle === null">
+            {{ 'unlimited_messages' | translate }}
+          </ng-container>
+        </li>
+        <li>
+          <mat-icon class="limit-icon">group</mat-icon>
+          {{ plan.maxTeamMembers !== null ? plan.maxTeamMembers : ('unlimited' | translate) }}
+          {{ 'team_members' | translate }}
+        </li>
+        <li *ngIf="plan.allowsAiBot">
+          <mat-icon class="limit-icon">memory</mat-icon>
+          {{ plan.aiModelTier }}
+        </li>
+        <li *ngIf="plan.maxKnowledgeBaseMb && plan.maxKnowledgeBaseMb > 0">
+          <mat-icon class="limit-icon">storage</mat-icon>
+          {{ plan.maxKnowledgeBaseMb !== null ? plan.maxKnowledgeBaseMb + ' MB KB' : ('unlimited' | translate) }}
+        </li>
+      </ul>
+
+      <!-- CTA -->
+      <a
+        [href]="signupUrl(plan)"
+        class="cta-button"
+        [class.cta-button--primary]="plan.tier === 'Growth'"
+        [class.cta-button--outline]="plan.tier !== 'Growth'">
+        {{ ctaLabel(plan) | translate }}
+      </a>
+    </div>
+  </div>
+
+  <!-- Feature comparison matrix -->
+  <div *ngIf="!loading && plans.length" class="comparison-table-wrap">
+    <h2 class="text-center mb-4">{{ 'feature_comparison' | translate }}</h2>
+    <div class="table-responsive">
+      <table class="comparison-table w-100">
+        <thead>
+          <tr>
+            <th class="feature-col">{{ 'feature' | translate }}</th>
+            <th *ngFor="let plan of plans" class="text-center plan-col">
+              {{ plan.displayName }}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let feat of allFeatures">
+            <td class="feature-name">{{ feat.label | translate }}</td>
+            <td *ngFor="let plan of plans" class="text-center">
+              <mat-icon *ngIf="hasFeature(plan, feat.key)" class="check-icon">check_circle</mat-icon>
+              <mat-icon *ngIf="!hasFeature(plan, feat.key)" class="dash-icon">remove</mat-icon>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</section>

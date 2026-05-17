@@ -9,6 +9,7 @@ import { AuthService } from 'src/app/shared/services/auth.service';
 import { CountryService } from 'src/app/shared/services/country.service';
 import { DevicesService } from '../../../devices.service';
 import { DeviceData } from '../../../device';
+import { SubscriptionStateService } from 'src/app/shared/services/subscription-state.service';
 
 @Component({
   selector: 'app-addTLDevice',
@@ -51,7 +52,8 @@ export class AddTLDeviceComponent implements OnInit {
     @Inject(MAT_DIALOG_DATA) public data:any,
     private countryService:CountryService,
     private authService:AuthService,
-    private deviceService:DevicesService
+    private deviceService:DevicesService,
+    private subscriptionState: SubscriptionStateService
 
   ) { }
 
@@ -92,6 +94,12 @@ export class AddTLDeviceComponent implements OnInit {
     )
   }
   submit(){
+    // Only block on add (new device); reconnects do not consume a new device slot.
+    if (!this.isReconnect && this.subscriptionState.isAtDeviceLimit()) {
+      const msg = `You have reached the Devices limit for your current plan. <a href="/plans" style="text-decoration:underline;font-weight:600">Upgrade Plan</a>`;
+      this.toaster.warning(msg, true);
+      return;
+    }
     this.isLoading=true;
     let data:any={
       email: this.email,

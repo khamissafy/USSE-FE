@@ -14,6 +14,7 @@ import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { ConfirmaionsComponent } from './confirmaions/confirmaions.component';
 import { ExpectedCampEndTimeComponent } from './expectedCampEndTime/expectedCampEndTime.component';
 import { MatStepper } from '@angular/material/stepper';
+import { SubscriptionStateService } from 'src/app/shared/services/subscription-state.service';
 // import { WriteMessageComponent } from 'src/app/pages/messages/Components/new-message/write-message/write-message.component';
 @Component({
   selector: 'app-addCompaigns',
@@ -89,7 +90,8 @@ actions:any=[];
     private toasterService:ToasterServices,
     private translate: TranslateService,
     public dialog: MatDialog,
-    private authService:AuthService){
+    private authService:AuthService,
+    private subscriptionState: SubscriptionStateService){
   }
   ngOnInit() {
 this.getLastCampaignData();
@@ -296,6 +298,17 @@ setActions(event){
   this.actions=event
     }
 addCampaign(){
+// Subscription pre-checks: active-campaign cap + per-campaign contact cap. BE re-validates.
+if (this.subscriptionState.isAtCampaignLimit()) {
+  const msg = `You have reached the Active Campaigns limit for your current plan. <a href="/plans" style="text-decoration:underline;font-weight:600">Upgrade Plan</a>`;
+  this.toasterService.warning(msg, true);
+  return;
+}
+if (this.subscriptionState.exceedsCampaignContacts(this.totalContacts)) {
+  const msg = `This campaign exceeds the contacts-per-campaign limit for your current plan. <a href="/plans" style="text-decoration:underline;font-weight:600">Upgrade Plan</a>`;
+  this.toasterService.warning(msg, true);
+  return;
+}
 this.isLoading = true;
 
 const data={

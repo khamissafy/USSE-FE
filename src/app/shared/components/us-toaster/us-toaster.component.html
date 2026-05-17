@@ -17,12 +17,16 @@
         <img src="assets/icons/succsess.svg" alt="" />
 
       </span>
-      <p style="
+      <p *ngIf="!isHtml" style="
         margin: 0 !important;
         max-width: 78%;
     ">{{ translate && (message | errorTranslate)? (message | translate):
         translate && !(message | errorTranslate) ? ('COMMON.ERR' | translate)
       : message }}</p>
+      <p *ngIf="isHtml" style="
+        margin: 0 !important;
+        max-width: 78%;
+    " [innerHTML]="safeHtml"></p>
     </div>
     <mat-icon class="position-absolute top-0 end-0 m-3 pointer" (click)="onTagClose($event)">close</mat-icon>
   <span class="toaster-progress-bar position-absolute bottom-0 start-0"

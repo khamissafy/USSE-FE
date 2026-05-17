@@ -1,38 +1,268 @@
 <section class="py-3 component-container d-flex flex-column gap-3">
 
-    <div class="info-card-container ">
-        <div class="info-card-body row">
-            <div class="plan-details col-4 p-2">
-                <h3 class="text-center my-4">{{'plan_details' | translate}}</h3>
-
-                <ul class="plans">
-                    <li class="d-flex justify-content-between mb-4 align-items-center">
-                        <span class="plan-name info-name">{{userSubscripitons?.subscribtionName}}</span>
-                        <span class="plan-price">{{userSubscripitons?.subscriptionPrice}}<small>$</small></span>
-                    </li>
-                    <li *ngFor="let item of extraParameters" class="d-flex   justify-content-between mb-4 align-items-center">
-                        <span class="plan-name info-name">{{item.name  |translate}}</span>
-                        <span class="plan-price">{{item.price}}<small>$</small></span>
-                    </li>
-
-                    <div class="line my-4"></div>
-                    <li class="d-flex justify-content-between mb-3 align-items-center">
-                        <span class="info-name">{{'total_price' |translate }}</span>
-                        <span class="plan-price">{{totalPrice}}<small>$</small></span>
-                    </li>
-                </ul>
-
-            </div>
-
-            <div class="full-details col-8 bg-white mt-2">
-                    <ul class="mt-4">
-                        <li  *ngFor="let item of fullDetails" class="detail d-flex justify-content-between mb-4 align-items-center">
-                            <span class="info-name">{{item.name  |translate}}</span>
-                            <span class="info-value">{{item.value  |translate}}</span>
-                        </li>
-                    </ul>
-            </div>
-
-        </div>
+  <!-- ── Loading skeleton ─────────────────────────────────────────────── -->
+  <ng-container *ngIf="!state">
+    <div class="info-card-container p-4 text-center">
+      <mat-spinner diameter="40" class="mx-auto"></mat-spinner>
     </div>
+  </ng-container>
+
+  <ng-container *ngIf="state as s">
+
+    <!-- ── Grace-state banner ────────────────────────────────────────── -->
+    <div *ngIf="s.isInGrace" class="grace-banner d-flex align-items-center gap-2 px-4 py-3">
+      <mat-icon class="grace-icon">warning_amber</mat-icon>
+      <span>
+        {{ 'grace_banner_prefix' | translate }}
+        <strong>{{ s.graceVectors.join(', ') }}</strong>
+        {{ 'grace_banner_suffix' | translate }}
+      </span>
+      <a routerLink="/plans" class="ms-auto upgrade-link">
+        {{ 'upgrade_plan' | translate }}
+      </a>
+    </div>
+
+    <!-- ── Trial countdown ───────────────────────────────────────────── -->
+    <div *ngIf="s.billing.status === 'Trial'" class="trial-banner d-flex align-items-center gap-2 px-4 py-3">
+      <mat-icon>hourglass_top</mat-icon>
+      <span>
+        {{ 'trial_ends_in' | translate }}
+        <strong>{{ trialDaysRemaining(s.billing.trialEndsAt) }}</strong>
+        {{ 'days' | translate }}
+      </span>
+      <a routerLink="/plans" class="ms-auto upgrade-link">
+        {{ 'upgrade_plan' | translate }}
+      </a>
+    </div>
+
+    <!-- ── Main card ─────────────────────────────────────────────────── -->
+    <div class="info-card-container">
+      <div class="info-card-body row g-0">
+
+        <!-- Left: plan details ─────────────────────────────────────── -->
+        <div class="plan-details col-12 col-lg-4 p-4 d-flex flex-column gap-3">
+          <h3 class="text-center mt-2 mb-0">{{ 'plan_details' | translate }}</h3>
+
+          <!-- Plan name + tier badge -->
+          <div class="d-flex justify-content-between align-items-center">
+            <span class="plan-name fs-5 fw-semibold">{{ s.plan.displayName }}</span>
+            <span class="tier-badge">{{ s.plan.tier }}</span>
+          </div>
+
+          <!-- Price -->
+          <div class="d-flex justify-content-between align-items-center">
+            <span class="info-name">{{ 'price' | translate }}</span>
+            <span class="plan-price">
+              <ng-container *ngIf="s.billing.currency === 'USD'; else egpPrice">
+                <ng-container *ngIf="s.billing.billingPeriod === 'Monthly'">
+                  {{ formatPrice(s.plan.priceUsdMonthly, 'USD') }}
+                </ng-container>
+                <ng-container *ngIf="s.billing.billingPeriod === 'Annual'">
+                  {{ formatPrice(s.plan.priceUsdAnnualMonthly, 'USD') }}
+                  <small class="savings-badge">{{ 'annual_20_off' | translate }}</small>
+                </ng-container>
+              </ng-container>
+              <ng-template #egpPrice>
+                <ng-container *ngIf="s.billing.billingPeriod === 'Monthly'">
+                  {{ formatPrice(s.plan.priceEgpMonthly, 'EGP') }}
+                </ng-container>
+                <ng-container *ngIf="s.billing.billingPeriod === 'Annual'">
+                  {{ formatPrice(s.plan.priceEgpAnnualMonthly, 'EGP') }}
+                  <small class="savings-badge">{{ 'annual_20_off' | translate }}</small>
+                </ng-container>
+              </ng-template>
+            </span>
+          </div>
+
+          <!-- Billing period -->
+          <div class="d-flex justify-content-between align-items-center">
+            <span class="info-name">{{ 'billing_period' | translate }}</span>
+            <span class="info-value">{{ s.billing.billingPeriod | translate }}</span>
+          </div>
+
+          <!-- Billing status -->
+          <div class="d-flex justify-content-between align-items-center">
+            <span class="info-name">{{ 'status' | translate }}</span>
+            <span class="status-badge" [class.trial]="s.billing.status === 'Trial'"
+                  [class.grace]="s.billing.status === 'Grace'">
+              {{ s.billing.status | translate }}
+            </span>
+          </div>
+
+          <!-- Next renewal -->
+          <div *ngIf="s.billing.nextRenewalDate" class="d-flex justify-content-between align-items-center">
+            <span class="info-name">{{ 'next_renewal' | translate }}</span>
+            <span class="info-value">{{ s.billing.nextRenewalDate | date:'mediumDate' }}</span>
+          </div>
+
+          <div class="line my-1"></div>
+
+          <!-- Add-ons -->
+          <ng-container *ngIf="s.addons.extraDevices || s.addons.extraSeats || s.addons.extraKnowledgeBaseMb || s.addons.officialApiDevices">
+            <h4 class="addon-heading mb-1">{{ 'add_ons' | translate }}</h4>
+            <div *ngIf="s.addons.extraDevices" class="d-flex justify-content-between">
+              <span class="info-name">{{ 'extra_devices' | translate }}</span>
+              <span class="info-value">+{{ s.addons.extraDevices }}</span>
+            </div>
+            <div *ngIf="s.addons.extraSeats" class="d-flex justify-content-between">
+              <span class="info-name">{{ 'extra_seats' | translate }}</span>
+              <span class="info-value">+{{ s.addons.extraSeats }}</span>
+            </div>
+            <div *ngIf="s.addons.extraKnowledgeBaseMb" class="d-flex justify-content-between">
+              <span class="info-name">{{ 'extra_kb_mb' | translate }}</span>
+              <span class="info-value">+{{ s.addons.extraKnowledgeBaseMb }} MB</span>
+            </div>
+            <div *ngIf="s.addons.officialApiDevices" class="d-flex justify-content-between">
+              <span class="info-name">{{ 'official_api_devices' | translate }}</span>
+              <span class="info-value">+{{ s.addons.officialApiDevices }}</span>
+            </div>
+            <div class="line my-1"></div>
+          </ng-container>
+
+          <a routerLink="/plans" class="upgrade-link text-center mt-auto">
+            {{ 'view_all_plans' | translate }}
+          </a>
+        </div>
+
+        <!-- Right: usage + features ────────────────────────────────── -->
+        <div class="full-details col-12 col-lg-8 bg-white p-4">
+
+          <!-- Usage progress bars -->
+          <h4 class="section-heading mb-3">{{ 'usage' | translate }}</h4>
+
+          <!-- Messages -->
+          <div class="usage-row mb-3">
+            <div class="d-flex justify-content-between mb-1">
+              <span class="info-name">{{ 'MESSAGES_LABEL' | translate }}</span>
+              <span class="info-value">
+                {{ s.usage.outgoingMessageCount | number }}
+                <ng-container *ngIf="s.plan.maxOutgoingMessagesPerCycle !== null">
+                  / {{ s.plan.maxOutgoingMessagesPerCycle | number }}
+                </ng-container>
+                <ng-container *ngIf="s.plan.maxOutgoingMessagesPerCycle === null">
+                  / {{ 'unlimited' | translate }}
+                </ng-container>
+              </span>
+            </div>
+            <mat-progress-bar
+              *ngIf="s.plan.maxOutgoingMessagesPerCycle !== null"
+              [mode]="'determinate'"
+              [value]="usagePct(s.usage.outgoingMessageCount, s.plan.maxOutgoingMessagesPerCycle)"
+              [color]="barColor(s.usage.outgoingMessageCount, s.plan.maxOutgoingMessagesPerCycle)">
+            </mat-progress-bar>
+          </div>
+
+          <!-- Devices -->
+          <div class="usage-row mb-3">
+            <div class="d-flex justify-content-between mb-1">
+              <span class="info-name">{{ 'devicesLabel' | translate }}</span>
+              <span class="info-value">
+                {{ s.usage.deviceCount }}
+                / {{ s.plan.maxDevices !== null ? s.plan.maxDevices : ('unlimited' | translate) }}
+              </span>
+            </div>
+            <mat-progress-bar
+              *ngIf="s.plan.maxDevices !== null"
+              [mode]="'determinate'"
+              [value]="usagePct(s.usage.deviceCount, s.plan.maxDevices)"
+              [color]="barColor(s.usage.deviceCount, s.plan.maxDevices)">
+            </mat-progress-bar>
+          </div>
+
+          <!-- Bots -->
+          <div class="usage-row mb-3">
+            <div class="d-flex justify-content-between mb-1">
+              <span class="info-name">{{ 'Automations' | translate }}</span>
+              <span class="info-value">
+                {{ s.usage.botCount }}
+                / {{ s.plan.maxBots !== null ? s.plan.maxBots : ('unlimited' | translate) }}
+              </span>
+            </div>
+            <mat-progress-bar
+              *ngIf="s.plan.maxBots !== null"
+              [mode]="'determinate'"
+              [value]="usagePct(s.usage.botCount, s.plan.maxBots)"
+              [color]="barColor(s.usage.botCount, s.plan.maxBots)">
+            </mat-progress-bar>
+          </div>
+
+          <!-- Active Campaigns -->
+          <div class="usage-row mb-3">
+            <div class="d-flex justify-content-between mb-1">
+              <span class="info-name">{{ 'active_campaigns' | translate }}</span>
+              <span class="info-value">
+                {{ s.usage.activeCampaignCount }}
+                / {{ s.plan.maxActiveCampaigns !== null ? (s.plan.maxActiveCampaigns === 0 ? ('unavailable' | translate) : s.plan.maxActiveCampaigns) : ('unlimited' | translate) }}
+              </span>
+            </div>
+            <mat-progress-bar
+              *ngIf="s.plan.maxActiveCampaigns !== null && s.plan.maxActiveCampaigns > 0"
+              [mode]="'determinate'"
+              [value]="usagePct(s.usage.activeCampaignCount, s.plan.maxActiveCampaigns)"
+              [color]="barColor(s.usage.activeCampaignCount, s.plan.maxActiveCampaigns)">
+            </mat-progress-bar>
+          </div>
+
+          <!-- Knowledge Base -->
+          <div class="usage-row mb-3" *ngIf="s.plan.maxKnowledgeBaseMb !== 0">
+            <div class="d-flex justify-content-between mb-1">
+              <span class="info-name">{{ 'knowledge_base' | translate }}</span>
+              <span class="info-value">
+                {{ bytesToMb(s.usage.knowledgeBaseBytesUsed) }} MB
+                <ng-container *ngIf="s.plan.maxKnowledgeBaseMb !== null">
+                  / {{ s.plan.maxKnowledgeBaseMb }} MB
+                </ng-container>
+                <ng-container *ngIf="s.plan.maxKnowledgeBaseMb === null">
+                  / {{ 'unlimited' | translate }}
+                </ng-container>
+              </span>
+            </div>
+            <mat-progress-bar
+              *ngIf="s.plan.maxKnowledgeBaseMb !== null"
+              [mode]="'determinate'"
+              [value]="usagePct(+bytesToMb(s.usage.knowledgeBaseBytesUsed), s.plan.maxKnowledgeBaseMb)"
+              [color]="barColor(+bytesToMb(s.usage.knowledgeBaseBytesUsed), s.plan.maxKnowledgeBaseMb)">
+            </mat-progress-bar>
+          </div>
+
+          <!-- Team Members / Seats -->
+          <div class="usage-row mb-3">
+            <div class="d-flex justify-content-between mb-1">
+              <span class="info-name">{{ 'USERS' | translate }}</span>
+              <span class="info-value">
+                {{ s.usage.teamMemberCount }}
+                / {{ s.plan.maxTeamMembers !== null ? s.plan.maxTeamMembers : ('unlimited' | translate) }}
+              </span>
+            </div>
+            <mat-progress-bar
+              *ngIf="s.plan.maxTeamMembers !== null"
+              [mode]="'determinate'"
+              [value]="usagePct(s.usage.teamMemberCount, s.plan.maxTeamMembers)"
+              [color]="barColor(s.usage.teamMemberCount, s.plan.maxTeamMembers)">
+            </mat-progress-bar>
+          </div>
+
+          <div class="line my-3"></div>
+
+          <!-- Feature availability list -->
+          <h4 class="section-heading mb-3">{{ 'features' | translate }}</h4>
+          <div class="feature-grid">
+            <ng-container *ngFor="let feat of featureList">
+              <div class="feature-item d-flex align-items-center gap-2">
+                <mat-icon [class.feature-on]="s.plan.features.includes(feat.key)"
+                          [class.feature-off]="!s.plan.features.includes(feat.key)">
+                  {{ s.plan.features.includes(feat.key) ? 'check_circle' : 'remove_circle_outline' }}
+                </mat-icon>
+                <span [class.text-muted]="!s.plan.features.includes(feat.key)">
+                  {{ feat.label | translate }}
+                </span>
+              </div>
+            </ng-container>
+          </div>
+
+        </div><!-- /.full-details -->
+      </div><!-- /.info-card-body -->
+    </div><!-- /.info-card-container -->
+
+  </ng-container>
 </section>

@@ -27,6 +27,12 @@
               <span>Telegram</span>
             </div>
           </button>
+          <button mat-menu-item (click)="openEvoStepsModal()">
+            <div class="d-flex w-100 gap-1 align-items-center">
+              <img style="max-width: 17px; margin-inline: 2px;" src="assets/icons/whats.svg" alt="" />
+              <span>{{ 'WHATSAPP_EVOLUTION' | translate }}</span>
+            </div>
+          </button>
 
         </mat-menu>
       </div>
@@ -103,6 +109,12 @@
                   <div class="d-flex w-100 gap-1 align-items-center">
                     <img style="max-width: 17px; margin-inline: 2px;" src="assets/icons/telegram.svg" alt="" /> 
                     <span>Telegram</span>
+                  </div>
+                </button>
+                <button mat-menu-item (click)="openEvoStepsModal()" style="min-width: 139px;">
+                  <div class="d-flex w-100 gap-1 align-items-center">
+                    <img style="max-width: 17px; margin-inline: 2px;" src="assets/icons/whats.svg" alt="" />
+                    <span>{{ 'WHATSAPP_EVOLUTION' | translate }}</span>
                   </div>
                 </button>
       
@@ -189,6 +201,7 @@
                     <img class="device-type-icon" *ngSwitchCase="'OWA'" src="assets/icons/whats.svg" style="width: 25px;"  alt="wbs">
                     <img class="device-type-icon" *ngSwitchCase="'SMS'" src="assets/icons/sms.svg"  style="width: 25px;" alt="wbs">
                     <img class="device-type-icon" *ngSwitchCase="'TL'" src="assets/icons/telegram.svg" style="width: 24px;" alt="wbs">
+                    <img class="device-type-icon" *ngSwitchCase="'EVO'" src="assets/icons/whats.svg" style="width: 25px;" alt="evo">
 
                   </ng-container>
 
@@ -277,6 +290,9 @@
                 <button [disabled]="loading" *ngIf="!element.isConnected  && element.deviceType == 'TL'&& element.deviceType !== 'WBS'" class="rest-style retry pointer" [title]="'reconnect' | translate" (click)="reconnectTlDev(element)">
                   <img src="assets/icons/reload.svg" alt="">
                 </button >
+                <button [disabled]="loading" *ngIf="!element.isConnected && element.deviceType == 'EVO'" class="rest-style retry pointer" [title]="'reconnect' | translate" (click)="reconnectEvo(element)">
+                  <img src="assets/icons/reload.svg" alt="">
+                </button>
                 <button [disabled]="loading" *ngIf="element.isConnected && !isTrialCustomer && (element.deviceType == 'WBS' || element.deviceType == 'TL')" class="rest-style pointer" [title]="'export-chats' | translate" (click)="exportChats(element)">
                   <img src="assets/icons/export-dev-chats.svg" alt="" style="width:28px">
                 </button >
@@ -316,6 +332,7 @@
                     <img class="device-type-icon" *ngSwitchCase="'OWA'" src="assets/icons/whats.svg" style="width: 25px;" alt="wbs">
                     <img class="device-type-icon" *ngSwitchCase="'SMS'" src="assets/icons/sms.svg" style="width: 25px;" alt="wbs">
                     <img class="device-type-icon" *ngSwitchCase="'TL'" src="assets/icons/telegram.svg" style="width: 24px;" alt="wbs">
+                    <img class="device-type-icon" *ngSwitchCase="'EVO'" src="assets/icons/whats.svg" style="width: 25px;" alt="evo">
 
                   </ng-container>
                 </div>
@@ -401,6 +418,9 @@
                     <img src="assets/icons/reload.svg" alt="">
                   </div> -->
                   <button [disabled]="loading" *ngIf="!element.isConnected  && element.deviceType == 'TL'&& element.deviceType !== 'WBS'" class="retry pointer rest-style" [title]="'reconnect' | translate" (click)="reconnectTlDev(element)">
+                    <img src="assets/icons/reload.svg" alt="">
+                  </button>
+                  <button [disabled]="loading" *ngIf="!element.isConnected && element.deviceType == 'EVO'" class="retry pointer rest-style" [title]="'reconnect' | translate" (click)="reconnectEvo(element)">
                     <img src="assets/icons/reload.svg" alt="">
                   </button>
                   <button [disabled]="loading" *ngIf="element.isConnected && !isTrialCustomer && (element.deviceType == 'WBS' || element.deviceType == 'TL')" class=" pointer rest-style" [title]="'export-chats' | translate" (click)="exportChats(element)">

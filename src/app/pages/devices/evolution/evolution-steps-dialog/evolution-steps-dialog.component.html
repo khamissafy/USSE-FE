@@ -1,0 +1,124 @@
+<section class="h-100 d-flex flex-column" style="overflow: hidden; overflow-y: auto;">
+  <div
+    class="d-flex justify-content-center align-items-center position-relative"
+    style="height: 5%"
+  >
+    <div
+      *ngIf="!isLoading && steps && !scanDevice"
+      style="font-weight: 500;"
+      class="txt-lg mt-3"
+    >
+      {{ 'Follow these steps to add a new device' | translate }}
+    </div>
+    <div
+      class="close-icon position-absolute end-0 pointer translate-middle-y mx-5 mt-3 zi-3"
+      style="top: 60%;"
+    >
+      <img
+        src="assets/icons/close-circle.svg"
+        (click)="onClose()"
+        alt="close-icon"
+        width="33px"
+        style="cursor: pointer;"
+      />
+    </div>
+  </div>
+
+  <!-- Steps screen -->
+  <ng-container *ngIf="!isLoading && steps && !scanDevice">
+    <div
+      class="steps-container"
+      style="background-image: url('assets/images/scann-steps.svg'); background-repeat: no-repeat;"
+    >
+      <div class="steps_">
+        <div>
+          <h3 style="color: black;" class="mb-0 mt-0 pt-0">{{ 'steps' | translate }}</h3>
+          <ol type="1" class="circles">
+            <li class="pb-1">{{ 'step_1' | translate }}</li>
+            <li class="pb-1">{{ 'step_2' | translate }}</li>
+            <li class="pb-1">{{ 'step_3' | translate }}</li>
+            <li class="pb-1">{{ 'step_4' | translate }}</li>
+            <li class="">{{ 'step_5' | translate }}</li>
+          </ol>
+
+          <div class="evo-form mt-3" [formGroup]="form">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>{{ 'devices.evolution.label' | translate }}</mat-label>
+              <input matInput formControlName="label" maxlength="64" />
+              <mat-error *ngIf="form.controls.label.hasError('required')">
+                {{ 'REQUIRED_FIELD_ERROR' | translate }}
+              </mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>{{ 'DELAY_INTERVAL' | translate }}</mat-label>
+              <input matInput type="number" formControlName="delayIntervalInSeconds" min="0" />
+            </mat-form-field>
+          </div>
+        </div>
+      </div>
+
+      <div
+        class="modal-footer justify-content-center gap-3"
+        style="position: absolute; bottom: 5%; left: 38%;"
+      >
+        <us-button
+          class="m-2"
+          label="{{ 'scan_now' | translate }}"
+          [fill]="true"
+          [size]="'sm'"
+          [loading]="false"
+          [disabled]="false"
+          [appearance]="'primary'"
+          (clicked)="scanCode()"
+        ></us-button>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- Loading spinner -->
+  <ng-container *ngIf="isLoading && !steps && !scanDevice">
+    <div class="p-5 h-100">
+      <div class="p-3 d-flex justify-content-center align-items-center flex-column gap-5 h-100">
+        <div class="spinner-container mb-5">
+          <svg width="120" height="120" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <style>
+              .spinner_0XTQ {
+                transform-origin: center;
+                animation: spinner_y6GP 0.75s linear infinite;
+              }
+              @keyframes spinner_y6GP {
+                100% {
+                  transform: rotate(360deg);
+                }
+              }
+            </style>
+            <path
+              class="spinner_0XTQ"
+              d="M12,23a9.63,9.63,0,0,1-8-9.5,9.51,9.51,0,0,1,6.79-9.1A1.66,1.66,0,0,0,12,2.81h0a1.67,1.67,0,0,0-1.94-1.64A11,11,0,0,0,12,23Z"
+            />
+          </svg>
+        </div>
+        <p style="font-size: 30px; color: rgba(0, 0, 0, 0.57);">
+          {{ 'please_wait_qr_code_loading' | translate }}
+        </p>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- QR code -->
+  <ng-container *ngIf="!isLoading && !steps && scanDevice">
+    <div class="p-5 h-100">
+      <div class="qr-code-container p-3 d-flex justify-content-center align-items-center flex-column gap-5 h-100">
+        <div class="qr-code p-5" style="border: 1px solid rgba(0, 101, 141, 1);">
+          <img *ngIf="qrSrc" [src]="qrSrc" alt="QR Code" />
+        </div>
+        <p *ngIf="pairCode" class="pair-code">
+          {{ 'devices.evolution.pairCode' | translate }}: <strong>{{ pairCode }}</strong>
+        </p>
+        <p style="font-size: 30px; color: rgba(0, 0, 0, 0.57);">
+          {{ 'scan_this_qr_code_to_preview' | translate }}
+        </p>
+      </div>
+    </div>
+  </ng-container>
+</section>

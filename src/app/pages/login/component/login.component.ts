@@ -8,6 +8,7 @@ import { UserData } from '../../users/users';
 import { Subject, Subscription, takeUntil } from 'rxjs';
 import { TranslationService } from 'src/app/shared/services/translation.service';
 import { AuthSessionService } from 'src/app/shared/services/auth-session.service';
+import { SubscriptionStateService } from 'src/app/shared/services/subscription-state.service';
 
 @Component({
   selector: 'app-login',
@@ -31,7 +32,8 @@ unsubscribe$ = new Subject<void>();
     private loginService:LoginService,
     private router:Router,
     private languageService:TranslationService,
-    private authSession: AuthSessionService) {
+    private authSession: AuthSessionService,
+    private subscriptionState: SubscriptionStateService) {
 
   }
   ngOnInit() {
@@ -122,8 +124,8 @@ let isTrialUser:boolean;
       this.authService.saveDataToLocalStorage(this.userInfo);
       this.authService.updateUserInfo(this.userInfo);
       this.authSession.scheduleRefreshBeforeExpiry(res.token);
+      this.subscriptionState.loadSnapshot().subscribe();
 
-      
         this.languageService.setAppDirection();
         this.loading=false;
         this.router.navigate(['/devices']).then(
