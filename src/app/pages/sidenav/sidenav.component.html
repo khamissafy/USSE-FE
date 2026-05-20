@@ -117,6 +117,14 @@
           <span >{{ "info" | translate }}</span>
         </a>
       </li>
+      <li *ngIf="!isUser">
+        <a routerLinkActive="active" routerLink="/billing" (click)="closeDrawerAndNavigate()" class="text-neutral-600 d-flex ">
+          <div class="icon">
+            <img src="assets/icons/billing-1.svg" alt="" />
+          </div>
+          <span >{{ "BILLING" | translate }}</span>
+        </a>
+      </li>
 
     </ul>
     <div class="versions w-100 d-flex justify-content-around  text-primary-800 " >

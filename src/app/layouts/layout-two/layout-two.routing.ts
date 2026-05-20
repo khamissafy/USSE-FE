@@ -95,6 +95,13 @@ const routes: Routes = [
         data: { name: "plans" },
         loadChildren: () =>
           import('./../../pages/plans/plans.module').then((m) => m.PlansModule)
+      },
+      {
+        path: "billing",
+        canActivate: [AuthGuard],
+        data: { name: "billing" },
+        loadChildren: () =>
+          import('./../../pages/billing/billing.module').then((m) => m.BillingModule)
       }
 
 

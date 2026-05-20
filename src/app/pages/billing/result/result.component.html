@@ -1,0 +1,52 @@
+<div class="result-container">
+
+  <!-- Pending -->
+  <div class="result-card pending" *ngIf="resultState === 'pending'">
+    <div class="spinner"></div>
+    <h2>{{ 'result_pending_title' | translate }}</h2>
+    <p>{{ 'result_pending_body' | translate }}</p>
+    <p class="order-ref">{{ 'result_order_ref' | translate }}: {{ orderId }}</p>
+  </div>
+
+  <!-- Paid -->
+  <div class="result-card success" *ngIf="resultState === 'paid'">
+    <div class="icon success-icon">✓</div>
+    <h2>{{ 'result_success_title' | translate }}</h2>
+    <p>{{ 'result_success_body' | translate }}</p>
+    <p class="order-ref">{{ 'result_order_ref' | translate }}: {{ orderId }}</p>
+    <div class="plan-info" *ngIf="billingState?.subscription">
+      <span>{{ billingState!.subscription.planName }}</span>
+      &mdash;
+      <span>{{ billingState!.subscription.billingPeriod | translate }}</span>
+    </div>
+    <button class="btn-primary" (click)="backToDashboard()">
+      {{ 'result_back_to_dashboard' | translate }}
+    </button>
+  </div>
+
+  <!-- Failed -->
+  <div class="result-card failed" *ngIf="resultState === 'failed'">
+    <div class="icon failed-icon">✕</div>
+    <h2>{{ 'result_failed_title' | translate }}</h2>
+    <p>{{ 'result_failed_body' | translate }}</p>
+    <div class="actions">
+      <button class="btn-primary" (click)="retryCheckout()">
+        {{ 'result_retry' | translate }}
+      </button>
+      <button class="btn-secondary" (click)="backToDashboard()">
+        {{ 'result_back_to_dashboard' | translate }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Timeout -->
+  <div class="result-card timeout" *ngIf="resultState === 'timeout'">
+    <div class="icon timeout-icon">⏱</div>
+    <h2>{{ 'result_timeout_title' | translate }}</h2>
+    <p>{{ 'result_timeout_body' | translate }}</p>
+    <button class="btn-secondary" (click)="backToDashboard()">
+      {{ 'result_back_to_dashboard' | translate }}
+    </button>
+  </div>
+
+</div>

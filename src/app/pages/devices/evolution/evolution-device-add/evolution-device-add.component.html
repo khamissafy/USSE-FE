@@ -3,14 +3,9 @@
 
   <form [formGroup]="form" (ngSubmit)="submit()" class="evo-add__form" *ngIf="!connected">
     <mat-form-field appearance="outline">
-      <mat-label>{{ 'devices.evolution.label' | translate }}</mat-label>
+      <mat-label>{{ 'DEVICE_NAME' | translate }}</mat-label>
       <input matInput formControlName="label" maxlength="64" />
       <mat-error *ngIf="form.controls.label.hasError('required')">{{ 'REQUIRED_FIELD_ERROR' | translate }}</mat-error>
-    </mat-form-field>
-
-    <mat-form-field appearance="outline">
-      <mat-label>{{ 'DELAY_INTERVAL' | translate }}</mat-label>
-      <input matInput type="number" formControlName="delayIntervalInSeconds" min="0" />
     </mat-form-field>
 
     <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid">

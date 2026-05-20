@@ -3,7 +3,7 @@
   <div class="message-content">
     <p class="d-flex mb-0">
       <mat-icon style="width: 32px;" class="mx-1">info</mat-icon>
-      <span *ngIf="isTrialMessage"> {{trialMessage}} <a href="mailto:contact@qweira.com" class="mx-1">contact@qweira.com</a>.</span> 
+      <span *ngIf="isTrialMessage"> {{trialMessage}} <a routerLink="/billing" class="mx-1 text-primary-800 fw-semibold">{{ 'UPGRADE_PLAN' | translate }}</a>.</span>
       <span *ngIf="devicesWarning"> {{translatedMessage}}</span> 
       
     </p>

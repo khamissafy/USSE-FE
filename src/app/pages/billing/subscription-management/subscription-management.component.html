@@ -1,0 +1,129 @@
+<div class="sub-mgmt-container">
+
+  <!-- Loading state -->
+  <div class="loading-state" *ngIf="loadingState">
+    <span>{{ 'billing_loading' | translate }}</span>
+  </div>
+
+  <ng-container *ngIf="!loadingState && state">
+
+    <!-- Plan card -->
+    <section class="section">
+      <h2 class="section-title">{{ 'billing_current_plan' | translate }}</h2>
+      <app-plan-card [subscription]="state.subscription"></app-plan-card>
+    </section>
+
+    <!-- Open Fawry order banner -->
+    <section class="section" *ngIf="state.openFawryOrder">
+      <div class="fawry-banner">
+        <span class="fawry-icon">💳</span>
+        <div>
+          <strong>{{ 'billing_fawry_pending' | translate }}</strong>
+          <span>{{ 'billing_fawry_ref' | translate }}: <code>{{ state.openFawryOrder.fawryReference }}</code></span>
+          <span>{{ 'billing_fawry_expires' | translate }}: {{ state.openFawryOrder.expiresAt | date:'medium' }}</span>
+          <span>{{ state.openFawryOrder.amountCents / 100 | number:'1.2-2' }} EGP</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Scheduled change banner -->
+    <section class="section" *ngIf="state.scheduledChange">
+      <app-scheduled-change-banner
+        [change]="state.scheduledChange"
+        (cancelChange)="onCancelScheduledChange()">
+      </app-scheduled-change-banner>
+    </section>
+
+    <!-- Action buttons -->
+    <section class="section">
+      <h2 class="section-title">{{ 'billing_actions' | translate }}</h2>
+      <div class="action-buttons">
+        <button class="btn-primary" (click)="toggleUpgradeFlow()">
+          {{ (showUpgradeFlow ? 'billing_close' : 'billing_upgrade') | translate }}
+        </button>
+        <button class="btn-secondary" *ngIf="isPaidPlan" (click)="toggleDowngradeFlow()">
+          {{ (showDowngradeFlow ? 'billing_close' : 'billing_downgrade') | translate }}
+        </button>
+        <button class="btn-danger" *ngIf="isPaidPlan" (click)="onCancelSubscription()">
+          {{ 'billing_cancel_subscription' | translate }}
+        </button>
+      </div>
+
+      <!-- Upgrade flow inline panel -->
+      <div class="flow-panel" *ngIf="showUpgradeFlow">
+        <app-upgrade-flow
+          [currentPlanId]="currentPlanId"
+          [billingPeriod]="billingPeriod"
+          [hasCard]="hasCard"
+          (upgraded)="onUpgraded()"
+          (cancelled)="toggleUpgradeFlow()">
+        </app-upgrade-flow>
+      </div>
+
+      <!-- Downgrade flow inline panel -->
+      <div class="flow-panel" *ngIf="showDowngradeFlow">
+        <app-downgrade-flow
+          [currentPlanId]="currentPlanId"
+          [billingPeriod]="billingPeriod"
+          (downgraded)="onDowngraded()"
+          (cancelled)="toggleDowngradeFlow()">
+        </app-downgrade-flow>
+      </div>
+    </section>
+
+    <!-- Transaction history -->
+    <section class="section">
+      <h2 class="section-title">{{ 'billing_transaction_history' | translate }}</h2>
+
+      <div class="table-wrapper">
+        <div class="loading-overlay" *ngIf="loadingTransactions">{{ 'billing_loading' | translate }}</div>
+
+        <table class="tx-table" *ngIf="transactions.length > 0; else noTransactions">
+          <colgroup>
+            <col style="width:16%">
+            <col style="width:18%">
+            <col style="width:14%">
+            <col style="width:16%">
+            <col style="width:14%">
+            <col style="width:22%">
+          </colgroup>
+          <thead>
+            <tr>
+              <th>{{ 'billing_tx_date' | translate }}</th>
+              <th>{{ 'billing_tx_purpose' | translate }}</th>
+              <th>{{ 'billing_tx_method' | translate }}</th>
+              <th>{{ 'billing_tx_amount' | translate }}</th>
+              <th>{{ 'billing_tx_status' | translate }}</th>
+              <th>{{ 'billing_tx_receipt' | translate }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <app-transaction-row
+              *ngFor="let tx of transactions"
+              [transaction]="tx">
+            </app-transaction-row>
+          </tbody>
+        </table>
+
+        <ng-template #noTransactions>
+          <p class="no-data">{{ 'billing_no_transactions' | translate }}</p>
+        </ng-template>
+      </div>
+
+      <!-- Pagination -->
+      <div class="pagination" *ngIf="transactionsTotal > 20">
+        <button class="btn-page" [disabled]="transactionsPage === 1" (click)="prevPage()">‹</button>
+        <span>{{ transactionsPage }}</span>
+        <button class="btn-page" [disabled]="transactions.length < 20" (click)="nextPage()">›</button>
+      </div>
+    </section>
+
+  </ng-container>
+
+  <!-- No subscription state -->
+  <div class="empty-state" *ngIf="!loadingState && !state">
+    <p>{{ 'billing_no_subscription' | translate }}</p>
+    <button class="btn-primary" routerLink="/billing/checkout">{{ 'billing_subscribe_now' | translate }}</button>
+  </div>
+
+</div>

@@ -33,9 +33,9 @@ export class SideBarComponent implements OnInit {
      private permissionService:PermissionsService) {}
   ngOnInit(): void {
    this.getBackEndVerison();
-    if(this.authService.getUserInfo()?.customerId!=""){
+    if(this.authService.getUserInfo()?.customerId){
       this.isUser=true;
-      this.authService.getUserDataObservable().subscribe(permissions => {
+      this.authService.getUserDataObservable()?.subscribe(permissions => {
         this.permissions=this.permissionService.executePermissions(permissions);
       })
       // let email=this.authService.getUserInfo()?.email;

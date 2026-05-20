@@ -1,0 +1,58 @@
+<div class="checkout-container">
+  <h2>{{ 'checkout_title' | translate }}</h2>
+
+  <!-- Payment method & plan selector -->
+  <form [formGroup]="form" (ngSubmit)="submit()" *ngIf="!fawryData">
+
+    <!-- Billing period -->
+    <div class="field-group">
+      <label>{{ 'checkout_billing_period' | translate }}</label>
+      <div class="period-tiles">
+        <button
+          type="button"
+          *ngFor="let p of periods"
+          [class.active]="form.get('billingPeriod')?.value === p.value"
+          (click)="form.patchValue({ billingPeriod: p.value })">
+          {{ p.labelKey | translate }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Payment method -->
+    <div class="field-group">
+      <label>{{ 'checkout_payment_method' | translate }}</label>
+      <div class="method-tiles">
+        <button
+          type="button"
+          *ngFor="let m of methods"
+          [class.active]="form.get('method')?.value === m.value"
+          (click)="form.patchValue({ method: m.value })">
+          {{ m.labelKey | translate }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Wallet phone (only for Wallet) -->
+    <div class="field-group" *ngIf="selectedMethod === 'Wallet'">
+      <label>{{ 'checkout_wallet_phone' | translate }}</label>
+      <input type="tel" formControlName="walletPhone" placeholder="01XXXXXXXXX" />
+    </div>
+
+    <button
+      type="submit"
+      [disabled]="form.invalid || submitting"
+      class="btn-primary">
+      {{ submitting ? ('checkout_processing' | translate) : ('checkout_pay' | translate) }}
+    </button>
+  </form>
+
+  <!-- Fawry reference -->
+  <div class="fawry-instructions" *ngIf="fawryData">
+    <h3>{{ 'checkout_fawry_reference' | translate }}</h3>
+    <p class="fawry-ref">{{ fawryData.fawryReference }}</p>
+    <p>{{ 'checkout_fawry_amount' | translate }}: {{ fawryData.amountCents / 100 | number:'1.2-2' }} EGP</p>
+    <p>{{ 'checkout_fawry_expiry' | translate }}: {{ fawryData.expiresAt | date:'medium' }}</p>
+    <p>{{ fawryData.instructionsLocaleEn }}</p>
+    <p dir="rtl">{{ fawryData.instructionsLocaleAr }}</p>
+  </div>
+</div>

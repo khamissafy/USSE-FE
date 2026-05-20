@@ -13,12 +13,26 @@ import { Router } from '@angular/router';
 import { AuthSessionService } from '../shared/services/auth-session.service';
 import { AuthService } from '../shared/services/auth.service';
 import { ApiResult } from '../models/api-result.model';
+import { TranslateService } from '@ngx-translate/core';
 
 /** Error codes emitted by SubscriptionGuardService that need an upgrade CTA. */
 const SUBSCRIPTION_ERROR_CODES = new Set([
   'SUBSCRIPTION_LIMIT_EXCEEDED',
   'FAIR_USE_THROTTLED',
 ]);
+
+/** Payment error codes mapped to i18n keys for Nebular toast display. */
+const PAYMENT_ERROR_I18N: Record<string, string> = {
+  PAYMENT_CURRENCY_UNSUPPORTED: 'payment_error_currency_unsupported',
+  PAYMENT_INVALID_METHOD:       'payment_error_invalid_method',
+  PAYMENT_DUPLICATE_INTENT:     'payment_error_duplicate_intent',
+  PAYMENT_GATEWAY_DOWN:         'payment_error_gateway_down',
+  PAYMENT_AUTH_REQUIRED:        'payment_error_auth_required',
+  PAYMENT_NOT_FOUND:            'payment_error_not_found',
+  PAYMENT_NOT_PERMITTED:        'payment_error_not_permitted',
+  PAYMENT_VALIDATION_FAILED:    'payment_error_validation_failed',
+  PAYMENT_INTERNAL_ERROR:       'payment_error_internal_error',
+};
 
 /** Shape of the limit-exceeded body returned by the backend. */
 interface SubscriptionLimitBody {
@@ -35,7 +49,8 @@ export class ErrorInterceptorService implements HttpInterceptor {
     private router: Router,
     private toaster: ToasterServices,
     private authSession: AuthSessionService,
-    private auth: AuthService
+    private auth: AuthService,
+    private translate: TranslateService,
   ) {}
 
   intercept(
@@ -102,6 +117,20 @@ export class ErrorInterceptorService implements HttpInterceptor {
               // isHtml=true so the toaster renders the anchor instead of escaping it.
               this.toaster.warning(toastMessage, true);
               return throwError(() => error);
+            }
+
+            // ── Payment errors (PAYMENT_*) ────────────────────────────────────
+            if (
+              errBody && typeof errBody === 'object' &&
+              'errorCode' in errBody
+            ) {
+              const code = (errBody as { errorCode?: string }).errorCode ?? '';
+              const i18nKey = PAYMENT_ERROR_I18N[code];
+              if (i18nKey) {
+                const msg = this.translate.instant(i18nKey) as string;
+                this.toaster.error(msg && msg !== i18nKey ? msg : code);
+                return throwError(() => error);
+              }
             }
 
             // ── Generic error display ─────────────────────────────────────────

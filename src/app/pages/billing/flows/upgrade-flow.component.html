@@ -1,0 +1,43 @@
+<div class="upgrade-flow">
+  <h3>{{ 'billing_upgrade_title' | translate }}</h3>
+
+  <div *ngIf="!result">
+    <p class="upgrade-hint">{{ 'billing_upgrade_hint' | translate }}</p>
+
+    <!-- Plan selection -->
+    <div class="plan-options" *ngIf="higherPlans.length > 0; else noUpgrade">
+      <div
+        class="plan-option"
+        *ngFor="let p of higherPlans"
+        [class.selected]="selectedPlanId === p.id"
+        (click)="selectPlan(p.id)">
+        <strong>{{ p.name }}</strong>
+        <span>{{ p.descKey | translate }}</span>
+      </div>
+    </div>
+
+    <ng-template #noUpgrade>
+      <p class="no-upgrade-hint">{{ 'billing_upgrade_already_highest' | translate }}</p>
+    </ng-template>
+
+    <div class="flow-actions">
+      <button class="btn-primary" [disabled]="!selectedPlanId || loading" (click)="confirm()">
+        {{ loading ? ('billing_processing' | translate) : ('billing_confirm_upgrade' | translate) }}
+      </button>
+      <button class="btn-secondary" (click)="cancel()">{{ 'billing_cancel' | translate }}</button>
+    </div>
+  </div>
+
+  <!-- Upgrade result (free/immediate charge confirmation) -->
+  <div class="upgrade-result" *ngIf="result">
+    <div *ngIf="result.quote?.appliedWithoutCharge" class="result-success">
+      ✓ {{ 'billing_upgrade_applied_free' | translate }}
+    </div>
+    <div *ngIf="!result.quote?.appliedWithoutCharge" class="result-pending">
+      <p>{{ 'billing_upgrade_charge_initiated' | translate }}</p>
+      <p class="amount">{{ result.quote?.prorationAmountCents / 100 | number:'1.2-2' }} EGP</p>
+      <p>{{ 'billing_upgrade_status_webhook' | translate }}</p>
+    </div>
+    <button class="btn-secondary" (click)="cancel()">{{ 'billing_close' | translate }}</button>
+  </div>
+</div>

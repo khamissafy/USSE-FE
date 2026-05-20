@@ -21,7 +21,7 @@ export class LayoutTwoComponent implements OnInit {
     this.getDevices()
   
   
-    this.showTrialHintMessage=this.authService.getSubscriptionState().isTrail ? this.authService.getSubscriptionState()?.isTrail : false;
+    this.showTrialHintMessage = false;
 
    
   }

@@ -120,14 +120,14 @@
           <span class="">{{ "info" | translate }}</span>
         </a>
       </li>
-      <!-- <li>
+      <li *ngIf="role === 'Customer'">
         <a routerLinkActive="active" routerLink="/billing" class="text-neutral-600 d-flex">
           <div class="icon">
             <img src="assets/icons/billing-1.svg" alt="" />
           </div>
           <span class="">{{ "BILLING" | translate }}</span>
         </a>
-      </li> -->
+      </li>
       <!-- <li>
         <a routerLinkActive="active" routerLink="/videos" class="text-neutral-600 d-flex">
           <div class="icon">

@@ -36,7 +36,7 @@ export class SidenavComponent implements OnDestroy{
  
   ngOnInit(): void {
    this.getBackEndVerison();
-    if(this.authService.getUserInfo()?.customerId!=""){
+    if(this.authService.getUserInfo()?.customerId){
       this.isUser=true;
       this.authService.getUserDataObservable().subscribe(permissions => {
         this.permissions=this.permissionService.executePermissions(permissions);

@@ -21,7 +21,7 @@ export interface EvolutionStepsDialogData {
 export class EvolutionStepsDialogComponent implements OnInit, OnDestroy {
   readonly form = this.fb.nonNullable.group({
     label: ['', [Validators.required, Validators.maxLength(64)]],
-    delayIntervalInSeconds: [0, [Validators.required, Validators.min(0)]]
+    delayIntervalInSeconds: [5, [Validators.required, Validators.min(0)]]
   })
 
   steps = true

@@ -1,13 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { map } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { SubscriptionPlanDto, PlanFeatureKey } from 'src/app/shared/models/subscription';
-
-interface ApiResponse<T> {
-  status: boolean;
-  data: T;
-}
 
 /** All features shown in the comparison matrix with their display label key. */
 const ALL_FEATURES: { key: PlanFeatureKey; label: string }[] = [
@@ -45,8 +39,7 @@ export class PlansComponent implements OnInit {
 
   ngOnInit(): void {
     this.http
-      .get<ApiResponse<SubscriptionPlanDto[]>>(`${environment.api}Subscription/plans`)
-      .pipe(map(r => r.data))
+      .get<SubscriptionPlanDto[]>(`${environment.api}Subscription/plans`)
       .subscribe({
         next: plans => {
           this.plans = plans;
@@ -65,9 +58,9 @@ export class PlansComponent implements OnInit {
     if (plan.tier === 'Starter') return 'Free';
     const price =
       this.billingPeriod === 'Monthly'
-        ? plan.priceUsdMonthly
-        : plan.priceUsdAnnualMonthly;
-    return price !== null ? `$${price}/mo` : 'Custom';
+        ? plan.priceEgpMonthly
+        : plan.priceEgpAnnualMonthly;
+    return price !== null ? `EGP ${price}/mo` : 'Custom';
   }
 
   hasFeature(plan: SubscriptionPlanDto, key: PlanFeatureKey): boolean {

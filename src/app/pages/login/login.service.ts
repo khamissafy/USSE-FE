@@ -28,4 +28,9 @@ export class LoginService {
 
   /** No-op: refresh token is HttpOnly server cookie only. */
   clearStoredRefreshToken(): void {}
+
+  /** Revokes the HttpOnly refresh cookie on the server. */
+  revokeToken(): Observable<any> {
+    return this.http.post<any>(`${this.api}Auth/revokeToken`, {});
+  }
 }

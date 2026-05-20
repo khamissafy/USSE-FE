@@ -1,0 +1,63 @@
+<div class="downgrade-flow">
+  <h3>{{ 'billing_downgrade_title' | translate }}</h3>
+
+  <div *ngIf="!result">
+    <p class="downgrade-hint">{{ 'billing_downgrade_hint' | translate }}</p>
+
+    <!-- No lower plans available -->
+    <p *ngIf="lowerPlans.length === 0" class="downgrade-hint">
+      {{ 'billing_downgrade_no_lower_plans' | translate }}
+    </p>
+
+    <!-- Plan selection — only plans below the current plan -->
+    <div class="plan-options" *ngIf="lowerPlans.length > 0">
+      <div
+        *ngFor="let plan of lowerPlans"
+        class="plan-option"
+        [class.selected]="selectedPlanId === plan.id"
+        (click)="selectPlan(plan.id)">
+        <strong>{{ plan.name }}</strong>
+      </div>
+    </div>
+
+    <div class="flow-actions">
+      <button class="btn-warning" [disabled]="!selectedPlanId || loading || lowerPlans.length === 0" (click)="confirm()">
+        {{ loading ? ('billing_processing' | translate) : ('billing_confirm_downgrade' | translate) }}
+      </button>
+      <button class="btn-secondary" (click)="cancel()">{{ 'billing_cancel' | translate }}</button>
+    </div>
+  </div>
+
+  <!-- Downgrade scheduled result -->
+  <div class="downgrade-result" *ngIf="result">
+    <div class="result-scheduled">
+      <p class="result-title">✓ {{ 'billing_downgrade_scheduled' | translate }}</p>
+      <p>
+        {{ 'billing_downgrade_effective' | translate }}:
+        <strong>{{ result.scheduledChange?.effectiveAt | date:'mediumDate' }}</strong>
+      </p>
+
+      <!-- FR-040a: surface the original billing-cycle start so annual subscribers
+           understand why the effective date is months away. -->
+      <p *ngIf="result.scheduledChange?.originalCycleStart" class="cycle-start-note">
+        {{ 'billing_downgrade_cycle_started' | translate }}:
+        <strong>{{ result.scheduledChange?.originalCycleStart | date:'mediumDate' }}</strong>
+        <span *ngIf="result.scheduledChange?.currentBillingPeriod">
+          ({{ result.scheduledChange?.currentBillingPeriod }})
+        </span>
+      </p>
+
+      <!-- No-refund disclosure — bilingual (FR-040a) -->
+      <div class="no-refund-disclosure">
+        <p>{{ result.scheduledChange?.noRefundDisclosure }}</p>
+        <p dir="rtl">{{ result.scheduledChange?.noRefundDisclosureAr }}</p>
+      </div>
+
+      <p class="access-note">
+        {{ 'billing_downgrade_access_until' | translate }}:
+        {{ result.scheduledChange?.effectiveAt | date:'mediumDate' }}
+      </p>
+    </div>
+    <button class="btn-secondary" (click)="cancel()">{{ 'billing_close' | translate }}</button>
+  </div>
+</div>
